@@ -1,0 +1,1 @@
+This file's commit is intentionally unsigned, to test the required-signatures branch protection rule.
