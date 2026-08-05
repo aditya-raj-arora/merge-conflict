@@ -63,3 +63,34 @@ required status check failed on the PR:
 
 - confirms the belt-and-braces design (local hook + CI job) actually has
   two independent layers, not just one that happens to work.
+
+## 3. Unsigned commit
+
+**What we did:** created a commit with `git commit --no-gpg-sign`
+(deliberately bypassing our own `commit.gpgsign true` git config) and
+pushed it straight to the PR branch with `git push --no-verify`.
+
+**Result:** GitHub's commit API confirms the commit is unverified:
+
+```json
+{
+  "payload": null,
+  "reason": "unsigned",
+  "signature": null,
+  "verified": false,
+  "verified_at": null
+}
+```
+
+The PR's `mergeStateStatus` immediately flipped to `BLOCKED` (while still
+reporting `mergeable: MERGEABLE` - i.e. no content conflict, purely the
+signature requirement holding it back). Did not attempt an actual merge
+call to force a rejection message out of the API - the read-only
+verification data above is sufficient evidence, and repeatedly calling
+`gh pr merge` against a protected branch isn't something to do just to
+watch it fail.
+
+Test file removed in the next commit (properly signed) - this branch's
+history still contains the one unsigned commit, which is fine since the
+whole branch gets deleted at the end of this exercise without ever
+merging.
