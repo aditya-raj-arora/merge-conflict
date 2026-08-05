@@ -1,0 +1,25 @@
+title = "Merge Conflict gitleaks config"
+
+# Start from gitleaks' own default ruleset (a big library of provider-specific
+# secret patterns - AWS keys, GitHub tokens, private keys, etc.) and just
+# layer our own allowlist on top instead of writing detection rules from
+# scratch.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Files that are allowed to contain placeholder secrets"
+paths = [
+  '''\.env\.example$''',
+  '''\.gitleaks\.toml$''',
+]
+
+# .env.example is full of intentionally fake placeholder values like
+# API_KEY=your_api_key_here - gitleaks would otherwise flag every one of
+# those as a real leaked credential.
+regexes = [
+  '''your_.*_here''',
+  '''<.*>''',
+  '''example''',
+  '''placeholder''',
+]
