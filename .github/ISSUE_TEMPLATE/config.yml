@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Have an open-ended idea or proposal?
+    url: https://github.com/aditya-raj-arora/merge-conflict/discussions/new?category=rfc
+    about: >-
+      If it's not concrete enough yet to be a Change Request, start a
+      Discussion (RFC template) instead. Once it's crystallized into an
+      actual proposed change, open a CR Issue for it.
