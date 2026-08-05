@@ -117,3 +117,63 @@ error: failed to push some refs
 [run 31010477887](https://github.com/aditya-raj-arora/merge-conflict/actions/runs/31010477887/job/92321058280).
 Same pattern as rounds 2 and 3 - local hook catches it first, CI catches
 it independently if the hook is bypassed.
+
+## 5. CodeQL finding (hardcoded vulnerable pattern)
+
+**Important nuance discovered along the way:** CodeQL does _not_ fail the
+`codeql (javascript-typescript)` status check when it finds something -
+that check just reports whether the scan itself ran successfully. Actual
+findings are posted as separate code scanning alerts, which is a real
+architectural difference from the other four gates (they're binary
+pass/fail; CodeQL is closer to an always-green scanner with a side
+channel of alerts). Worth knowing before assuming "codeql check = green"
+means "no vulnerabilities."
+
+**First attempt:** added a plain `eval(code)` call on a function
+parameter. No alert was produced. Best explanation: CodeQL's default
+JS/TS query pack uses data-flow analysis (source -> sink), and a bare
+function parameter isn't a recognized _source_ of untrusted data on its
+own - there's no traced flow from something CodeQL considers "attacker
+controlled" into the `eval` sink.
+
+**Second attempt:** swapped to a canonical source->sink pattern -
+`window.location.search` (recognized untrusted source) flowing into
+`el.innerHTML` (recognized dangerous sink). This produced a real alert:
+
+```json
+{
+  "rule": "js/xss",
+  "severity": "error",
+  "security_severity_level": "high",
+  "location": "src/engine/gateEvidenceVuln.ts:8",
+  "message": "Cross-site scripting vulnerability due to user-provided value."
+}
+```
+
+[alert #1](https://github.com/aditya-raj-arora/merge-conflict/security/code-scanning/1)
+
+**Second nuance:** alerts from a PR-triggered CodeQL run are queryable via
+`ref=refs/pull/<n>/merge`, not `refs/heads/<branch-name>` - querying the
+branch ref directly returned an empty list even though the scan had
+genuinely found and uploaded the alert. Cost some time figuring out this
+wasn't a false negative, just the wrong query parameter.
+
+**Follow-up worth opening as its own CR:** since `eval()`-style code
+injection isn't caught by our current "Default" query suite, consider
+whether `codeql.yml` should opt into the `security-extended` query pack
+for broader coverage - tracked as a future improvement, not fixed here.
+
+Vulnerable file removed in the next commit.
+
+## Summary
+
+| Gate                    | Local layer                             | Remote layer                                                                            |
+| ----------------------- | --------------------------------------- | --------------------------------------------------------------------------------------- |
+| Commit message format   | `commit-msg` hook blocked it            | `commitlint-pr-title` (proven organically on Dependabot PRs, CR-019)                    |
+| Secret in a file        | `pre-commit` hook blocked it            | `gitleaks` check failed                                                                 |
+| Unsigned commit         | n/a (git allows local unsigned commits) | GitHub API: `verified: false`, PR `mergeStateStatus: BLOCKED`                           |
+| Failing test            | `pre-push` hook blocked it              | `test` check failed                                                                     |
+| Vulnerable code pattern | n/a (no local SAST hook)                | CodeQL alert posted (`js/xss`, high severity) - does _not_ fail the status check itself |
+
+Branch (`throwaway/gate-evidence`) deleted after this exercise, PR #22
+closed without merging - see CR-021.
