@@ -114,6 +114,23 @@ branch protection + CODEOWNERS — a PR can't merge without passing status
 checks and getting an approving review, and CODEOWNERS auto-requests that
 review from the right person.
 
+### 5.1 Known deviation — required review count during solo bootstrap
+
+GitHub hard-blocks self-approval on your own PR (this is a platform rule,
+not something branch protection can waive — even repo admins can't override
+it). Since the bootstrap phase of this project is a single person pushing
+commits before Mukta is added as a GitHub collaborator, `required_approving_
+review_count` on `develop` and `main` is temporarily set to **0** rather
+than 1, purely so these early PRs can actually merge.
+
+This is a deliberate, logged exception, not a silent bypass — everything
+else in the CCB gate still applies (status checks must pass, commits must
+be signed, PR must reference a `CR-` Issue). Once Mukta's GitHub handle is
+added to `CODEOWNERS` and she's a collaborator on the repo, this gets
+reverted back to `required_approving_review_count: 1` so review is a real
+second pair of eyes again, not a formality. Track that reversion as its own
+CR when it happens.
+
 ## 6. Status Accounting
 
 `docs/scm/STATUS-LEDGER.md` tracks, per item: current version, which
