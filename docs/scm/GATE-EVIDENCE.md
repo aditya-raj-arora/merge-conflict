@@ -33,3 +33,33 @@ and pushed anyway, opening a PR with a non-conventional _title_ fails the
 `commitlint-pr-title: fail` runs on Dependabot PRs #5-#9 earlier in this
 project's history (before CR-019 relaxed the subject-case rule) for a
 real example of this happening organically, not just staged for this doc.
+
+## 2. Secret in a staged file
+
+**What we did:** committed `.gate-evidence-secret-test.txt` containing a
+fake, well-formed AWS access key ID (`AKIA` + 16 uppercase letters -
+matches the shape gitleaks looks for, isn't a real credential). Value
+intentionally not reproduced verbatim in this doc - see below.
+
+**Result, local layer:** blocked by the `pre-commit` Husky hook before
+the commit was created:
+
+```
+Finding:     AWS_ACCESS_KEY_ID=REDACTED
+Secret:      REDACTED
+RuleID:      aws-access-token
+Entropy:     3.884184
+File:        .gate-evidence-secret-test.txt
+Line:        2
+
+gitleaks found something that looks like a secret in your staged changes.
+husky - pre-commit script failed (code 1)
+```
+
+**Result, remote layer:** bypassed the local hook with `--no-verify`
+(intentional, for this exercise) and pushed anyway. The `gitleaks`
+required status check failed on the PR:
+[run 31009921550](https://github.com/aditya-raj-arora/merge-conflict/actions/runs/31009921550/job/92319152377)
+
+- confirms the belt-and-braces design (local hook + CI job) actually has
+  two independent layers, not just one that happens to work.
