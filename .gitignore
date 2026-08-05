@@ -1,0 +1,46 @@
+# --- Node ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.eslintcache
+
+# --- Vite / build output ---
+dist/
+dist-ssr/
+*.local
+.vite/
+
+# --- Env ---
+.env
+.env.*
+!.env.example
+
+# --- Coverage ---
+coverage/
+*.lcov
+.nyc_output/
+
+# --- macOS ---
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# --- Windows ---
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# --- VS Code ---
+.vscode/*
+!.vscode/extensions.json
+
+# --- JetBrains (WebStorm etc.) ---
+.idea/
+*.iml
+*.iws
+
+# --- Logs / misc ---
+*.log
+.cache/
