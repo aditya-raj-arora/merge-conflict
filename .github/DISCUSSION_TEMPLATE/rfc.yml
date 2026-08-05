@@ -1,0 +1,42 @@
+title: "[RFC] "
+labels: ["rfc"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is the "before it's concrete enough to be a CR" space. Use it
+        to argue out an idea, get pushback, and figure out if it's actually
+        worth doing — once there's rough consensus, whoever's driving it
+        opens a proper `CR-` Issue that references this Discussion.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are we trying to solve?
+      description: What's currently broken, missing, or annoying?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Rough proposal
+      description: Doesn't need to be fully baked — that's what the discussion is for.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What else did you think about, and why not that instead?
+    validations:
+      required: false
+
+  - type: textarea
+    id: open-questions
+    attributes:
+      label: Open questions
+      description: What are we still unsure about?
+    validations:
+      required: false

@@ -1,0 +1,32 @@
+version: 2
+updates:
+  # npm deps — check daily, but bundle everything into one PR per week so we're
+  # not drowning in individual bump PRs for a two-person team.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    groups:
+      npm-weekly:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # GitHub Actions — weekly is plenty, these move slower than npm packages.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "ci"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
