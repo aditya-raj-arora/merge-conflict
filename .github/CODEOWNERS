@@ -1,0 +1,9 @@
+# CODEOWNERS — this is basically our Change Control Board membership list.
+# GitHub auto-requests a review from whoever's listed here whenever a
+# matching path changes, so nothing merges into develop/main unreviewed.
+#
+# TODO: add @mukta-motwani (or her actual GitHub handle) once she's on GitHub
+# and has been added as a collaborator on this repo — right now everything
+# routes to Aditya by default since he's the only registered owner.
+
+* @aditya-raj-arora
