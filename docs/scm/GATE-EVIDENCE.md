@@ -94,3 +94,26 @@ Test file removed in the next commit (properly signed) - this branch's
 history still contains the one unsigned commit, which is fine since the
 whole branch gets deleted at the end of this exercise without ever
 merging.
+
+## 4. Trivially failing test
+
+**What we did:** added `tests/gate-evidence-failing.test.ts` asserting
+`1 + 1 === 3`.
+
+**Result, local layer:** blocked by the `pre-push` Husky hook (which
+runs `typecheck` + `test`) before the push was even attempted:
+
+```
+FAIL  tests/gate-evidence-failing.test.ts > gate-evidence: intentional
+failure > fails on purpose to test the CI gate
+AssertionError: expected 2 to be 3
+
+husky - pre-push script failed (code 1)
+error: failed to push some refs
+```
+
+**Result, remote layer:** bypassed with `git push --no-verify`, and the
+`test` required status check failed on the PR:
+[run 31010477887](https://github.com/aditya-raj-arora/merge-conflict/actions/runs/31010477887/job/92321058280).
+Same pattern as rounds 2 and 3 - local hook catches it first, CI catches
+it independently if the hook is bypassed.
