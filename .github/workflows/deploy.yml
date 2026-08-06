@@ -1,0 +1,99 @@
+name: deploy
+
+on:
+  push:
+    branches: [develop]
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "deploy-${{ github.ref }}"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      # Two different artifact formats for two different destinations:
+      # upload-pages-artifact produces the tar.gz shape actions/deploy-
+      # pages expects; upload-artifact is a plain copy of dist/ for the
+      # Vercel CLI to deploy directly.
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  # --- staging: develop push -> Vercel ---
+  # GitHub Pages only processes deployments recorded against an
+  # environment literally named "github-pages" (confirmed the hard way,
+  # see CR-034) - and it only hosts one site per repo anyway, so it
+  # can't serve as both staging and prod. Staging deploys to Vercel
+  # instead; the "staging" environment's 5-min wait timer is still the
+  # real gate here, same as before.
+  deploy-staging:
+    name: deploy-staging
+    if: github.ref == 'refs/heads/develop'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: ${{ steps.deploy.outputs.url }}
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - run: npm install -g vercel@latest
+      - name: Deploy dist/ to Vercel
+        id: deploy
+        run: |
+          url=$(vercel deploy ./dist --token=${{ secrets.VERCEL_TOKEN }} --yes)
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+  # --- prod: v*.*.* tag push -> GitHub Pages ---
+  # Split into two jobs on purpose: prod-gate is where the required-
+  # reviewer approval ceremony actually happens (environment: prod).
+  # deploy-prod only runs after that approval, and MUST use
+  # environment: github-pages - that exact name is the one GitHub's
+  # Pages backend will actually pick a deployment up from. Neither job
+  # alone can do both things at once (a job has exactly one
+  # `environment:`), so chaining them via `needs` keeps the real
+  # approval gate without losing the working deploy.
+  prod-gate:
+    name: prod-gate
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: prod
+    steps:
+      - run: echo "Approved for prod release ${{ github.ref_name }}"
+
+  deploy-prod:
+    name: deploy-prod
+    needs: prod-gate
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v5
+        id: deployment
