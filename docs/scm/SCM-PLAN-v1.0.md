@@ -158,9 +158,26 @@ status, and whether every CR in the release is actually resolved.
   `BL-<NN>-<name>` tag — the semver tag versions the _build_, the baseline
   tag versions the _approved configuration_ (they usually point at the same
   commit, but conceptually they're answering different questions).
-- **Environments:** `dev` (no gate) → `staging` (5-min wait timer, deploys
-  from `develop`) → `prod` (required reviewer, only deploys from `main`,
-  only on tag push).
+- **Environments:** `dev` (no gate, not currently wired to a deploy) →
+  `staging` (5-min wait timer, deploys from `develop`) → `prod` (required
+  reviewer, only on `v*.*.*` tag push).
+- **Staging deploys to Vercel, not GitHub Pages - real infrastructure
+  constraint, not a design choice:** GitHub Pages only processes
+  deployments recorded against an environment literally named
+  `github-pages` (confirmed empirically - deployments under any other
+  environment name sit at `deployment_queued` forever, see CR-034), and
+  it only hosts one site per repo anyway, so it structurally can't serve
+  both staging and prod. `deploy.yml` reflects this:
+  - `deploy-staging` (develop push): `environment: staging` (the real
+    5-min gate) → deploys `dist/` straight to Vercel via the CLI
+    (`VERCEL_TOKEN`/`VERCEL_ORG_ID`/`VERCEL_PROJECT_ID` repo secrets)
+  - `prod-gate` (v\*.\*.\* tag push): `environment: prod` (required
+    reviewer) - this is where the actual approval ceremony happens
+  - `deploy-prod`: `needs: prod-gate`, `environment: github-pages` - the
+    only environment name GitHub's Pages backend will pick a deployment
+    up from. A job can only declare one `environment:`, so the
+    required-reviewer gate and the Pages-eligible environment have to
+    live on two chained jobs, not one.
 - **First release is `v0.1.0`, not `v1.0.0`:** release-please treats a
   `package.json` version of exactly `0.0.0` as a special "unreleased"
   sentinel and defaults straight to `1.0.0` for the first release,
