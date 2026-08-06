@@ -45,3 +45,6 @@ desktop.ini
 *.log
 .cache/
 *.tsbuildinfo
+
+# --- Vercel ---
+.vercel
