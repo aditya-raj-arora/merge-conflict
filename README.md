@@ -3,6 +3,10 @@
 [![ci](https://github.com/aditya-raj-arora/merge-conflict/actions/workflows/ci.yml/badge.svg)](https://github.com/aditya-raj-arora/merge-conflict/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/aditya-raj-arora/merge-conflict/branch/develop/graph/badge.svg)](https://codecov.io/gh/aditya-raj-arora/merge-conflict)
 
+**Play it:** [aditya-raj-arora.github.io/merge-conflict](https://aditya-raj-arora.github.io/merge-conflict/)
+(staging, deployed from `develop`) — tagged releases deploy the same
+build to prod on `main`.
+
 So here's the pitch: **Merge Conflict** is a narrative browser game that
 teaches Software Configuration Management (SCM) by making you feel the pain
 each discipline exists to prevent, _before_ handing you the tool that fixes
