@@ -26,16 +26,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      # Two different artifact formats for two different destinations:
-      # upload-pages-artifact produces the tar.gz shape actions/deploy-
-      # pages expects; upload-artifact is a plain copy of dist/ for the
-      # Vercel CLI to deploy directly.
+      # Only Pages needs this artifact now - Vercel does its own build
+      # remotely (see deploy-staging below), it doesn't consume this.
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist/
-      - uses: actions/upload-artifact@v4
-        with:
-          name: dist
           path: dist/
 
   # --- staging: develop push -> Vercel ---
@@ -45,10 +39,16 @@ jobs:
   # can't serve as both staging and prod. Staging deploys to Vercel
   # instead; the "staging" environment's 5-min wait timer is still the
   # real gate here, same as before.
+  #
+  # Deliberately NOT reusing the `build` job's dist/ artifact here -
+  # handing Vercel an already-built dist/ folder makes it try to run
+  # `vite build` again ON the built output (it doesn't know it's
+  # prebuilt), which fails. `vercel build` + `vercel deploy --prebuilt`
+  # is the actual supported flow: Vercel builds from source itself,
+  # remotely, using the project settings from `vercel link`.
   deploy-staging:
     name: deploy-staging
     if: github.ref == 'refs/heads/develop'
-    needs: build
     runs-on: ubuntu-latest
     environment:
       name: staging
@@ -57,15 +57,14 @@ jobs:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist
+      - uses: actions/checkout@v4
       - run: npm install -g vercel@latest
-      - name: Deploy dist/ to Vercel
+      - run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      - run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy prebuilt output to Vercel
         id: deploy
         run: |
-          url=$(vercel deploy ./dist --token=${{ secrets.VERCEL_TOKEN }} --yes)
+          url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
           echo "url=$url" >> "$GITHUB_OUTPUT"
 
   # --- prod: v*.*.* tag push -> GitHub Pages ---
