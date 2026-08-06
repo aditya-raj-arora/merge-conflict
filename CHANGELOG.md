@@ -13,3 +13,6 @@ in the meantime.
 ### Added
 
 - Initial project scaffold (repo structure, license, docs skeleton).
+- Chapter 1 first playable slice: commit-graph engine, SVG graph
+  renderer, Zustand game store, and the "Which One Shipped?" level -
+  the opening Configuration Identification puzzle.
