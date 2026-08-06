@@ -170,6 +170,28 @@ status, and whether every CR in the release is actually resolved.
   "1.0 stable" milestone, we override this once via a `Release-As: 0.1.0`
   commit trailer (release-please's documented mechanism for forcing the
   next computed version). See CR-027.
+- **release-please's own tag isn't the signed one - process for every
+  release:** `release-please-action` has no access to our private GPG
+  key (nor should it), so the tag it creates when its release PR merges
+  is a lightweight, unsigned tag - it exists purely so release-please's
+  own manifest tracking knows what's already been released. Do NOT
+  treat that tag as the real release artifact. Instead, after the
+  release PR merges:
+  1. Note the commit SHA release-please's tag points at
+     (`git ls-remote --tags origin`, or the tag's `object.sha` via the
+     GitHub API).
+  2. Locally, `git tag -s vX.Y.Z <that-sha> -m "..."` - a real annotated,
+     signed tag, at the same commit.
+  3. `git push origin vX.Y.Z` - this is what actually triggers
+     `deploy-pages.yml`'s prod gate (which matches `v*.*.*`) and what
+     goes in `BASELINE-REGISTER.md`.
+
+  See CR-029 for the naming-collision bug this working around
+  (release-please defaulted to tagging `merge-conflict-vX.Y.Z`, which
+  didn't even match the deploy trigger - fixed via
+  `include-component-in-tag: false` in `release-please-config.json`,
+  but the "hand-sign the real tag" step is permanent, not a one-time
+  fix, since release-please fundamentally can't sign anything).
 
 ## 9. The 17-tool toolchain
 
