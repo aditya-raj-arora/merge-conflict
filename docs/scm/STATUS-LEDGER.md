@@ -8,13 +8,19 @@ would actually check first).
 
 ## Ledger
 
-| Item | Current Version | Environment | Last Change | Open CRs |
-|---|---|---|---|---|
-| CSCI-MC (whole app) | unreleased | — | Repo scaffold ([`aaa803d`](../../CHANGELOG.md)) | CR-001 |
+| Item                                             | Current Version                         | Environment                         | Last Change                             | Open CRs |
+| ------------------------------------------------ | --------------------------------------- | ----------------------------------- | --------------------------------------- | -------- |
+| CSCI-MC (whole app)                              | `v0.1.0` / `BL-01-identification-intro` | staging + prod (both verified live) | 2026-08-06, Chapter 1 baseline (CR-024) | —        |
+| TLCSC-01-ENGINE (commit graph + level mechanics) | `_r1` (all units)                       | staging + prod                      | 2026-08-06                              | —        |
+| TLCSC-02-UI (GraphCanvas, LevelView)             | `_r1`                                   | staging + prod                      | 2026-08-06                              | —        |
+| TLCSC-03-STATE (useGameStore)                    | `_r1`                                   | staging + prod                      | 2026-08-06                              | —        |
+| TLCSC-04-CONTENT > LLCSC-04-01-CH01 (LVL-01-01)  | `_r1`                                   | staging + prod                      | 2026-08-06                              | —        |
 
-*(Table grows one row per top-level CI as they come online — engine,
-components, content chapters, etc. Right now there's nothing shipped yet, so
-it's just the CSCI-level placeholder.)*
+_(Table grows one row per top-level CI as they come online. `staging` =
+Vercel, deployed from `develop`; `prod` = GitHub Pages at
+https://aditya-raj-arora.github.io/merge-conflict/, deployed from
+`v*.*.*` tags through the required-reviewer gate — see CR-034 for why
+they're on different hosts.)_
 
 ## How to read this table
 
