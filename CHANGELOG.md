@@ -8,6 +8,18 @@ This file is auto-maintained going forward by `release-please` off our
 Conventional Commit history — we just keep the `[Unreleased]` section honest
 in the meantime.
 
+## [0.2.1](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.2.0...v0.2.1) (2026-08-20)
+
+
+### Features
+
+* **ui:** level-select screen so all shipped levels are reachable ([#59](https://github.com/aditya-raj-arora/merge-conflict/issues/59)) ([49aa7a9](https://github.com/aditya-raj-arora/merge-conflict/commit/49aa7a943fb3adc3b50dc176331c46b18e93e14d))
+
+
+### Continuous Integration
+
+* force v0.2.1 for the level-select release ([fd53cfd](https://github.com/aditya-raj-arora/merge-conflict/commit/fd53cfd48ceabc44d21927a7fe6f76b7742648d8))
+
 ## [0.2.0](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.1.1...v0.2.0) (2026-08-20)
 
 
