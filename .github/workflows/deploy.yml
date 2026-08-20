@@ -28,7 +28,7 @@ jobs:
       - run: npm run build
       # Only Pages needs this artifact now - Vercel does its own build
       # remotely (see deploy-staging below), it doesn't consume this.
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist/
 
