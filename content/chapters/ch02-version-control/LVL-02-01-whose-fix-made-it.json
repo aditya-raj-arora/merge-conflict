@@ -1,0 +1,56 @@
+{
+  "id": "LVL-02-01-whose-fix-made-it",
+  "chapterId": "ch02-version-control",
+  "title": "Whose Fix Made It?",
+  "narrative": {
+    "intro": "Two devs, same sprint, same bug tracker. Priya branched off to fix a null-check crash on checkout. Sam branched off separately to fix a race condition in the save queue. Standup this morning: \"both fixes are merged into main, ready for release.\" You pull up the graph to confirm before you sign off on it.",
+    "correctDebrief": "Correct - only Priya's fix actually landed. Look at the commit on main: its message claims both fixes got combined, but it only has one parent - Priya's tip. Sam's commit still exists, signed and all, but it's sitting on its own unreferenced branch, unreachable from main. Nobody lied on purpose, probably - someone force-pushed, squashed, or fast-forwarded wrong. Either way: without Version Control actually tracking full merge ancestry (not just trusting a commit message), \"both fixes are merged\" was just wrong, and nobody would've caught it without walking the graph.",
+    "incorrectDebrief": "Check the merge commit's parents, not its message. A commit message can claim anything - what actually determines whether a change is \"in\" is whether its commit is an ancestor of HEAD. Trace main's parentIds back and see which branch tip it actually connects to."
+  },
+  "graph": {
+    "commits": {
+      "c1": {
+        "id": "c1",
+        "parentIds": [],
+        "message": "chore: branch off for checkout/save-queue fixes",
+        "authorSigned": true,
+        "timestamp": 0
+      },
+      "c2": {
+        "id": "c2",
+        "parentIds": ["c1"],
+        "message": "fix: null check crash on checkout",
+        "authorSigned": true,
+        "timestamp": 1
+      },
+      "c3": {
+        "id": "c3",
+        "parentIds": ["c1"],
+        "message": "fix: race condition in save queue",
+        "authorSigned": true,
+        "timestamp": 1
+      },
+      "c4": {
+        "id": "c4",
+        "parentIds": ["c2"],
+        "message": "merge: combine checkout fix and save-queue fix into main",
+        "authorSigned": true,
+        "timestamp": 2
+      }
+    },
+    "refs": {
+      "priya-fix": { "name": "priya-fix", "commitId": "c2" },
+      "sam-fix": { "name": "sam-fix", "commitId": "c3" },
+      "main": { "name": "main", "commitId": "c4" }
+    },
+    "head": { "type": "branch", "name": "main" }
+  },
+  "prompt": "Whose fix is actually live on main right now?",
+  "options": [
+    { "id": "priya-only", "label": "Only Priya's checkout fix" },
+    { "id": "sam-only", "label": "Only Sam's save-queue fix" },
+    { "id": "both", "label": "Both fixes" },
+    { "id": "neither", "label": "Neither fix" }
+  ],
+  "correctOptionId": "priya-only"
+}
