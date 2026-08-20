@@ -8,13 +8,14 @@ would actually check first).
 
 ## Ledger
 
-| Item                                             | Current Version                         | Environment                         | Last Change                            | Open CRs |
-| ------------------------------------------------ | --------------------------------------- | ----------------------------------- | -------------------------------------- | -------- |
-| CSCI-MC (whole app)                              | `v0.1.1` / `BL-02-dependency-hardening` | staging + prod (both verified live) | 2026-08-20, dependency hardening patch | —        |
-| TLCSC-01-ENGINE (commit graph + level mechanics) | `_r1` (all units)                       | staging + prod                      | 2026-08-06                             | —        |
-| TLCSC-02-UI (GraphCanvas, LevelView)             | `_r1`                                   | staging + prod                      | 2026-08-06                             | —        |
-| TLCSC-03-STATE (useGameStore)                    | `_r1`                                   | staging + prod                      | 2026-08-06                             | —        |
-| TLCSC-04-CONTENT > LLCSC-04-01-CH01 (LVL-01-01)  | `_r1`                                   | staging + prod                      | 2026-08-06                             | —        |
+| Item                                             | Current Version                          | Environment                                                           | Last Change                             | Open CRs |
+| ------------------------------------------------ | ---------------------------------------- | --------------------------------------------------------------------- | --------------------------------------- | -------- |
+| CSCI-MC (whole app)                              | `v0.2.0` / `BL-03-version-control-intro` | staging + prod (both verified live)                                   | 2026-08-20, Chapter 2 baseline (CR-051) | —        |
+| TLCSC-01-ENGINE (commit graph + level mechanics) | `_r1` (all units)                        | staging + prod                                                        | 2026-08-06                              | —        |
+| TLCSC-02-UI (GraphCanvas, LevelView)             | `_r1`                                    | staging + prod                                                        | 2026-08-06                              | —        |
+| TLCSC-03-STATE (useGameStore)                    | `_r1`                                    | staging + prod                                                        | 2026-08-06                              | —        |
+| TLCSC-04-CONTENT > LLCSC-04-01-CH01 (LVL-01-01)  | `_r1`                                    | staging + prod                                                        | 2026-08-06                              | —        |
+| TLCSC-04-CONTENT > LLCSC-04-02-CH02 (LVL-02-01)  | `_r1`                                    | shipped, not yet reachable in UI (see BASELINE-REGISTER.md known gap) | 2026-08-20                              | —        |
 
 _(Table grows one row per top-level CI as they come online. `staging` =
 Vercel, deployed from `develop`; `prod` = GitHub Pages at
