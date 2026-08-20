@@ -8,6 +8,15 @@ This file is auto-maintained going forward by `release-please` off our
 Conventional Commit history — we just keep the `[Unreleased]` section honest
 in the meantime.
 
+## [0.1.1](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.1.0...v0.1.1) (2026-08-20)
+
+
+### Bug Fixes
+
+* **release:** let Vercel build remotely instead of deploying our dist/ as-is ([41e9c17](https://github.com/aditya-raj-arora/merge-conflict/commit/41e9c17ce3d2849109d2c13208b8a2e194e9e69a))
+* **release:** rework deploy pipeline - Vercel staging, github-pages-gated prod ([1b676f8](https://github.com/aditya-raj-arora/merge-conflict/commit/1b676f8d3c07e4ecbcbd3464ddb3d9eb3bf098ba))
+* **release:** stop release-please from prefixing tags with the component name ([262316c](https://github.com/aditya-raj-arora/merge-conflict/commit/262316cdade2befe631379cde0e1146a79775634))
+
 ## 0.1.0 (2026-08-06)
 
 
