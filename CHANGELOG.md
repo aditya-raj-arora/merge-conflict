@@ -8,6 +8,13 @@ This file is auto-maintained going forward by `release-please` off our
 Conventional Commit history — we just keep the `[Unreleased]` section honest
 in the meantime.
 
+## [0.4.0](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.3.0...v0.4.0) (2026-08-20)
+
+
+### Features
+
+* **content:** Chapter 4 first playable slice - What's Actually Live? ([#70](https://github.com/aditya-raj-arora/merge-conflict/issues/70)) ([9d7bf3f](https://github.com/aditya-raj-arora/merge-conflict/commit/9d7bf3fb02f3e4ec8bc821798383f44055ac4efc))
+
 ## [0.3.0](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.2.1...v0.3.0) (2026-08-20)
 
 
