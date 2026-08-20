@@ -8,6 +8,18 @@ This file is auto-maintained going forward by `release-please` off our
 Conventional Commit history — we just keep the `[Unreleased]` section honest
 in the meantime.
 
+## [0.2.0](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.1.1...v0.2.0) (2026-08-20)
+
+
+### Features
+
+* **content:** Chapter 2 first playable slice - Whose Fix Made It? ([#52](https://github.com/aditya-raj-arora/merge-conflict/issues/52)) ([cbe431b](https://github.com/aditya-raj-arora/merge-conflict/commit/cbe431bdc50c88c6dcfdabdad49a30dbe2163bc5))
+
+
+### Bug Fixes
+
+* **release:** pre-1.0 feat commits should bump MINOR, not PATCH ([#55](https://github.com/aditya-raj-arora/merge-conflict/issues/55)) ([6f262f4](https://github.com/aditya-raj-arora/merge-conflict/commit/6f262f44cfb41684333287b94f65b81c0ffde78c))
+
 ## [0.1.1](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.1.0...v0.1.1) (2026-08-20)
 
 
