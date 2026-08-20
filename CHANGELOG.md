@@ -8,6 +8,13 @@ This file is auto-maintained going forward by `release-please` off our
 Conventional Commit history — we just keep the `[Unreleased]` section honest
 in the meantime.
 
+## [0.3.0](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.2.1...v0.3.0) (2026-08-20)
+
+
+### Features
+
+* **content:** Chapter 3 first playable slice - Who Skipped Review? ([#66](https://github.com/aditya-raj-arora/merge-conflict/issues/66)) ([045e940](https://github.com/aditya-raj-arora/merge-conflict/commit/045e940792515551e79f94cc84884efb68e6ce55))
+
 ## [0.2.1](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.2.0...v0.2.1) (2026-08-20)
 
 
