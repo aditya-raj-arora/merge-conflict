@@ -74,6 +74,34 @@ type Head =
   { type: "branch"; name: string } | { type: "detached"; commitId: string };
 ```
 
+## Merge commits
+
+A merge commit is just a `Commit` whose `parentIds` has more than one
+entry - there's no separate "merge" shape. `layoutGraph()` and
+`GraphCanvas` were written parent-count-agnostic from the start (see
+`LLCSC-01-01-GRAPH`'s doc comment in `commitGraph.ts`), so this works with
+no schema or engine changes; verified against a real fixture in
+`tests/engine/layout.test.ts` and shipped in
+`content/chapters/ch02-version-control/LVL-02-01-whose-fix-made-it.json`
+(CR-051).
+
+One thing to know when authoring one: `computeLanes()` in `layout.ts`
+assigns lanes by walking **first-parent** history from each ref, so give
+every diverging branch its own ref (not just the branch that ends up
+merged) - otherwise a commit only reachable as a merge's second-plus
+parent falls into the "unreferenced commit" fallback lane assignment
+instead of a lane that reflects its actual branch.
+
+```json
+{
+  "id": "c4",
+  "parentIds": ["c2", "c3"],
+  "message": "merge: combine two branches",
+  "authorSigned": true,
+  "timestamp": 2
+}
+```
+
 ## Rules a level fixture must follow
 
 - Every `Commit.id` used as a key in `commits` must equal that commit's
@@ -107,6 +135,7 @@ the engine agrees is correct.
 
 ## Document history
 
-| Version | Date       | Change                                    |
-| ------- | ---------- | ----------------------------------------- |
-| 1.0     | 2026-08-06 | Initial spec, written alongside LVL-01-01 |
+| Version | Date       | Change                                                                 |
+| ------- | ---------- | ---------------------------------------------------------------------- |
+| 1.0     | 2026-08-06 | Initial spec, written alongside LVL-01-01                              |
+| 1.0     | 2026-08-20 | Added the Merge commits section, verified alongside LVL-02-01 (CR-051) |
