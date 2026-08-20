@@ -1,13 +1,22 @@
+import { useState } from "react";
+import { LevelSelect } from "./components/LevelSelect";
 import { LevelView } from "./components/LevelView";
-import { parseLevel } from "./engine/mechanics/level";
-import rawLevel from "../content/chapters/ch01-identification/LVL-01-01-which-one-shipped.json";
-
-const level = parseLevel(rawLevel);
+import { levelManifest } from "../content/levelManifest";
 
 function App() {
+  const [selectedLevelId, setSelectedLevelId] = useState<string | null>(null);
+  const selectedEntry = levelManifest.find((e) => e.id === selectedLevelId);
+
   return (
     <main className="min-h-screen bg-slate-900">
-      <LevelView level={level} />
+      {selectedEntry ? (
+        <LevelView
+          level={selectedEntry.level}
+          onBack={() => setSelectedLevelId(null)}
+        />
+      ) : (
+        <LevelSelect entries={levelManifest} onSelect={setSelectedLevelId} />
+      )}
     </main>
   );
 }

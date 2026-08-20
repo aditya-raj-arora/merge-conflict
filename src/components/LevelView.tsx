@@ -6,9 +6,10 @@ import type { Level } from "../engine/mechanics/level";
 
 export interface LevelViewProps {
   level: Level;
+  onBack?: () => void;
 }
 
-export function LevelView({ level }: LevelViewProps) {
+export function LevelView({ level, onBack }: LevelViewProps) {
   const {
     selectedOptionId,
     result,
@@ -24,6 +25,15 @@ export function LevelView({ level }: LevelViewProps) {
 
   return (
     <div className="mx-auto max-w-2xl p-6 text-slate-100">
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          className="mb-4 text-sm text-slate-400 hover:text-slate-200"
+        >
+          ← Back to levels
+        </button>
+      )}
       <h1 className="text-2xl font-bold">{level.title}</h1>
       <p className="mt-3 text-slate-300">{level.narrative.intro}</p>
 
