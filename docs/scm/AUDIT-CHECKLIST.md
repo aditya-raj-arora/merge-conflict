@@ -22,19 +22,19 @@ here and note the baseline tag it was run for) before tagging.
 
 ## Why each check exists
 
-| Check | What it catches |
-|---|---|
-| CodeQL | A known-bad code pattern slipping into an "approved" baseline |
-| gitleaks | A secret getting baked permanently into git history |
-| Coverage delta | Untested code quietly becoming part of the shipped configuration |
-| Dependabot queue | A known CVE in a dependency being present in what we're about to call "approved" |
-| CRs resolved | A baseline claiming to include work that was never actually finished/reviewed |
-| Tag signature | No way to prove *who* approved this baseline, or that it wasn't tampered with after the fact |
+| Check             | What it catches                                                                                   |
+| ----------------- | ------------------------------------------------------------------------------------------------- |
+| CodeQL            | A known-bad code pattern slipping into an "approved" baseline                                     |
+| gitleaks          | A secret getting baked permanently into git history                                               |
+| Coverage delta    | Untested code quietly becoming part of the shipped configuration                                  |
+| Dependabot queue  | A known CVE in a dependency being present in what we're about to call "approved"                  |
+| CRs resolved      | A baseline claiming to include work that was never actually finished/reviewed                     |
+| Tag signature     | No way to prove _who_ approved this baseline, or that it wasn't tampered with after the fact      |
 | Baseline register | The whole point of an audit — if this table's stale, nobody downstream can trust "what's in prod" |
-| Status ledger | Same idea, but for "where is it," not "what is it" |
+| Status ledger     | Same idea, but for "where is it," not "what is it"                                                |
 
 ## Audit log
 
-| Baseline tag | Date | Run by | Result | Notes |
-|---|---|---|---|---|
-| _(none yet)_ | | | | |
+| Baseline tag                 | Date       | Run by           | Result                   | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ---------------------------- | ---------- | ---------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `BL-01-identification-intro` | 2026-08-06 | Aditya Raj Arora | Pass, with one gap noted | CodeQL: clean (0 open alerts). gitleaks: clean. Coverage delta: **not measured** - Codecov was never connected to a real account/token, so `codecov/patch` isn't a real signal yet (dropped from required checks back in Step 5). Dependabot queue: empty. CRs resolved: all 8 closed as part of this audit (CR-001, CR-003, CR-019, CR-021, CR-024, CR-027, CR-029, CR-032) - they'd been merged for a while but never auto-closed, since PRs used `Refs:` instead of a GitHub closing keyword; fixed the PR template (see CR-038) so this doesn't recur. Tag signature: verifies (`git tag -v`). Register + ledger: this PR. |

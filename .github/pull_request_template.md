@@ -7,7 +7,17 @@ first.
 
 ## Linked CR
 
-Refs: CR-<!-- issue number -->
+Closes #<!-- issue number -->
+
+<!--
+Use a real GitHub closing keyword (Closes/Fixes/Resolves #NNN), not just
+"Refs: CR-NNN" - the latter shows up in the commit body for traceability
+but does NOT auto-close the Issue on merge. Learned this the hard way in
+CR-038: eight resolved CRs sat open for days because every PR only used
+Refs. Still add "Refs: CR-NNN" in the squash-merge commit body too (that
+part's for commit-history traceability, this closing keyword is for the
+Issue itself).
+-->
 
 ## What changed and why
 
