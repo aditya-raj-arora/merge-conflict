@@ -151,6 +151,15 @@ status, and whether every CR in the release is actually resolved.
 
 - **Versioning:** SemVer. MAJOR = breaking engine/schema change, MINOR = new
   chapter/mechanic, PATCH = fixes/tuning.
+- **Not every `feat:` commit is a MINOR bump:** release-please's own
+  Conventional Commits parsing treats `feat:` as "always MINOR pre-1.0"
+  (see CR-054), but that's a looser rule than this project's actual policy
+  above. UI/tooling work that makes already-shipped content reachable
+  (e.g. CR-058's level-select screen) is a `feat:` commit by Conventional
+  Commits' own definition, but it's not a new chapter or mechanic - it
+  gets `Release-As:`-forced down to PATCH (see CR-061). When in doubt: did
+  this add a chapter or a new kind of puzzle mechanic? If not, it's PATCH,
+  regardless of what release-please's default would pick.
 - **Automation:** release-please reads our Conventional Commit history,
   opens a release PR bumping `package.json` + `CHANGELOG.md`, and on merge
   cuts a signed `vX.Y.Z` tag.
