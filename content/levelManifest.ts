@@ -5,6 +5,7 @@ import { parseLevel, type Level } from "../src/engine/mechanics/level";
 import rawLvl0101 from "./chapters/ch01-identification/LVL-01-01-which-one-shipped.json";
 import rawLvl0201 from "./chapters/ch02-version-control/LVL-02-01-whose-fix-made-it.json";
 import rawLvl0301 from "./chapters/ch03-change-control/LVL-03-01-who-skipped-review.json";
+import rawLvl0401 from "./chapters/ch04-status-accounting/LVL-04-01-whats-actually-live.json";
 
 export interface ManifestEntry {
   id: string;
@@ -27,4 +28,5 @@ export const levelManifest: ManifestEntry[] = [
   toEntry(rawLvl0101),
   toEntry(rawLvl0201),
   toEntry(rawLvl0301),
+  toEntry(rawLvl0401),
 ];
