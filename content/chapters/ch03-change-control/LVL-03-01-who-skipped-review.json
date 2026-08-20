@@ -1,0 +1,61 @@
+{
+  "id": "LVL-03-01-who-skipped-review",
+  "chapterId": "ch03-change-control",
+  "title": "Who Skipped Review?",
+  "narrative": {
+    "intro": "The library hit the front page of a link aggregator overnight and downloads 10x'd in a day. Contributors you've never heard of started opening PRs, and in the rush to keep up, some things got merged fast. Now there's a bug in production - a config default got flipped that never should have shipped. Every commit on main this week is signed. Only one has no linked change request explaining why it happened.",
+    "correctDebrief": "Correct - \"flip default timeout to 100ms\" has no Refs: CR-NNN anywhere in it, unlike every other commit here. It's still signed - nobody's impersonating anybody, that's not the gap. Change Control isn't about identity, it's about traceability: a record of why a change happened and who actually signed off on it as a change, not just who authored the commit. That's the gap that let a bad default ship straight to main with nobody accountable for the decision.",
+    "incorrectDebrief": "Check every commit message for a \"Refs: CR-NNN\" line, not just whether it's signed - all four of these are signed, that's not the tell. The one that broke prod is the one with no linked change request at all."
+  },
+  "graph": {
+    "commits": {
+      "c1": {
+        "id": "c1",
+        "parentIds": [],
+        "message": "chore: prep repo for the surge - add contributing guide",
+        "authorSigned": true,
+        "timestamp": 0
+      },
+      "c2": {
+        "id": "c2",
+        "parentIds": ["c1"],
+        "message": "feat: add response caching (Refs: CR-112)",
+        "authorSigned": true,
+        "timestamp": 1
+      },
+      "c3": {
+        "id": "c3",
+        "parentIds": ["c2"],
+        "message": "fix: correct off-by-one in pagination (Refs: CR-115)",
+        "authorSigned": true,
+        "timestamp": 2
+      },
+      "c4": {
+        "id": "c4",
+        "parentIds": ["c3"],
+        "message": "chore: flip default timeout to 100ms",
+        "authorSigned": true,
+        "timestamp": 3
+      },
+      "c5": {
+        "id": "c5",
+        "parentIds": ["c4"],
+        "message": "docs: update README badges (Refs: CR-118)",
+        "authorSigned": true,
+        "timestamp": 4
+      }
+    },
+    "refs": {
+      "main": { "name": "main", "commitId": "c5" }
+    },
+    "head": { "type": "branch", "name": "main" }
+  },
+  "prompt": "Every commit here is properly signed. Which one skipped Change Control - no linked CR, no record of who approved it or why?",
+  "options": [
+    { "id": "c2", "label": "feat: add response caching" },
+    { "id": "c3", "label": "fix: correct off-by-one in pagination" },
+    { "id": "c4", "label": "chore: flip default timeout to 100ms" },
+    { "id": "c5", "label": "docs: update README badges" }
+  ],
+  "correctOptionId": "c4"
+}
