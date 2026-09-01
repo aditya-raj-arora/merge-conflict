@@ -8,6 +8,13 @@ This file is auto-maintained going forward by `release-please` off our
 Conventional Commit history — we just keep the `[Unreleased]` section honest
 in the meantime.
 
+## [0.8.0](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.7.0...v0.8.0) (2026-09-01)
+
+
+### Features
+
+* **ui:** visual-novel StoryView; deepen STORY-01-01 branches ([#96](https://github.com/aditya-raj-arora/merge-conflict/issues/96)) ([e22377d](https://github.com/aditya-raj-arora/merge-conflict/commit/e22377d6aa8b427ba86ebbddc1dbabe46a127960))
+
 ## [0.7.0](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.6.0...v0.7.0) (2026-09-01)
 
 
