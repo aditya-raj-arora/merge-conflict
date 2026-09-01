@@ -8,18 +8,19 @@ would actually check first).
 
 ## Ledger
 
-| Item                                             | Current Version                              | Environment                                            | Last Change                             | Open CRs |
-| ------------------------------------------------ | -------------------------------------------- | ------------------------------------------------------ | --------------------------------------- | -------- |
-| CSCI-MC (whole app)                              | `v0.5.0` / `BL-07-configuration-audit-intro` | staging + prod (both verified live)                    | 2026-08-20, Chapter 5 baseline (CR-073) | —        |
-| TLCSC-02-UI > LevelSelect                        | `_r1` (new)                                  | staging + prod                                         | 2026-08-20                              | —        |
-| TLCSC-01-ENGINE (commit graph + level mechanics) | `_r1` (all units)                            | staging + prod                                         | 2026-08-06                              | —        |
-| TLCSC-02-UI (GraphCanvas, LevelView)             | `_r1`                                        | staging + prod                                         | 2026-08-06                              | —        |
-| TLCSC-03-STATE (useGameStore)                    | `_r1`                                        | staging + prod                                         | 2026-08-06                              | —        |
-| TLCSC-04-CONTENT > LLCSC-04-01-CH01 (LVL-01-01)  | `_r1`                                        | staging + prod                                         | 2026-08-06                              | —        |
-| TLCSC-04-CONTENT > LLCSC-04-02-CH02 (LVL-02-01)  | `_r1`                                        | staging + prod (now reachable via level-select, BL-04) | 2026-08-20                              | —        |
-| TLCSC-04-CONTENT > LLCSC-04-03-CH03 (LVL-03-01)  | `_r1`                                        | staging + prod                                         | 2026-08-20                              | —        |
-| TLCSC-04-CONTENT > LLCSC-04-04-CH04 (LVL-04-01)  | `_r1`                                        | staging + prod                                         | 2026-08-20                              | —        |
-| TLCSC-04-CONTENT > LLCSC-04-05-CH05 (LVL-05-01)  | `_r1` (new)                                  | staging + prod                                         | 2026-08-20                              | —        |
+| Item                                             | Current Version                        | Environment                                            | Last Change                             | Open CRs |
+| ------------------------------------------------ | -------------------------------------- | ------------------------------------------------------ | --------------------------------------- | -------- |
+| CSCI-MC (whole app)                              | `v0.6.0` / `BL-08-build-release-intro` | staging + prod (both verified live)                    | 2026-08-20, Chapter 6 baseline (CR-083) | —        |
+| TLCSC-02-UI > LevelSelect                        | `_r1` (new)                            | staging + prod                                         | 2026-08-20                              | —        |
+| TLCSC-01-ENGINE (commit graph + level mechanics) | `_r1` (all units)                      | staging + prod                                         | 2026-08-06                              | —        |
+| TLCSC-02-UI (GraphCanvas, LevelView)             | `_r1`                                  | staging + prod                                         | 2026-08-06                              | —        |
+| TLCSC-03-STATE (useGameStore)                    | `_r1`                                  | staging + prod                                         | 2026-08-06                              | —        |
+| TLCSC-04-CONTENT > LLCSC-04-01-CH01 (LVL-01-01)  | `_r1`                                  | staging + prod                                         | 2026-08-06                              | —        |
+| TLCSC-04-CONTENT > LLCSC-04-02-CH02 (LVL-02-01)  | `_r1`                                  | staging + prod (now reachable via level-select, BL-04) | 2026-08-20                              | —        |
+| TLCSC-04-CONTENT > LLCSC-04-03-CH03 (LVL-03-01)  | `_r1`                                  | staging + prod                                         | 2026-08-20                              | —        |
+| TLCSC-04-CONTENT > LLCSC-04-04-CH04 (LVL-04-01)  | `_r1`                                  | staging + prod                                         | 2026-08-20                              | —        |
+| TLCSC-04-CONTENT > LLCSC-04-05-CH05 (LVL-05-01)  | `_r1`                                  | staging + prod                                         | 2026-08-20                              | —        |
+| TLCSC-04-CONTENT > LLCSC-04-06-CH06 (LVL-06-01)  | `_r1` (new)                            | staging + prod                                         | 2026-08-20                              | —        |
 
 _(Table grows one row per top-level CI as they come online. `staging` =
 Vercel, deployed from `develop`; `prod` = GitHub Pages at
