@@ -1,0 +1,49 @@
+{
+  "id": "LVL-06-01-which-tag-lied",
+  "chapterId": "ch06-build-release",
+  "title": "Which Tag Lied?",
+  "narrative": {
+    "intro": "Three releases went out this month, one after another: v1.0.0, v1.0.1, v1.0.2. All signed, all in order, nothing about the sequence itself looks wrong. A downstream team just filed a bug report: they upgraded from v1.0.1 to v1.0.2 expecting a routine patch, like the version number promised, and it broke their integration. You go back and read what each tagged commit actually says it is.",
+    "correctDebrief": "Correct - v1.0.2's own commit message starts with \"feat!:\", the Conventional Commits marker for a breaking change. That should have been v2.0.0, not a PATCH bump. Nothing else about the release looked wrong - it was signed, it shipped in order, the tag sequence looked perfectly ordinary. That's the whole failure mode Build & Release Management exists to prevent: without something actually gating \"does this tag's version number match what the commit itself claims to be,\" a breaking change can wear a patch release's clothes all the way to production, and the first person to find out is a downstream consumer who trusted the number.",
+    "incorrectDebrief": "Don't just check whether the tags are signed and in order - read what each commit message actually says about the size of the change, and compare that to the version bump its tag claims. One of these three doesn't match."
+  },
+  "graph": {
+    "commits": {
+      "c1": {
+        "id": "c1",
+        "parentIds": [],
+        "message": "feat: initial auth service",
+        "authorSigned": true,
+        "timestamp": 0
+      },
+      "c2": {
+        "id": "c2",
+        "parentIds": ["c1"],
+        "message": "fix: correct token expiry check",
+        "authorSigned": true,
+        "timestamp": 1
+      },
+      "c3": {
+        "id": "c3",
+        "parentIds": ["c2"],
+        "message": "feat!: replace session cookies with JWT, breaking all existing sessions",
+        "authorSigned": true,
+        "timestamp": 2
+      }
+    },
+    "refs": {
+      "v1.0.0": { "name": "v1.0.0", "commitId": "c1" },
+      "v1.0.1": { "name": "v1.0.1", "commitId": "c2" },
+      "v1.0.2": { "name": "v1.0.2", "commitId": "c3" }
+    },
+    "head": { "type": "branch", "name": "v1.0.2" }
+  },
+  "prompt": "Which tagged release doesn't actually match what its own commit says it is?",
+  "options": [
+    { "id": "v1.0.0", "label": "v1.0.0" },
+    { "id": "v1.0.1", "label": "v1.0.1" },
+    { "id": "v1.0.2", "label": "v1.0.2" },
+    { "id": "none", "label": "None - all three are labeled correctly" }
+  ],
+  "correctOptionId": "v1.0.2"
+}
