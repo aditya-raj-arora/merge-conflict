@@ -1,0 +1,379 @@
+{
+  "id": "STORY-05-01-does-it-still-match",
+  "chapterId": "ch05-configuration-audit",
+  "title": "Does It Still Match?",
+  "startStageId": "start",
+  "stages": {
+    "start": {
+      "id": "start",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "Compliance wants a quick answer before the quarterly review: does what's actually running in prod match BL-01, the last configuration anyone formally signed off on? You pull up both refs to check. Nothing about this smells like an incident - no unsigned commits, no missing CR reference, nothing that looks like it slipped past review.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "release: cut v1.0.0",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "chore: tag baseline BL-01 - approved launch configuration",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c2"],
+            "message": "fix: bump rate-limit threshold under load (Refs: CR-201)",
+            "authorSigned": true,
+            "timestamp": 2
+          }
+        },
+        "refs": {
+          "BL-01": { "name": "BL-01", "commitId": "c2" },
+          "prod": { "name": "prod", "commitId": "c3" }
+        },
+        "head": { "type": "branch", "name": "prod" }
+      },
+      "prompt": "Does what's actually running in prod match the last approved baseline, BL-01?",
+      "choices": [
+        {
+          "id": "matches",
+          "label": "Yes - prod is exactly at BL-01",
+          "nextStageId": "wrong-matches-open"
+        },
+        {
+          "id": "extra-commit",
+          "label": "No - prod has a commit on top of BL-01 that was never itself audited or baselined",
+          "nextStageId": "correct-open"
+        },
+        {
+          "id": "missing-commit",
+          "label": "No - prod is missing a commit that BL-01 already included",
+          "nextStageId": "wrong-missing-open"
+        },
+        {
+          "id": "cant-tell",
+          "label": "Can't tell from the graph alone",
+          "nextStageId": "wrong-canttell-open"
+        }
+      ]
+    },
+
+    "correct-open": {
+      "id": "correct-open",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You're right - prod is one commit past BL-01, and that commit was never itself audited or folded into a new baseline. It's signed, the fix looks reasonable, nobody did anything wrong. That's exactly the point.",
+      "autoNext": "correct-report"
+    },
+    "correct-report": {
+      "id": "correct-report",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You report the drift honestly - not as an incident, just as an unaudited change - and compliance schedules a proper re-audit before the quarterly review.",
+      "ending": {
+        "kind": "good",
+        "debrief": "Prod is one commit past BL-01, and that commit was never itself audited or folded into a new baseline. Nothing about it looks suspicious: it's signed, the fix is reasonable, nobody did anything wrong. That's exactly the point Configuration Audit exists to make - it isn't about catching bad actors, it's about catching this: a perfectly fine change that shipped without anyone re-running the approval loop, so the official record (\"BL-01 is what's approved\") quietly stopped being true the moment it landed."
+      }
+    },
+
+    "wrong-matches-open": {
+      "id": "wrong-matches-open",
+      "speaker": "Narrator",
+      "mood": "tense",
+      "narrative": "You tell compliance prod matches BL-01 exactly. But BL-01's ref names c2, and prod's ref names c3 - a different commit, one step further down the chain. You compared the labels, not the actual commit IDs underneath them.",
+      "autoNext": "wrong-matches-team-beat"
+    },
+    "wrong-matches-team-beat": {
+      "id": "wrong-matches-team-beat",
+      "speaker": "Compliance Lead",
+      "mood": "tense",
+      "narrative": "\"Matches exactly? I thought there was a rate-limit fix that went out after the launch baseline - did you actually diff the two commit IDs, or just eyeball the graph?\"",
+      "autoNext": "wrong-matches-consequence"
+    },
+    "wrong-matches-consequence": {
+      "id": "wrong-matches-consequence",
+      "speaker": "You",
+      "mood": "danger",
+      "narrative": "You've got the compliance lead questioning your read, and you haven't actually compared the two commit IDs directly.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "release: cut v1.0.0",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "chore: tag baseline BL-01 - approved launch configuration",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c2"],
+            "message": "fix: bump rate-limit threshold under load (Refs: CR-201)",
+            "authorSigned": true,
+            "timestamp": 2
+          }
+        },
+        "refs": {
+          "BL-01": { "name": "BL-01", "commitId": "c2" },
+          "prod": { "name": "prod", "commitId": "c3" }
+        },
+        "head": { "type": "branch", "name": "prod" }
+      },
+      "prompt": "Do you compare BL-01's and prod's commit IDs directly, or defend your answer?",
+      "choices": [
+        {
+          "id": "recheck",
+          "label": "Compare the two commit IDs directly",
+          "nextStageId": "matches-recover"
+        },
+        {
+          "id": "defend",
+          "label": "Defend your answer - they match",
+          "nextStageId": "matches-worse"
+        }
+      ]
+    },
+    "matches-recover": {
+      "id": "matches-recover",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "You compare the IDs directly this time. BL-01 names c2. Prod names c3. They are not the same commit - prod is one step ahead, carrying the rate-limit fix.",
+      "autoNext": "matches-recover-end"
+    },
+    "matches-recover-end": {
+      "id": "matches-recover-end",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You correct your answer before compliance signs off on a stale claim.",
+      "ending": {
+        "kind": "neutral",
+        "debrief": "You got there - but only because the compliance lead remembered the rate-limit fix and pushed back first. If they hadn't, \"prod matches BL-01 exactly\" would have gone into the quarterly review as fact. Comparing commit IDs directly the first time isn't optional busywork; it's the only way \"does it still match\" doesn't depend on who happens to remember what shipped after the baseline."
+      }
+    },
+    "matches-worse": {
+      "id": "matches-worse",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "You insist prod matches BL-01 exactly. The quarterly review goes out claiming the launch configuration is still exactly what's running - and nobody re-audits the rate-limit fix that's actually been live for weeks.",
+      "autoNext": "matches-worse-end"
+    },
+    "matches-worse-end": {
+      "id": "matches-worse-end",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "Months later, an actual incident traces back to that same rate-limit threshold - and the postmortem discovers it was never audited, because the last review certified prod as \"unchanged since BL-01.\"",
+      "ending": {
+        "kind": "bad",
+        "debrief": "A false \"matches exactly\" claim let a real, unaudited change sit unexamined for months until it mattered. BL-01 names c2; prod names c3. Those are different commits, and no amount of the two looking similar changes that. Comparing labels instead of the actual IDs underneath them is exactly the shortcut Configuration Audit exists to catch."
+      }
+    },
+
+    "wrong-missing-open": {
+      "id": "wrong-missing-open",
+      "speaker": "Narrator",
+      "mood": "tense",
+      "narrative": "You tell compliance prod is missing a commit BL-01 already included. But prod is a descendant of BL-01, not a divergent or earlier point - it has everything BL-01 has, plus one more commit on top. Nothing is missing; something extra was added.",
+      "autoNext": "wrong-missing-team-beat"
+    },
+    "wrong-missing-team-beat": {
+      "id": "wrong-missing-team-beat",
+      "speaker": "Compliance Lead",
+      "mood": "tense",
+      "narrative": "\"Missing something? That's strange - nothing's been reverted that I know of. Did you check whether prod is actually behind BL-01, or ahead of it?\"",
+      "autoNext": "wrong-missing-consequence"
+    },
+    "wrong-missing-consequence": {
+      "id": "wrong-missing-consequence",
+      "speaker": "You",
+      "mood": "danger",
+      "narrative": "The compliance lead's right to ask - you assumed a direction of drift without actually checking which ref is ahead of which.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "release: cut v1.0.0",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "chore: tag baseline BL-01 - approved launch configuration",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c2"],
+            "message": "fix: bump rate-limit threshold under load (Refs: CR-201)",
+            "authorSigned": true,
+            "timestamp": 2
+          }
+        },
+        "refs": {
+          "BL-01": { "name": "BL-01", "commitId": "c2" },
+          "prod": { "name": "prod", "commitId": "c3" }
+        },
+        "head": { "type": "branch", "name": "prod" }
+      },
+      "prompt": "Do you check which ref is actually ahead of which, or defend your answer?",
+      "choices": [
+        {
+          "id": "recheck",
+          "label": "Check which ref is actually ahead",
+          "nextStageId": "missing-recover"
+        },
+        {
+          "id": "defend",
+          "label": "Defend your answer - something's missing",
+          "nextStageId": "missing-worse"
+        }
+      ]
+    },
+    "missing-recover": {
+      "id": "missing-recover",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "You check the direction properly. Prod's parent is BL-01's commit - prod is ahead, not behind. Nothing is missing; there's an extra, unaudited commit on top.",
+      "autoNext": "missing-recover-end"
+    },
+    "missing-recover-end": {
+      "id": "missing-recover-end",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You correct your answer and report the drift accurately.",
+      "ending": {
+        "kind": "good",
+        "debrief": "You caught the mistake before it went out backwards. \"Doesn't match\" has a direction, and assuming it without checking almost sent compliance looking for a missing revert that never happened. The habit that scales is checking which ref is actually the descendant, not guessing at the shape of the drift."
+      }
+    },
+    "missing-worse": {
+      "id": "missing-worse",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "You insist something's missing from prod. The team spends the afternoon searching for a reverted or rolled-back commit that was never actually removed - while the real issue, an unaudited addition, sits untouched the entire time.",
+      "autoNext": "missing-worse-end"
+    },
+    "missing-worse-end": {
+      "id": "missing-worse-end",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "By evening, someone finally checks the parent chain directly and realizes the drift runs the opposite direction from what was reported. The search for a phantom missing commit wasted the whole afternoon.",
+      "ending": {
+        "kind": "bad",
+        "debrief": "An afternoon went into searching for a commit that was never missing, because the direction of the drift was assumed instead of checked. Prod is a strict descendant of BL-01 - it has one commit more, not one commit less. Getting the direction wrong isn't a small error; it sends the entire investigation the wrong way."
+      }
+    },
+
+    "wrong-canttell-open": {
+      "id": "wrong-canttell-open",
+      "speaker": "Narrator",
+      "mood": "tense",
+      "narrative": "You tell compliance it can't be determined from the graph alone. But the graph shows exactly what each ref names and exactly how the commits connect - that's the entire question, answered directly, with nothing left to guess at.",
+      "autoNext": "wrong-canttell-team-beat"
+    },
+    "wrong-canttell-team-beat": {
+      "id": "wrong-canttell-team-beat",
+      "speaker": "Compliance Lead",
+      "mood": "tense",
+      "narrative": "\"Can't tell? Isn't the whole point of the commit graph that we can trace exactly what's where? What would you need that isn't already right there?\"",
+      "autoNext": "wrong-canttell-consequence"
+    },
+    "wrong-canttell-consequence": {
+      "id": "wrong-canttell-consequence",
+      "speaker": "You",
+      "mood": "danger",
+      "narrative": "You don't actually have an answer to that - the graph really does have everything needed, and you reached for \"can't tell\" instead of reading it.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "release: cut v1.0.0",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "chore: tag baseline BL-01 - approved launch configuration",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c2"],
+            "message": "fix: bump rate-limit threshold under load (Refs: CR-201)",
+            "authorSigned": true,
+            "timestamp": 2
+          }
+        },
+        "refs": {
+          "BL-01": { "name": "BL-01", "commitId": "c2" },
+          "prod": { "name": "prod", "commitId": "c3" }
+        },
+        "head": { "type": "branch", "name": "prod" }
+      },
+      "prompt": "Do you actually read what the graph shows, or defend your answer?",
+      "choices": [
+        {
+          "id": "recheck",
+          "label": "Actually read what the graph shows",
+          "nextStageId": "canttell-recover"
+        },
+        {
+          "id": "defend",
+          "label": "Defend your answer - it's genuinely unclear",
+          "nextStageId": "canttell-worse"
+        }
+      ]
+    },
+    "canttell-recover": {
+      "id": "canttell-recover",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "You actually read it this time. BL-01 names c2, prod names c3, and c3's parent is c2. That's a complete, unambiguous answer - prod is one audited-free commit past BL-01.",
+      "autoNext": "canttell-recover-end"
+    },
+    "canttell-recover-end": {
+      "id": "canttell-recover-end",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You give compliance the real answer instead of a shrug.",
+      "ending": {
+        "kind": "good",
+        "debrief": "\"Can't tell\" was never true here - the graph names both refs' commits and their exact relationship, which is the whole question. You recovered by actually reading it instead of defending a guess that there wasn't enough information. Configuration Audit depends on someone being willing to read the graph, not decide in advance that it's unreadable."
+      }
+    },
+    "canttell-worse": {
+      "id": "canttell-worse",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "You insist it's genuinely unclear and ask for more information that doesn't exist. The quarterly review ships with \"audit inconclusive\" next to the launch configuration - a config that was, in fact, perfectly traceable the whole time.",
+      "autoNext": "canttell-worse-end"
+    },
+    "canttell-worse-end": {
+      "id": "canttell-worse-end",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "The \"inconclusive\" result triggers a much heavier follow-up audit weeks later - one that finds the exact same two commits, and the exact same answer that was available from the graph all along.",
+      "ending": {
+        "kind": "bad",
+        "debrief": "\"Can't tell\" turned a two-minute graph read into a full follow-up audit weeks later, for the same answer that was sitting right there in BL-01's and prod's commit IDs. The graph isn't incomplete just because reading it takes a moment of attention - declaring it unreadable instead of reading it is its own kind of audit failure."
+      }
+    }
+  }
+}
