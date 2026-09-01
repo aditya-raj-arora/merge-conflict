@@ -1,24 +1,40 @@
 // LLCSC-04-*-CH*: the list of levels a player can actually pick from.
 // New chapters/levels register themselves here - this is the only place
 // App.tsx needs to know nothing about individual level files (CR-058).
+// Entries are polymorphic over kind (CR-091): "quiz" is the original
+// single-question-over-a-graph mechanic (level.ts/LevelView), "story" is
+// the newer branching multi-stage mechanic (story.ts/StoryView).
 import { parseLevel, type Level } from "../src/engine/mechanics/level";
-import rawLvl0101 from "./chapters/ch01-identification/LVL-01-01-which-one-shipped.json";
+import { parseStory, type Story } from "../src/engine/mechanics/story";
 import rawLvl0201 from "./chapters/ch02-version-control/LVL-02-01-whose-fix-made-it.json";
 import rawLvl0301 from "./chapters/ch03-change-control/LVL-03-01-who-skipped-review.json";
 import rawLvl0401 from "./chapters/ch04-status-accounting/LVL-04-01-whats-actually-live.json";
 import rawLvl0501 from "./chapters/ch05-configuration-audit/LVL-05-01-does-it-still-match.json";
 import rawLvl0601 from "./chapters/ch06-build-release/LVL-06-01-which-tag-lied.json";
+import rawStory0101 from "./chapters/ch01-identification/STORY-01-01-which-one-shipped.json";
 
-export interface ManifestEntry {
+export interface QuizManifestEntry {
+  kind: "quiz";
   id: string;
   chapterId: string;
   title: string;
   level: Level;
 }
 
-function toEntry(raw: unknown): ManifestEntry {
+export interface StoryManifestEntry {
+  kind: "story";
+  id: string;
+  chapterId: string;
+  title: string;
+  story: Story;
+}
+
+export type ManifestEntry = QuizManifestEntry | StoryManifestEntry;
+
+function toQuizEntry(raw: unknown): QuizManifestEntry {
   const level = parseLevel(raw);
   return {
+    kind: "quiz",
     id: level.id,
     chapterId: level.chapterId,
     title: level.title,
@@ -26,11 +42,22 @@ function toEntry(raw: unknown): ManifestEntry {
   };
 }
 
+function toStoryEntry(raw: unknown): StoryManifestEntry {
+  const story = parseStory(raw);
+  return {
+    kind: "story",
+    id: story.id,
+    chapterId: story.chapterId,
+    title: story.title,
+    story,
+  };
+}
+
 export const levelManifest: ManifestEntry[] = [
-  toEntry(rawLvl0101),
-  toEntry(rawLvl0201),
-  toEntry(rawLvl0301),
-  toEntry(rawLvl0401),
-  toEntry(rawLvl0501),
-  toEntry(rawLvl0601),
+  toStoryEntry(rawStory0101),
+  toQuizEntry(rawLvl0201),
+  toQuizEntry(rawLvl0301),
+  toQuizEntry(rawLvl0401),
+  toQuizEntry(rawLvl0501),
+  toQuizEntry(rawLvl0601),
 ];
