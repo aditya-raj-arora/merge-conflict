@@ -1,0 +1,383 @@
+{
+  "id": "STORY-06-01-which-tag-lied",
+  "chapterId": "ch06-build-release",
+  "title": "Which Tag Lied?",
+  "startStageId": "start",
+  "stages": {
+    "start": {
+      "id": "start",
+      "speaker": "Narrator",
+      "mood": "tense",
+      "narrative": "Three releases went out this month, one after another: v1.0.0, v1.0.1, v1.0.2. All signed, all in order, nothing about the sequence itself looks wrong. A downstream team just filed a bug report: they upgraded from v1.0.1 to v1.0.2 expecting a routine patch, like the version number promised, and it broke their integration. You go back and read what each tagged commit actually says it is.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "feat: initial auth service",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "fix: correct token expiry check",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c2"],
+            "message": "feat!: replace session cookies with JWT, breaking all existing sessions",
+            "authorSigned": true,
+            "timestamp": 2
+          }
+        },
+        "refs": {
+          "v1.0.0": { "name": "v1.0.0", "commitId": "c1" },
+          "v1.0.1": { "name": "v1.0.1", "commitId": "c2" },
+          "v1.0.2": { "name": "v1.0.2", "commitId": "c3" }
+        },
+        "head": { "type": "branch", "name": "v1.0.2" }
+      },
+      "prompt": "Which tagged release doesn't actually match what its own commit says it is?",
+      "choices": [
+        {
+          "id": "v1.0.0",
+          "label": "v1.0.0",
+          "nextStageId": "wrong-100-open"
+        },
+        {
+          "id": "v1.0.1",
+          "label": "v1.0.1",
+          "nextStageId": "wrong-101-open"
+        },
+        {
+          "id": "v1.0.2",
+          "label": "v1.0.2",
+          "nextStageId": "correct-open"
+        },
+        {
+          "id": "none",
+          "label": "None - all three are labeled correctly",
+          "nextStageId": "wrong-none-open"
+        }
+      ]
+    },
+
+    "correct-open": {
+      "id": "correct-open",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You're right - v1.0.2's own commit message starts with \"feat!:\", the Conventional Commits marker for a breaking change. That should have been v2.0.0, not a PATCH bump.",
+      "autoNext": "correct-report"
+    },
+    "correct-report": {
+      "id": "correct-report",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You flag the mismatch to the release team before anyone else upgrades expecting a routine patch. They yank v1.0.2 and recut it as v2.0.0 with proper breaking-change notes.",
+      "ending": {
+        "kind": "good",
+        "debrief": "v1.0.2's own commit message starts with \"feat!:\", the Conventional Commits marker for a breaking change. That should have been v2.0.0, not a PATCH bump. Nothing else about the release looked wrong - it was signed, it shipped in order, the tag sequence looked perfectly ordinary. That's the whole failure mode Build & Release Management exists to prevent: without something actually gating \"does this tag's version number match what the commit itself claims to be,\" a breaking change can wear a patch release's clothes all the way to production, and the first person to find out is a downstream consumer who trusted the number."
+      }
+    },
+
+    "wrong-100-open": {
+      "id": "wrong-100-open",
+      "speaker": "Narrator",
+      "mood": "tense",
+      "narrative": "You point to v1.0.0. But its commit message is \"feat: initial auth service\" - a first feature release, and v1.0.0 is exactly the version number an initial release should carry. Nothing about that tag lies.",
+      "autoNext": "wrong-100-team-beat"
+    },
+    "wrong-100-team-beat": {
+      "id": "wrong-100-team-beat",
+      "speaker": "Release Manager",
+      "mood": "tense",
+      "narrative": "\"v1.0.0? That's just the initial release - what would even be wrong with it? Did you compare its commit message against what a version-one tag is supposed to mean, or just point at the oldest one?\"",
+      "autoNext": "wrong-100-consequence"
+    },
+    "wrong-100-consequence": {
+      "id": "wrong-100-consequence",
+      "speaker": "You",
+      "mood": "danger",
+      "narrative": "You've got the release manager questioning your read, and you haven't actually compared each commit's own message against the size of change its tag claims.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "feat: initial auth service",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "fix: correct token expiry check",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c2"],
+            "message": "feat!: replace session cookies with JWT, breaking all existing sessions",
+            "authorSigned": true,
+            "timestamp": 2
+          }
+        },
+        "refs": {
+          "v1.0.0": { "name": "v1.0.0", "commitId": "c1" },
+          "v1.0.1": { "name": "v1.0.1", "commitId": "c2" },
+          "v1.0.2": { "name": "v1.0.2", "commitId": "c3" }
+        },
+        "head": { "type": "branch", "name": "v1.0.2" }
+      },
+      "prompt": "Do you read each commit's own message and compare it against its tag, or defend your answer?",
+      "choices": [
+        {
+          "id": "recheck",
+          "label": "Read each commit's message against its tag",
+          "nextStageId": "v100-recover"
+        },
+        {
+          "id": "defend",
+          "label": "Defend your answer - it's v1.0.0",
+          "nextStageId": "v100-worse"
+        }
+      ]
+    },
+    "v100-recover": {
+      "id": "v100-recover",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "You read all three properly this time. v1.0.0's \"feat: initial auth service\" matches an initial release. v1.0.1's fix matches a patch. v1.0.2's \"feat!:\" - a breaking change - is the one tagged as a mere patch.",
+      "autoNext": "v100-recover-end"
+    },
+    "v100-recover-end": {
+      "id": "v100-recover-end",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You correct your answer before the release manager moves on trusting the wrong tag.",
+      "ending": {
+        "kind": "neutral",
+        "debrief": "You got there - but only because the release manager pushed back and made you actually re-read the commits. If they hadn't, v1.0.0 would have been reported as the mismatch while v1.0.2's real breaking change kept shipping as a routine patch. Comparing every commit message against its tag the first time isn't optional busywork; it's the only way \"which tag lied\" doesn't depend on someone else catching your guess."
+      }
+    },
+    "v100-worse": {
+      "id": "v100-worse",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "You insist v1.0.0 is the mismatch. The release manager, trusting your read, spends the afternoon re-auditing the original launch release - which was always fine - while v1.0.2's actual breaking change keeps going out to downstream teams as a routine patch.",
+      "autoNext": "wrong-100-worse-end"
+    },
+    "wrong-100-worse-end": {
+      "id": "wrong-100-worse-end",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "By the time someone finally reads v1.0.2's commit message directly, three more downstream teams have upgraded expecting a patch and hit the same breakage.",
+      "ending": {
+        "kind": "bad",
+        "debrief": "A wasted afternoon re-auditing a release that was never wrong, while the actual breaking change kept shipping as a \"patch\" to more downstream consumers. v1.0.0's commit message matches its tag exactly - there was never a mismatch there to find. The accusation replaced the check instead of following from it."
+      }
+    },
+
+    "wrong-101-open": {
+      "id": "wrong-101-open",
+      "speaker": "Narrator",
+      "mood": "tense",
+      "narrative": "You point to v1.0.1. But its commit message is \"fix: correct token expiry check\" - a plain bug fix, exactly what a PATCH version bump is supposed to mean. Nothing about that tag lies either.",
+      "autoNext": "wrong-101-team-beat"
+    },
+    "wrong-101-team-beat": {
+      "id": "wrong-101-team-beat",
+      "speaker": "Release Manager",
+      "mood": "tense",
+      "narrative": "\"v1.0.1? That was just the token expiry fix - straightforward patch. What made you land on that one instead of the other two?\"",
+      "autoNext": "wrong-101-consequence"
+    },
+    "wrong-101-consequence": {
+      "id": "wrong-101-consequence",
+      "speaker": "You",
+      "mood": "danger",
+      "narrative": "You don't have a good answer - you haven't actually compared each commit's own message against the size of change its tag claims.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "feat: initial auth service",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "fix: correct token expiry check",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c2"],
+            "message": "feat!: replace session cookies with JWT, breaking all existing sessions",
+            "authorSigned": true,
+            "timestamp": 2
+          }
+        },
+        "refs": {
+          "v1.0.0": { "name": "v1.0.0", "commitId": "c1" },
+          "v1.0.1": { "name": "v1.0.1", "commitId": "c2" },
+          "v1.0.2": { "name": "v1.0.2", "commitId": "c3" }
+        },
+        "head": { "type": "branch", "name": "v1.0.2" }
+      },
+      "prompt": "Do you read each commit's own message against its tag, or defend your answer?",
+      "choices": [
+        {
+          "id": "recheck",
+          "label": "Read each commit's message against its tag",
+          "nextStageId": "v101-recover"
+        },
+        {
+          "id": "defend",
+          "label": "Defend your answer - it's v1.0.1",
+          "nextStageId": "v101-worse"
+        }
+      ]
+    },
+    "v101-recover": {
+      "id": "v101-recover",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "You read all three properly. v1.0.1's fix matches its patch tag exactly. v1.0.2's \"feat!:\" - a breaking change - is the one tagged as a mere patch instead.",
+      "autoNext": "v101-recover-end"
+    },
+    "v101-recover-end": {
+      "id": "v101-recover-end",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You correct your answer and point the release manager at the real mismatch.",
+      "ending": {
+        "kind": "good",
+        "debrief": "You caught the mistake before it cost anything. v1.0.1's commit message matches its tag exactly - a fix, tagged as a patch, correctly. The habit that scales is reading every commit message against its tag the first time, not guessing at which one \"feels off\" and waiting for someone to question it."
+      }
+    },
+    "v101-worse": {
+      "id": "v101-worse",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "You insist v1.0.1 is the mismatch. The team spends time reviewing a plain, correctly-tagged bug fix for a problem that was never there, while v1.0.2's real breaking change keeps shipping as a routine patch to anyone who upgrades.",
+      "autoNext": "wrong-101-worse-end"
+    },
+    "wrong-101-worse-end": {
+      "id": "wrong-101-worse-end",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "By the time someone finally reads v1.0.2's commit message directly, the breaking change has already reached several more downstream integrations expecting a routine patch.",
+      "ending": {
+        "kind": "bad",
+        "debrief": "Time went into reviewing a correctly-tagged fix for a mismatch that was never there, while the real breaking change kept going out as a \"patch\" the whole time. v1.0.1's commit and tag agree - the fix belonged in a patch release, and got one. The accusation needed to follow from actually reading the commit, not from a guess."
+      }
+    },
+
+    "wrong-none-open": {
+      "id": "wrong-none-open",
+      "speaker": "Narrator",
+      "mood": "tense",
+      "narrative": "You tell the release manager all three tags are labeled correctly. But v1.0.2's commit message starts with \"feat!:\" - Conventional Commits' own marker for a breaking change - tagged as a PATCH bump instead of a MAJOR one.",
+      "autoNext": "wrong-none-team-beat"
+    },
+    "wrong-none-team-beat": {
+      "id": "wrong-none-team-beat",
+      "speaker": "Release Manager",
+      "mood": "tense",
+      "narrative": "\"All correct? Then why did a downstream team's integration break on what was supposed to be a routine patch upgrade? Something in that chain doesn't add up.\"",
+      "autoNext": "wrong-none-consequence"
+    },
+    "wrong-none-consequence": {
+      "id": "wrong-none-consequence",
+      "speaker": "You",
+      "mood": "danger",
+      "narrative": "The release manager's got a real symptom pointing at a real cause, and you dismissed the whole question without reading any of the three commit messages closely.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "feat: initial auth service",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "fix: correct token expiry check",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c2"],
+            "message": "feat!: replace session cookies with JWT, breaking all existing sessions",
+            "authorSigned": true,
+            "timestamp": 2
+          }
+        },
+        "refs": {
+          "v1.0.0": { "name": "v1.0.0", "commitId": "c1" },
+          "v1.0.1": { "name": "v1.0.1", "commitId": "c2" },
+          "v1.0.2": { "name": "v1.0.2", "commitId": "c3" }
+        },
+        "head": { "type": "branch", "name": "v1.0.2" }
+      },
+      "prompt": "Do you actually read each commit message against its tag, or defend your answer?",
+      "choices": [
+        {
+          "id": "recheck",
+          "label": "Actually read each commit message against its tag",
+          "nextStageId": "none-recover"
+        },
+        {
+          "id": "defend",
+          "label": "Defend your answer - the tags are all fine",
+          "nextStageId": "none-worse"
+        }
+      ]
+    },
+    "none-recover": {
+      "id": "none-recover",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "You read all three properly this time. v1.0.2's \"feat!:\" marks a breaking change, and it's tagged as a patch. That's the mismatch the downstream team's bug report was pointing at the whole time.",
+      "autoNext": "none-recover-end"
+    },
+    "none-recover-end": {
+      "id": "none-recover-end",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You correct your answer and the release team recuts v1.0.2 as v2.0.0 with proper breaking-change notes.",
+      "ending": {
+        "kind": "good",
+        "debrief": "\"All correct\" was never true here - a downstream integration doesn't break on a routine patch upgrade for no reason, and that symptom was the release manager's clue, not yours. You recovered by actually reading v1.0.2's own commit message instead of trusting the tag sequence's appearance of orderliness. Build & Release Management depends on someone being willing to check the claim against the commit, not wave off a real symptom."
+      }
+    },
+    "none-worse": {
+      "id": "none-worse",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "You insist all three tags are correctly labeled and the downstream team's breakage must be their own bug. v1.0.2 keeps shipping as a trusted patch release while more teams upgrade into the same breaking change.",
+      "autoNext": "wrong-none-worse-end"
+    },
+    "wrong-none-worse-end": {
+      "id": "wrong-none-worse-end",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "Weeks later, enough downstream teams have filed the identical bug report that someone finally reads v1.0.2's commit message directly - and finds the \"feat!:\" marker that was there from the start.",
+      "ending": {
+        "kind": "bad",
+        "debrief": "Dismissing a real symptom - a routine-patch upgrade breaking an integration - as someone else's bug let a genuinely mislabeled breaking change keep shipping for weeks. v1.0.2's own commit message says \"feat!:\" in plain text. The tag sequence looking orderly on the surface was never a substitute for reading what each commit actually claims to be."
+      }
+    }
+  }
+}

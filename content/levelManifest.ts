@@ -3,15 +3,20 @@
 // App.tsx needs to know nothing about individual level files (CR-058).
 // Entries are polymorphic over kind (CR-091): "quiz" is the original
 // single-question-over-a-graph mechanic (level.ts/LevelView), "story" is
-// the newer branching multi-stage mechanic (story.ts/StoryView).
+// the newer branching multi-stage mechanic (story.ts/StoryView). As of
+// CR-108 every registered chapter is story-format - the quiz mechanic
+// itself isn't removed (level.ts/useGameStore/LevelView are still live
+// code, still covered by their own tests), it just has no active content
+// right now. toQuizEntry/QuizManifestEntry stay exported so a future
+// quiz-format level can register here without re-adding this plumbing.
 import { parseLevel, type Level } from "../src/engine/mechanics/level";
 import { parseStory, type Story } from "../src/engine/mechanics/story";
-import rawLvl0601 from "./chapters/ch06-build-release/LVL-06-01-which-tag-lied.json";
 import rawStory0101 from "./chapters/ch01-identification/STORY-01-01-which-one-shipped.json";
 import rawStory0201 from "./chapters/ch02-version-control/STORY-02-01-whose-fix-made-it.json";
 import rawStory0301 from "./chapters/ch03-change-control/STORY-03-01-who-skipped-review.json";
 import rawStory0401 from "./chapters/ch04-status-accounting/STORY-04-01-what-does-prod-actually-run.json";
 import rawStory0501 from "./chapters/ch05-configuration-audit/STORY-05-01-does-it-still-match.json";
+import rawStory0601 from "./chapters/ch06-build-release/STORY-06-01-which-tag-lied.json";
 
 export interface QuizManifestEntry {
   kind: "quiz";
@@ -31,7 +36,7 @@ export interface StoryManifestEntry {
 
 export type ManifestEntry = QuizManifestEntry | StoryManifestEntry;
 
-function toQuizEntry(raw: unknown): QuizManifestEntry {
+export function toQuizEntry(raw: unknown): QuizManifestEntry {
   const level = parseLevel(raw);
   return {
     kind: "quiz",
@@ -59,5 +64,5 @@ export const levelManifest: ManifestEntry[] = [
   toStoryEntry(rawStory0301),
   toStoryEntry(rawStory0401),
   toStoryEntry(rawStory0501),
-  toQuizEntry(rawLvl0601),
+  toStoryEntry(rawStory0601),
 ];
