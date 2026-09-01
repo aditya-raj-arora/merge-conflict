@@ -6,6 +6,8 @@
   "stages": {
     "start": {
       "id": "start",
+      "speaker": "Narrator",
+      "mood": "tense",
       "narrative": "Three days before the investor demo, and there's been zero process - everyone just branches off whatever looked newest. Right now there are three builds sitting around: build-a, build-b, build-c. You have to tell the team which one is ready to show investors tomorrow.",
       "graph": {
         "commits": {
@@ -61,14 +63,31 @@
       },
       "prompt": "Which build do you flag as ready for the demo?",
       "choices": [
-        { "id": "pick-a", "label": "build-a", "nextStageId": "a-consequence" },
-        { "id": "pick-b", "label": "build-b", "nextStageId": "b-good" },
-        { "id": "pick-c", "label": "build-c", "nextStageId": "c-consequence" }
+        { "id": "pick-a", "label": "build-a", "nextStageId": "a-open" },
+        { "id": "pick-b", "label": "build-b", "nextStageId": "b-scene" },
+        { "id": "pick-c", "label": "build-c", "nextStageId": "c-open" }
       ]
+    },
+
+    "a-open": {
+      "id": "a-open",
+      "speaker": "Narrator",
+      "mood": "tense",
+      "narrative": "You flag build-a. Nobody double-checks - you said it, so it must be fine. The team wires it up on the demo laptop and moves on to rehearsing the pitch.",
+      "autoNext": "a-team-beat"
+    },
+    "a-team-beat": {
+      "id": "a-team-beat",
+      "speaker": "Teammate",
+      "mood": "tense",
+      "narrative": "\"Twenty minutes to doors,\" someone calls out, opening the app one last time just to make sure everything looks right before people start walking in.",
+      "autoNext": "a-consequence"
     },
     "a-consequence": {
       "id": "a-consequence",
-      "narrative": "You flag build-a. The team ships it to the demo laptop without a second look - after all, you said it was ready.\n\nTwenty minutes before investors arrive, someone actually opens the app. build-a still has the experimental procedural-levels feature half-wired in - the commit that added it was never signed, never reviewed, and clearly says \"(WIP)\" right in the message. It crashes on the very first level generated.",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "build-a still has the experimental procedural-levels feature half-wired in - the commit that added it was never signed, never reviewed, and clearly says \"(WIP)\" right in the message. It crashes on the very first level generated.",
       "graph": {
         "commits": {
           "c1": {
@@ -126,42 +145,118 @@
         {
           "id": "swap-immediately",
           "label": "Swap to a signed build right now",
-          "nextStageId": "a-recover"
+          "nextStageId": "a-recover-scene"
         },
         {
           "id": "patch-live",
           "label": "Try to patch it live before doors open",
-          "nextStageId": "a-worse"
+          "nextStageId": "a-crash"
         }
       ]
     },
+
+    "a-recover-scene": {
+      "id": "a-recover-scene",
+      "speaker": "You",
+      "mood": "tense",
+      "narrative": "You swap to build-b on the spot - the one commit that's actually signed all the way back to root and ends in a commit that says, in so many words, \"approved for the demo.\" Ten minutes to spare. Barely.",
+      "autoNext": "a-recover"
+    },
     "a-recover": {
       "id": "a-recover",
-      "narrative": "You swap to build-b on the spot - the one commit in the whole graph that's actually signed all the way back to root and ends in a commit that says, in so many words, \"approved for the demo.\" It's not glamorous, scrambling minutes before doors open, but the demo itself goes fine.\n\nAfterward, someone asks the obvious question: why didn't anyone know which build was approved *before* today?",
+      "speaker": "Narrator",
+      "mood": "neutral",
+      "narrative": "The demo goes fine. Afterward, someone asks the obvious question: why didn't anyone know which build was approved *before* today?",
       "ending": {
         "kind": "neutral",
         "debrief": "You avoided disaster, but only barely, and only because someone happened to actually open the app before investors did. That's not a process - that's luck. A real baseline record would have made \"which build is approved\" a lookup, not a scramble. Configuration Identification exists so this isn't the first time anyone checks."
       }
     },
-    "a-worse": {
-      "id": "a-worse",
+
+    "a-crash": {
+      "id": "a-crash",
+      "speaker": "Narrator",
+      "mood": "danger",
       "narrative": "You try to patch it live - comment out the broken feature, hope nothing else breaks, do it while investors are already walking in. It doesn't go well. The crash happens again, mid-sentence, in front of everyone.",
+      "autoNext": "a-aftermath"
+    },
+    "a-aftermath": {
+      "id": "a-aftermath",
+      "speaker": "You",
+      "mood": "danger",
+      "narrative": "The room goes quiet. A teammate looks at you, waiting to see how you're going to handle it.",
+      "prompt": "How do you respond?",
+      "choices": [
+        {
+          "id": "own-it",
+          "label": "Own it - this build was never actually approved",
+          "nextStageId": "a-worse-honest"
+        },
+        {
+          "id": "blame-tooling",
+          "label": "Blame a bug in the build tooling",
+          "nextStageId": "a-worse-blame"
+        }
+      ]
+    },
+    "a-worse-honest": {
+      "id": "a-worse-honest",
+      "speaker": "You",
+      "mood": "danger",
+      "narrative": "\"That's on me - I flagged a build that was never actually approved, and nobody checked before it went out.\"",
       "ending": {
         "kind": "bad",
-        "debrief": "The demo crashed live. Nobody in that room is thinking about your roadmap anymore, only about the app that broke in front of them. The root cause wasn't the crash - plenty of software has bugs. It's that nobody could say with any confidence which build was actually supposed to ship, so an unreviewed, unsigned, work-in-progress commit ended up on stage."
+        "debrief": "It doesn't undo the crash. Nobody in that room is thinking about your roadmap anymore, only about the app that broke in front of them. But it's the truth, and it's the last honest thing anyone remembers about the demo - which matters more than it feels like it does right now. The root cause was never the crash itself; it's that nobody could say with any confidence which build was actually supposed to ship, so an unreviewed, unsigned, work-in-progress commit ended up on stage."
       }
+    },
+    "a-worse-blame": {
+      "id": "a-worse-blame",
+      "speaker": "You",
+      "mood": "danger",
+      "narrative": "\"Must be some kind of bug in the build tooling,\" you say. It isn't, and everyone who actually looks at the commit graph afterward knows it isn't.",
+      "ending": {
+        "kind": "bad",
+        "debrief": "The excuse doesn't survive the walk back to the office. Worse than the crash itself is watching your own team quietly stop trusting what you tell them about a build's status - because this time, when it mattered, you reached for a story instead of the graph. The root cause was never the crash; it's that nobody could say with any confidence which build was actually supposed to ship, and then nobody wanted to admit that out loud either."
+      }
+    },
+
+    "b-scene": {
+      "id": "b-scene",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You flag build-b. It's the one commit that's signed all the way back to the very first commit, and its own message says, plainly, \"approved for the investor demo.\"",
+      "autoNext": "b-good"
     },
     "b-good": {
       "id": "b-good",
-      "narrative": "You flag build-b. It's the one commit that's signed all the way back to the very first commit, and its own message says, plainly, \"approved for the investor demo.\" The team ships it without incident. Investors see exactly what was meant to be shown, nothing more, nothing less.",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "The team ships it without incident. Investors see exactly what was meant to be shown, nothing more, nothing less.",
       "ending": {
         "kind": "good",
         "debrief": "Correct call, and for the right reason: not a guess, but because build-b was the only build with a clean, fully-signed history ending in an explicit approval. That's what a real baseline gives you - the ability to answer \"which one shipped\" as a fact, not a bet."
       }
     },
+
+    "c-open": {
+      "id": "c-open",
+      "speaker": "Narrator",
+      "mood": "tense",
+      "narrative": "You flag build-c. It's an older point in history - stable, sure, but older.",
+      "autoNext": "c-team-beat"
+    },
+    "c-team-beat": {
+      "id": "c-team-beat",
+      "speaker": "Teammate",
+      "mood": "tense",
+      "narrative": "\"Wait,\" someone says, pulling up the demo script, \"doesn't this mention the new level-load fix?\"",
+      "autoNext": "c-consequence"
+    },
     "c-consequence": {
       "id": "c-consequence",
-      "narrative": "You flag build-c. It's an older point in history - stable, sure, but it's missing the crash fix and the UI polish pass that landed afterward. Someone on the team frowns: \"Wait, doesn't the demo script mention the new level-load fix?\"",
+      "speaker": "You",
+      "mood": "tense",
+      "narrative": "You check. build-c is missing both the crash fix and the UI polish pass that landed afterward.",
       "graph": {
         "commits": {
           "c1": {
@@ -219,26 +314,44 @@
         {
           "id": "present-anyway",
           "label": "Present build-c anyway",
-          "nextStageId": "c-bad"
+          "nextStageId": "c-notice"
         },
         {
           "id": "double-check",
           "label": "Go back and check the refs again",
-          "nextStageId": "c-recover"
+          "nextStageId": "c-recheck"
         }
       ]
     },
+    "c-notice": {
+      "id": "c-notice",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "You present build-c anyway, betting nobody will notice.",
+      "autoNext": "c-bad"
+    },
     "c-bad": {
       "id": "c-bad",
-      "narrative": "You present build-c anyway, betting nobody will notice. Someone notices. An investor asks directly about the fix that was supposedly already shipped, and there's no good answer ready - because it isn't in this build at all.",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "An investor asks directly about the fix that was supposedly already shipped. There's no good answer ready - because it isn't in this build at all.",
       "ending": {
         "kind": "bad",
         "debrief": "build-c wasn't broken, it just wasn't current - and \"not current\" turned into an unprepared answer to a direct question in the room. Configuration Identification isn't only about catching outright breakage; it's about knowing exactly what state you're actually showing people, so you're never caught flat-footed by your own history."
       }
     },
+    "c-recheck": {
+      "id": "c-recheck",
+      "speaker": "You",
+      "mood": "tense",
+      "narrative": "You go back and actually walk the graph instead of trusting the first name that sounded familiar.",
+      "autoNext": "c-recover"
+    },
     "c-recover": {
       "id": "c-recover",
-      "narrative": "You go back and actually walk the graph instead of trusting the first name that sounded familiar. build-c is two commits behind - it's missing both the crash fix and the polish pass. There's exactly one build with a fully signed history ending in an explicit \"approved for the demo\" commit: build-b.",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "There's exactly one build with a fully signed history ending in an explicit \"approved for the demo\" commit: build-b. You catch it with time to spare.",
       "graph": {
         "commits": {
           "c1": {

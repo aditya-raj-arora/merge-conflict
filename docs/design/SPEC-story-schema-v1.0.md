@@ -34,10 +34,13 @@ interface Story {
 interface StoryStage {
   id: string; // must equal its own key in stages, same redundancy rule as Level's Commit.id
   narrative: string; // scene text shown this stage; \n\n for paragraph breaks
+  speaker?: string; // who's "speaking" this beat, e.g. "Narrator", "You", "Teammate" - StoryView falls back to "Narrator" if omitted
+  mood?: "calm" | "tense" | "danger" | "neutral"; // drives StoryView's backdrop theme (CR-095); falls back to "neutral"
   graph?: Graph; // optional - reuses the exact same Graph shape as Level (see SPEC-level-schema-v1.0.md)
-  prompt?: string; // the question posed this stage
-  choices?: StoryChoice[]; // required on every stage except an ending
-  ending?: StoryEnding; // required on a terminal stage, mutually exclusive with choices
+  prompt?: string; // the question posed this stage - only on a stage with choices
+  choices?: StoryChoice[]; // a real decision point
+  autoNext?: string; // a narrative-only beat, click to continue straight to this stage id (CR-095) - no decision, just pacing/depth
+  ending?: StoryEnding; // a terminal stage
 }
 
 interface StoryChoice {
@@ -57,13 +60,15 @@ interface StoryEnding {
 - Every `StoryStage.id` used as a key in `stages` must equal that stage's
   own `id` field (same redundancy-on-purpose rule as `Level`'s `Commit`).
 - `startStageId` must reference a stage that exists in `stages`.
-- Every `StoryChoice.nextStageId` must reference a stage that exists in
-  `stages`.
-- A stage has exactly one of `choices` or `ending`, never both, never
-  neither. A stage with `choices` needs a non-empty array and a `prompt`;
-  a stage with `ending` needs no `prompt` and no `choices`.
-- Every stage must be reachable from `startStageId` by following
-  choices - an authored-but-unreachable stage is a content bug.
+- Every `StoryChoice.nextStageId` and every `StoryStage.autoNext` must
+  reference a stage that exists in `stages`.
+- A stage has **exactly one** of `choices` (non-empty), `ending`, or
+  `autoNext` - never more than one, never none. A stage with `choices`
+  needs a `prompt`; a stage with `ending` or `autoNext` needs neither
+  `prompt` nor `choices`.
+- Every stage must be reachable from `startStageId` by following choices
+  and `autoNext` edges - an authored-but-unreachable stage is a content
+  bug.
 - Every reachable path must terminate at an ending - no cycles. This is
   a straightforward branching tree/DAG, not a full state machine; if a
   future story genuinely needs loops, that's a schema change, not an
@@ -74,9 +79,22 @@ interface StoryEnding {
 
 None of this is enforced by a JSON Schema validator, same caveat as
 `Level` - `parseStory()` only checks the top-level fields are present.
-Structural correctness (reachability, no dangling `nextStageId`, at
-least one good ending) is caught by tests written against each story
-fixture, not by the parser.
+Structural correctness (reachability, no dangling `nextStageId`/
+`autoNext`, at least one good ending) is caught by tests written
+against each story fixture, not by the parser.
+
+### `autoNext` - depth without inventing a decision at every stage (CR-095)
+
+A choice point at every single stage gets exhausting to author and to
+play. `autoNext` is how a path gets real narrative depth - multiple
+beats, alternating speakers, rising tension - without forcing a
+decision each time. Use it for scene-setting, a teammate's reaction, or
+anything that's pure pacing; reserve `choices` for the moments that
+actually matter. Not every path needs the same depth: a story is free
+to let its "things went fine" path stay short while its consequence
+paths run deeper - see `STORY-01-01`'s build-b path (quick) versus its
+build-a/build-c paths (5+ stages, with a real second decision point on
+the build-a side).
 
 ## Solvability testing (structural, not "one correct answer")
 
@@ -85,16 +103,20 @@ A `Story` has no single correct answer - the whole point is that
 different choices lead to different, valid endings - so its test proves
 the _structure_ is sound instead:
 
-1. Every `nextStageId` referenced by any choice resolves to a real stage.
+1. Every `nextStageId` referenced by any choice, and every `autoNext`,
+   resolves to a real stage.
 2. Every stage is reachable from `startStageId`.
-3. Every stage has exactly one of `choices` (non-empty) or `ending`.
+3. Every stage has exactly one of `choices` (non-empty), `ending`, or
+   `autoNext`.
 4. At least one reachable ending has `kind: "good"`.
 
 See `tests/engine/story.test.ts` for the reusable validator and
-`tests/engine/ch01-story.test.ts` for `STORY-01-01` run through it.
+`tests/engine/ch01-story.test.ts` for `STORY-01-01` run through it,
+including assertions on minimum path depth for the consequence branches.
 
 ## Document history
 
-| Version | Date       | Change                                               |
-| ------- | ---------- | ---------------------------------------------------- |
-| 1.0     | 2026-09-01 | Initial spec, written alongside STORY-01-01 (CR-091) |
+| Version | Date       | Change                                                                         |
+| ------- | ---------- | ------------------------------------------------------------------------------ |
+| 1.0     | 2026-09-01 | Initial spec, written alongside STORY-01-01 (CR-091)                           |
+| 1.0     | 2026-09-01 | Added `speaker`, `mood`, `autoNext` for the VN UI and deeper branches (CR-095) |
