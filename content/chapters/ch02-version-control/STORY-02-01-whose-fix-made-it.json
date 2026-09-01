@@ -1,0 +1,411 @@
+{
+  "id": "STORY-02-01-whose-fix-made-it",
+  "chapterId": "ch02-version-control",
+  "title": "Whose Fix Made It?",
+  "startStageId": "start",
+  "stages": {
+    "start": {
+      "id": "start",
+      "speaker": "Narrator",
+      "mood": "tense",
+      "narrative": "Two devs, same sprint, same bug tracker. Priya branched off to fix a null-check crash on checkout. Sam branched off separately to fix a race condition in the save queue. Standup this morning: \"both fixes are merged into main, ready for release.\" You pull up the graph to confirm before you sign off on it.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "chore: branch off for checkout/save-queue fixes",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "fix: null check crash on checkout",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c1"],
+            "message": "fix: race condition in save queue",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c4": {
+            "id": "c4",
+            "parentIds": ["c2"],
+            "message": "merge: combine checkout fix and save-queue fix into main",
+            "authorSigned": true,
+            "timestamp": 2
+          }
+        },
+        "refs": {
+          "priya-fix": { "name": "priya-fix", "commitId": "c2" },
+          "sam-fix": { "name": "sam-fix", "commitId": "c3" },
+          "main": { "name": "main", "commitId": "c4" }
+        },
+        "head": { "type": "branch", "name": "main" }
+      },
+      "prompt": "Whose fix is actually live on main right now?",
+      "choices": [
+        {
+          "id": "priya-only",
+          "label": "Only Priya's checkout fix",
+          "nextStageId": "correct-open"
+        },
+        {
+          "id": "sam-only",
+          "label": "Only Sam's save-queue fix",
+          "nextStageId": "sam-wrong-open"
+        },
+        {
+          "id": "both",
+          "label": "Both fixes",
+          "nextStageId": "both-wrong-open"
+        },
+        {
+          "id": "neither",
+          "label": "Neither fix",
+          "nextStageId": "neither-wrong-open"
+        }
+      ]
+    },
+
+    "correct-open": {
+      "id": "correct-open",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You're right - the merge commit only has one parent. Priya's fix made it in; Sam's never did.",
+      "autoNext": "correct-report"
+    },
+    "correct-report": {
+      "id": "correct-report",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You flag it before the release notes go out. Sam's fix ships in a quick follow-up patch instead of silently missing entirely.",
+      "ending": {
+        "kind": "good",
+        "debrief": "Crisis avoided, and for the right reason: you traced the merge commit's actual parents instead of trusting a standup update. Version Control isn't about assuming a message is accurate - it's about the graph being the one source of truth that can't just misspeak."
+      }
+    },
+
+    "sam-wrong-open": {
+      "id": "sam-wrong-open",
+      "speaker": "Narrator",
+      "mood": "tense",
+      "narrative": "You tell the team Sam's fix is live and Priya's isn't. That's backwards - main's tip commit is a direct child of Priya's branch, not Sam's.",
+      "autoNext": "sam-wrong-team-beat"
+    },
+    "sam-wrong-team-beat": {
+      "id": "sam-wrong-team-beat",
+      "speaker": "Priya",
+      "mood": "tense",
+      "narrative": "\"That's odd - I'm already seeing my fix show up in the staging logs. Are you sure about that?\"",
+      "autoNext": "sam-wrong-consequence"
+    },
+    "sam-wrong-consequence": {
+      "id": "sam-wrong-consequence",
+      "speaker": "You",
+      "mood": "danger",
+      "narrative": "You've got two conflicting signals now: what you told the team, and what Priya's actually seeing in staging.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "chore: branch off for checkout/save-queue fixes",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "fix: null check crash on checkout",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c1"],
+            "message": "fix: race condition in save queue",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c4": {
+            "id": "c4",
+            "parentIds": ["c2"],
+            "message": "merge: combine checkout fix and save-queue fix into main",
+            "authorSigned": true,
+            "timestamp": 2
+          }
+        },
+        "refs": {
+          "priya-fix": { "name": "priya-fix", "commitId": "c2" },
+          "sam-fix": { "name": "sam-fix", "commitId": "c3" },
+          "main": { "name": "main", "commitId": "c4" }
+        },
+        "head": { "type": "branch", "name": "main" }
+      },
+      "prompt": "Do you double-check the graph, or stick with what you told the team?",
+      "choices": [
+        {
+          "id": "double-check",
+          "label": "Double-check the graph",
+          "nextStageId": "sam-recover"
+        },
+        {
+          "id": "stick-with-it",
+          "label": "Stick with it - reassure the team",
+          "nextStageId": "sam-worse"
+        }
+      ]
+    },
+    "sam-recover": {
+      "id": "sam-recover",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "You look again. main's tip really is a direct child of Priya's branch, not Sam's. You correct yourself before it goes any further.",
+      "autoNext": "sam-recover-end"
+    },
+    "sam-recover-end": {
+      "id": "sam-recover-end",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You send a correction: Priya's fix is live, Sam's isn't yet.",
+      "ending": {
+        "kind": "neutral",
+        "debrief": "You caught your own misread before it caused real damage - but only because Priya happened to push back with contradicting evidence. If she hadn't spoken up, the wrong read would've stood. That's the gap: a correction that depends on someone else catching your mistake isn't the same as getting it right from the graph in the first place."
+      }
+    },
+    "sam-worse": {
+      "id": "sam-worse",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "You reassure the team Sam's fix is live and Priya must be seeing something else. It isn't, and she wasn't wrong.",
+      "autoNext": "sam-worse-end"
+    },
+    "sam-worse-end": {
+      "id": "sam-worse-end",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "The save-queue race condition - the bug Sam's fix was actually meant to close - ships untouched. It resurfaces in production two days later, corrupting saves during peak traffic.",
+      "ending": {
+        "kind": "bad",
+        "debrief": "Priya gave you a direct, correct signal, and you overruled it with an answer that was never checked against the graph in the first place. The race condition was real, Sam's fix for it never merged, and now it's a production incident instead of a one-line correction in standup. Version Control exists precisely so \"whose fix is live\" doesn't depend on who argues more confidently in the room."
+      }
+    },
+
+    "both-wrong-open": {
+      "id": "both-wrong-open",
+      "speaker": "Narrator",
+      "mood": "tense",
+      "narrative": "You tell the team both fixes are live - trusting the merge commit's message instead of checking its actual parents.",
+      "autoNext": "both-wrong-team-beat"
+    },
+    "both-wrong-team-beat": {
+      "id": "both-wrong-team-beat",
+      "speaker": "Narrator",
+      "mood": "tense",
+      "narrative": "Release notes go out crediting both fixes. Nobody double-checks, because you already signed off on it.",
+      "autoNext": "both-wrong-consequence"
+    },
+    "both-wrong-consequence": {
+      "id": "both-wrong-consequence",
+      "speaker": "Support",
+      "mood": "danger",
+      "narrative": "A support ticket comes in the next morning: a customer's cart is losing items intermittently under load - the exact symptom the save-queue race condition causes.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "chore: branch off for checkout/save-queue fixes",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "fix: null check crash on checkout",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c1"],
+            "message": "fix: race condition in save queue",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c4": {
+            "id": "c4",
+            "parentIds": ["c2"],
+            "message": "merge: combine checkout fix and save-queue fix into main",
+            "authorSigned": true,
+            "timestamp": 2
+          }
+        },
+        "refs": {
+          "priya-fix": { "name": "priya-fix", "commitId": "c2" },
+          "sam-fix": { "name": "sam-fix", "commitId": "c3" },
+          "main": { "name": "main", "commitId": "c4" }
+        },
+        "head": { "type": "branch", "name": "main" }
+      },
+      "prompt": "How do you respond to the ticket?",
+      "choices": [
+        {
+          "id": "investigate-graph",
+          "label": "Go back and actually walk the graph",
+          "nextStageId": "both-recover"
+        },
+        {
+          "id": "dismiss-ticket",
+          "label": "Log it as a one-off and move on",
+          "nextStageId": "both-worse"
+        }
+      ]
+    },
+    "both-recover": {
+      "id": "both-recover",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "You go back to the graph instead of trusting the release notes you signed off on. Sam's commit was never actually merged - it's sitting on its own branch, unreachable from main.",
+      "autoNext": "both-recover-end"
+    },
+    "both-recover-end": {
+      "id": "both-recover-end",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You ship the real fix within the hour and follow up with the customer directly.",
+      "ending": {
+        "kind": "good",
+        "debrief": "It took a support ticket to get you back to the graph, which isn't ideal, but you got there - and once you did, you fixed it fast instead of defending the wrong answer. Still: the release notes were wrong for a full day because \"both fixes are merged\" was accepted as true without anyone tracing main's actual ancestry first."
+      }
+    },
+    "both-worse": {
+      "id": "both-worse",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "You log it as a one-off, since the release notes clearly say both fixes shipped. More tickets trickle in over the next week, each one written off the same way.",
+      "autoNext": "both-worse-end"
+    },
+    "both-worse-end": {
+      "id": "both-worse-end",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "By the time someone finally opens the commit graph, a week of customers have lost cart items, and there's no way to know how many just gave up and left instead of filing a ticket.",
+      "ending": {
+        "kind": "bad",
+        "debrief": "Every one of those tickets was the same bug, and every one got waved off because the release notes said it was already fixed. The release notes were never checked against the graph in the first place - they were generated from a merge commit's message, and nobody verified that message against its actual parents before trusting it for a week."
+      }
+    },
+
+    "neither-wrong-open": {
+      "id": "neither-wrong-open",
+      "speaker": "Narrator",
+      "mood": "tense",
+      "narrative": "You tell the team neither fix made it. That's wrong too - Priya's fix is sitting right there on main, a direct child of her branch.",
+      "autoNext": "neither-wrong-team-beat"
+    },
+    "neither-wrong-team-beat": {
+      "id": "neither-wrong-team-beat",
+      "speaker": "Priya",
+      "mood": "tense",
+      "narrative": "\"That's not right - I can see my commit right there on main. What are you looking at?\"",
+      "autoNext": "neither-wrong-consequence"
+    },
+    "neither-wrong-consequence": {
+      "id": "neither-wrong-consequence",
+      "speaker": "You",
+      "mood": "tense",
+      "narrative": "Priya's pushing back hard, and she's got a point - you need to actually look again instead of just repeating your first answer.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "chore: branch off for checkout/save-queue fixes",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "fix: null check crash on checkout",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c1"],
+            "message": "fix: race condition in save queue",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c4": {
+            "id": "c4",
+            "parentIds": ["c2"],
+            "message": "merge: combine checkout fix and save-queue fix into main",
+            "authorSigned": true,
+            "timestamp": 2
+          }
+        },
+        "refs": {
+          "priya-fix": { "name": "priya-fix", "commitId": "c2" },
+          "sam-fix": { "name": "sam-fix", "commitId": "c3" },
+          "main": { "name": "main", "commitId": "c4" }
+        },
+        "head": { "type": "branch", "name": "main" }
+      },
+      "prompt": "Do you re-check the graph, or hold your answer?",
+      "choices": [
+        {
+          "id": "recheck",
+          "label": "Re-check the graph",
+          "nextStageId": "neither-recover"
+        },
+        {
+          "id": "hold-answer",
+          "label": "Hold your answer",
+          "nextStageId": "neither-worse"
+        }
+      ]
+    },
+    "neither-recover": {
+      "id": "neither-recover",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "You look again, properly this time. Priya's right - her commit is main's direct parent. You were wrong, and you say so.",
+      "autoNext": "neither-recover-end"
+    },
+    "neither-recover-end": {
+      "id": "neither-recover-end",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You correct the record: Priya's fix is live, Sam's isn't.",
+      "ending": {
+        "kind": "good",
+        "debrief": "Being wrong first isn't the failure here - not checking carefully enough the first time is. What actually matters is that when challenged, you went back to the graph instead of defending an answer you hadn't verified. That's the habit Version Control depends on: the graph settles the argument, not confidence."
+      }
+    },
+    "neither-worse": {
+      "id": "neither-worse",
+      "speaker": "You",
+      "mood": "danger",
+      "narrative": "\"I already checked - neither fix is in. I'd know if I'd missed it.\" You hold your answer without looking again.",
+      "autoNext": "neither-worse-end"
+    },
+    "neither-worse-end": {
+      "id": "neither-worse-end",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "Priya escalates to your lead, who opens the graph in about ten seconds and confirms her fix has been on main the whole time. The bigger cost isn't the correction - it's that the next time you say you checked something, people check it themselves anyway.",
+      "ending": {
+        "kind": "bad",
+        "debrief": "Holding an unverified answer against someone who was actually right doesn't just cost you this one correction - it costs your word the next time it matters. The graph would have settled this in ten seconds the first time you looked. Confidence isn't a substitute for actually tracing the ancestry, and everyone in that thread just learned they can't take your \"I checked\" at face value anymore."
+      }
+    }
+  }
+}
