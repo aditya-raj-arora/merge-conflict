@@ -1,0 +1,407 @@
+{
+  "id": "STORY-04-01-what-does-prod-actually-run",
+  "chapterId": "ch04-status-accounting",
+  "title": "What Does Prod Actually Run?",
+  "startStageId": "start",
+  "stages": {
+    "start": {
+      "id": "start",
+      "speaker": "Narrator",
+      "mood": "tense",
+      "narrative": "Customers are reporting the app is slow. The team's internal status page says \"v1.4.2 - deployed and healthy\" - the perf-improvements release everyone's been excited about. But the status page hasn't been touched in weeks, and the on-call channel mentions some kind of rollback last month, in passing, with no follow-up. You pull up prod's actual ref to find out what's really running.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "release: cut v1.4.0",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "release: cut v1.4.1 - hotfix for auth bug",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c2"],
+            "message": "release: cut v1.4.2 - perf improvements",
+            "authorSigned": true,
+            "timestamp": 2
+          },
+          "c4": {
+            "id": "c4",
+            "parentIds": ["c2"],
+            "message": "revert: roll back v1.4.2 - perf change caused a memory leak",
+            "authorSigned": true,
+            "timestamp": 3
+          }
+        },
+        "refs": {
+          "v1.4.0": { "name": "v1.4.0", "commitId": "c1" },
+          "v1.4.1": { "name": "v1.4.1", "commitId": "c2" },
+          "v1.4.2": { "name": "v1.4.2", "commitId": "c3" },
+          "prod": { "name": "prod", "commitId": "c4" }
+        },
+        "head": { "type": "branch", "name": "prod" }
+      },
+      "prompt": "The status page says v1.4.2 is live. What does prod's ref actually point to?",
+      "choices": [
+        { "id": "v140", "label": "v1.4.0", "nextStageId": "wrong-140-open" },
+        { "id": "v141", "label": "v1.4.1", "nextStageId": "wrong-141-open" },
+        {
+          "id": "v142",
+          "label": "v1.4.2, exactly what the status page claims",
+          "nextStageId": "wrong-142-open"
+        },
+        {
+          "id": "rollback",
+          "label": "A rollback commit with no release tag at all",
+          "nextStageId": "correct-open"
+        }
+      ]
+    },
+
+    "correct-open": {
+      "id": "correct-open",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You're right - prod's ref doesn't land on any tag. It points at an untagged revert commit, built on top of v1.4.1, with a message that says exactly what happened: the perf change caused a memory leak and got rolled back.",
+      "autoNext": "correct-report"
+    },
+    "correct-report": {
+      "id": "correct-report",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You report the real ref, not the status page's claim. The team fixes the status page and opens a ticket to make sure rollbacks always get recorded somewhere official from now on.",
+      "ending": {
+        "kind": "good",
+        "debrief": "Prod isn't on v1.4.2 at all - it's on an untagged revert commit built on top of v1.4.1, from a rollback nobody ever recorded anywhere official. The status page kept claiming v1.4.2 because updating it was never part of the rollback; the actual deployed state and the claimed state just quietly drifted apart. That's the whole failure mode Status Accounting exists to prevent: a claim about \"what's in prod\" is worthless unless something's actually keeping it in sync with prod's real ref."
+      }
+    },
+
+    "wrong-140-open": {
+      "id": "wrong-140-open",
+      "speaker": "Narrator",
+      "mood": "tense",
+      "narrative": "You say prod is still on v1.4.0. But prod's ref is two commits ahead of v1.4.0 - you didn't actually follow the chain, you guessed at the oldest tag you recognized.",
+      "autoNext": "wrong-140-team-beat"
+    },
+    "wrong-140-team-beat": {
+      "id": "wrong-140-team-beat",
+      "speaker": "On-call Engineer",
+      "mood": "tense",
+      "narrative": "\"v1.4.0? That's ancient - we shipped the auth hotfix ages after that. Are you sure you traced the ref, not just picked the earliest tag?\"",
+      "autoNext": "wrong-140-consequence"
+    },
+    "wrong-140-consequence": {
+      "id": "wrong-140-consequence",
+      "speaker": "You",
+      "mood": "danger",
+      "narrative": "You've got an on-call engineer questioning your read, and you haven't actually walked prod's ref back through its own parent chain yet.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "release: cut v1.4.0",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "release: cut v1.4.1 - hotfix for auth bug",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c2"],
+            "message": "release: cut v1.4.2 - perf improvements",
+            "authorSigned": true,
+            "timestamp": 2
+          },
+          "c4": {
+            "id": "c4",
+            "parentIds": ["c2"],
+            "message": "revert: roll back v1.4.2 - perf change caused a memory leak",
+            "authorSigned": true,
+            "timestamp": 3
+          }
+        },
+        "refs": {
+          "v1.4.0": { "name": "v1.4.0", "commitId": "c1" },
+          "v1.4.1": { "name": "v1.4.1", "commitId": "c2" },
+          "v1.4.2": { "name": "v1.4.2", "commitId": "c3" },
+          "prod": { "name": "prod", "commitId": "c4" }
+        },
+        "head": { "type": "branch", "name": "prod" }
+      },
+      "prompt": "Do you walk prod's ref back through its own parent chain, or defend your answer?",
+      "choices": [
+        {
+          "id": "recheck",
+          "label": "Walk prod's ref back through its parent chain",
+          "nextStageId": "v140-recover"
+        },
+        {
+          "id": "defend",
+          "label": "Defend your answer - it's v1.4.0",
+          "nextStageId": "v140-worse"
+        }
+      ]
+    },
+    "v140-recover": {
+      "id": "v140-recover",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "You trace it properly this time. Prod's parent is the v1.4.1 hotfix commit, not v1.4.0 - and prod itself is a revert commit sitting on top of that, with no tag of its own.",
+      "autoNext": "v140-recover-end"
+    },
+    "v140-recover-end": {
+      "id": "v140-recover-end",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You correct your answer before anyone reports the wrong version upstream.",
+      "ending": {
+        "kind": "neutral",
+        "debrief": "You got there - but only because an on-call engineer with a rough sense of the timeline pushed back first. If they hadn't spoken up, \"prod is on v1.4.0\" might have gone straight into an incident report. Walking the ref's actual parent chain the first time isn't optional busywork; it's the only way \"what's live\" doesn't depend on who happens to remember the release history."
+      }
+    },
+    "v140-worse": {
+      "id": "v140-worse",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "You insist prod is on v1.4.0. The incident report goes out claiming customers are on a build from before the auth hotfix even existed - which sends the security team scrambling to check whether the old auth bug is back in production.",
+      "autoNext": "v140-worse-end"
+    },
+    "v140-worse-end": {
+      "id": "v140-worse-end",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "Hours later, someone finally walks the actual parent chain and finds the truth: prod was never anywhere near v1.4.0, and the security team's scramble was for nothing.",
+      "ending": {
+        "kind": "bad",
+        "debrief": "A guess at \"the oldest tag I recognize\" triggered a false security scare that had nothing to do with what prod actually runs. Prod's ref was one hop past v1.4.1, not anywhere near v1.4.0 - and the only way to know that is to actually follow the parent chain, not estimate from memory."
+      }
+    },
+
+    "wrong-141-open": {
+      "id": "wrong-141-open",
+      "speaker": "Narrator",
+      "mood": "tense",
+      "narrative": "You say prod is on v1.4.1, the hotfix release. It's close - prod's parent commit is v1.4.1 - but prod itself is one commit further, a revert sitting on top of it.",
+      "autoNext": "wrong-141-team-beat"
+    },
+    "wrong-141-team-beat": {
+      "id": "wrong-141-team-beat",
+      "speaker": "On-call Engineer",
+      "mood": "tense",
+      "narrative": "\"v1.4.1? That tracks with the hotfix timeline, but didn't something get rolled back on top of that a few weeks later? Did you check what's actually sitting on the ref right now, or just the nearest tag?\"",
+      "autoNext": "wrong-141-consequence"
+    },
+    "wrong-141-consequence": {
+      "id": "wrong-141-consequence",
+      "speaker": "You",
+      "mood": "danger",
+      "narrative": "The engineer's right to ask - you matched the nearest tag instead of checking what commit the ref actually names.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "release: cut v1.4.0",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "release: cut v1.4.1 - hotfix for auth bug",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c2"],
+            "message": "release: cut v1.4.2 - perf improvements",
+            "authorSigned": true,
+            "timestamp": 2
+          },
+          "c4": {
+            "id": "c4",
+            "parentIds": ["c2"],
+            "message": "revert: roll back v1.4.2 - perf change caused a memory leak",
+            "authorSigned": true,
+            "timestamp": 3
+          }
+        },
+        "refs": {
+          "v1.4.0": { "name": "v1.4.0", "commitId": "c1" },
+          "v1.4.1": { "name": "v1.4.1", "commitId": "c2" },
+          "v1.4.2": { "name": "v1.4.2", "commitId": "c3" },
+          "prod": { "name": "prod", "commitId": "c4" }
+        },
+        "head": { "type": "branch", "name": "prod" }
+      },
+      "prompt": "Do you check exactly what commit prod's ref names, or defend your answer?",
+      "choices": [
+        {
+          "id": "recheck",
+          "label": "Check exactly what commit prod's ref names",
+          "nextStageId": "v141-recover"
+        },
+        {
+          "id": "defend",
+          "label": "Defend your answer - it's v1.4.1",
+          "nextStageId": "v141-worse"
+        }
+      ]
+    },
+    "v141-recover": {
+      "id": "v141-recover",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "You check the ref itself, not the nearest tag to it. Prod names c4 - the revert commit - which is one commit past v1.4.1, not v1.4.1 itself. Close, but not the same thing.",
+      "autoNext": "v141-recover-end"
+    },
+    "v141-recover-end": {
+      "id": "v141-recover-end",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You correct your answer and report what's actually deployed - a revert, not a tagged release.",
+      "ending": {
+        "kind": "good",
+        "debrief": "You caught the mistake before it went out as fact. \"Close to a tag\" and \"is that tag\" aren't the same claim - prod's ref names the revert commit sitting one hop past v1.4.1, not v1.4.1 itself. The habit that scales is checking exactly what the ref names, not the nearest release you recognize near it."
+      }
+    },
+    "v141-worse": {
+      "id": "v141-worse",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "You insist prod is on v1.4.1. The team spends the next hour trying to reproduce the slowness on a clean v1.4.1 build - and can't, because that's not what's actually running.",
+      "autoNext": "v141-worse-end"
+    },
+    "v141-worse-end": {
+      "id": "v141-worse-end",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "By the time someone thinks to check the ref directly instead of trusting your answer, an hour of reproduction effort has gone toward the wrong build entirely.",
+      "ending": {
+        "kind": "bad",
+        "debrief": "An hour went into reproducing a bug on v1.4.1 - a build nobody was actually running. Prod's ref named the revert commit built on top of v1.4.1, one hop further along. \"Close enough to the nearest tag\" cost real debugging time that a direct check of the ref would have saved."
+      }
+    },
+
+    "wrong-142-open": {
+      "id": "wrong-142-open",
+      "speaker": "Narrator",
+      "mood": "tense",
+      "narrative": "You confirm the status page: prod is on v1.4.2. But v1.4.2's tag points at c3, and prod's ref points at c4 - a different commit entirely, one that isn't a descendant of c3 at all.",
+      "autoNext": "wrong-142-team-beat"
+    },
+    "wrong-142-team-beat": {
+      "id": "wrong-142-team-beat",
+      "speaker": "On-call Engineer",
+      "mood": "tense",
+      "narrative": "\"Wait, the status page says that, but didn't we roll v1.4.2 back last month? Did you actually compare prod's commit against v1.4.2's, or just trust the page?\"",
+      "autoNext": "wrong-142-consequence"
+    },
+    "wrong-142-consequence": {
+      "id": "wrong-142-consequence",
+      "speaker": "You",
+      "mood": "danger",
+      "narrative": "You trusted the status page's claim instead of comparing prod's actual commit against v1.4.2's tagged commit.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "release: cut v1.4.0",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "release: cut v1.4.1 - hotfix for auth bug",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c2"],
+            "message": "release: cut v1.4.2 - perf improvements",
+            "authorSigned": true,
+            "timestamp": 2
+          },
+          "c4": {
+            "id": "c4",
+            "parentIds": ["c2"],
+            "message": "revert: roll back v1.4.2 - perf change caused a memory leak",
+            "authorSigned": true,
+            "timestamp": 3
+          }
+        },
+        "refs": {
+          "v1.4.0": { "name": "v1.4.0", "commitId": "c1" },
+          "v1.4.1": { "name": "v1.4.1", "commitId": "c2" },
+          "v1.4.2": { "name": "v1.4.2", "commitId": "c3" },
+          "prod": { "name": "prod", "commitId": "c4" }
+        },
+        "head": { "type": "branch", "name": "prod" }
+      },
+      "prompt": "Do you compare prod's commit directly against v1.4.2's tagged commit, or defend your answer?",
+      "choices": [
+        {
+          "id": "recheck",
+          "label": "Compare prod's commit directly against v1.4.2's",
+          "nextStageId": "v142-recover"
+        },
+        {
+          "id": "defend",
+          "label": "Defend your answer - the status page says v1.4.2",
+          "nextStageId": "v142-worse"
+        }
+      ]
+    },
+    "v142-recover": {
+      "id": "v142-recover",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "You compare the two commits directly. v1.4.2 is c3. Prod is c4 - a sibling built on v1.4.1, not a descendant of c3 at all. The status page was simply wrong, and had been for weeks.",
+      "autoNext": "v142-recover-end"
+    },
+    "v142-recover-end": {
+      "id": "v142-recover-end",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You report the real ref and flag the status page as stale before the customer-facing team repeats the wrong claim.",
+      "ending": {
+        "kind": "good",
+        "debrief": "The status page's claim and prod's actual ref were never the same fact, and only comparing the two commits directly exposed that. v1.4.2 is c3; prod is c4, a sibling revert built on v1.4.1 that never descends from c3 at all. A status page is a claim about prod, not a substitute for checking prod - that's the entire discipline Status Accounting is testing here."
+      }
+    },
+    "v142-worse": {
+      "id": "v142-worse",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "You insist the status page is right and prod is on v1.4.2. The perf team spends the afternoon trying to figure out why the shipped memory-leak fix isn't helping - because it was never actually deployed.",
+      "autoNext": "v142-worse-end"
+    },
+    "v142-worse-end": {
+      "id": "v142-worse-end",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "By evening, someone finally diffs prod against v1.4.2's tag directly and finds they share only a grandparent commit. The whole afternoon's investigation was aimed at code that was never running.",
+      "ending": {
+        "kind": "bad",
+        "debrief": "A whole afternoon went into debugging a \"live\" release that was never actually deployed - because the status page's claim was trusted over a direct check of prod's own ref. v1.4.2 and prod diverge at c2; they aren't the same commit, and no amount of trusting the status page changes that. The only fact that matters is what the ref names, checked directly."
+      }
+    }
+  }
+}
