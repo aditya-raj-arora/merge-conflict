@@ -6,12 +6,12 @@
 // the newer branching multi-stage mechanic (story.ts/StoryView).
 import { parseLevel, type Level } from "../src/engine/mechanics/level";
 import { parseStory, type Story } from "../src/engine/mechanics/story";
-import rawLvl0301 from "./chapters/ch03-change-control/LVL-03-01-who-skipped-review.json";
 import rawLvl0401 from "./chapters/ch04-status-accounting/LVL-04-01-whats-actually-live.json";
 import rawLvl0501 from "./chapters/ch05-configuration-audit/LVL-05-01-does-it-still-match.json";
 import rawLvl0601 from "./chapters/ch06-build-release/LVL-06-01-which-tag-lied.json";
 import rawStory0101 from "./chapters/ch01-identification/STORY-01-01-which-one-shipped.json";
 import rawStory0201 from "./chapters/ch02-version-control/STORY-02-01-whose-fix-made-it.json";
+import rawStory0301 from "./chapters/ch03-change-control/STORY-03-01-who-skipped-review.json";
 
 export interface QuizManifestEntry {
   kind: "quiz";
@@ -56,7 +56,7 @@ function toStoryEntry(raw: unknown): StoryManifestEntry {
 export const levelManifest: ManifestEntry[] = [
   toStoryEntry(rawStory0101),
   toStoryEntry(rawStory0201),
-  toQuizEntry(rawLvl0301),
+  toStoryEntry(rawStory0301),
   toQuizEntry(rawLvl0401),
   toQuizEntry(rawLvl0501),
   toQuizEntry(rawLvl0601),
