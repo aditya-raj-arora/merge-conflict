@@ -16,13 +16,21 @@ describe("App", () => {
     ).toBeInTheDocument();
   });
 
-  it("selecting a level loads it, and back returns to select", () => {
+  it("selecting a story loads it; choices appear once the reveal is skipped; back returns to select", () => {
     render(<App />);
 
     fireEvent.click(screen.getByRole("button", { name: "Which One Shipped?" }));
     expect(
       screen.getByRole("heading", { name: "Which One Shipped?" }),
     ).toBeInTheDocument();
+
+    // VN-style typewriter reveal (CR-095) - choices don't appear until
+    // the text finishes revealing. Skip it, same as a player clicking
+    // the dialogue box to fast-forward.
+    fireEvent.click(
+      screen.getByRole("button", { name: /click to skip text reveal/i }),
+    );
+
     expect(screen.getByRole("button", { name: "build-a" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "build-b" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "build-c" })).toBeInTheDocument();

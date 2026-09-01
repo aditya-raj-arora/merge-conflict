@@ -1,4 +1,4 @@
-// CSU-01.02.002-SRC-story_r1
+// CSU-01.02.002-SRC-story_r2
 // LLCSC-01-02-MECHANICS: a branching, multi-stage story - a choice
 // doesn't just get graded right/wrong, it moves the player to a
 // genuinely different stage with its own consequences and, eventually,
@@ -18,16 +18,32 @@ export interface StoryEnding {
   debrief: string;
 }
 
+/** Drives StoryView's backdrop theme (CR-095) - purely presentational,
+ * the engine never reasons about mood. */
+export type StoryMood = "calm" | "tense" | "danger" | "neutral";
+
 export interface StoryStage {
   id: string;
   narrative: string;
+  /** Who's "speaking" this beat - e.g. "Narrator", "You", "Teammate".
+   * Optional; StoryView falls back to "Narrator" if omitted. */
+  speaker?: string;
+  /** Backdrop theme for this beat (CR-095). Optional; falls back to
+   * "neutral" if omitted. */
+  mood?: StoryMood;
   /** Optional - a narrative-only stage (no new graph info) can omit this. */
   graph?: Graph;
-  /** The question posed this stage, if any (absent on ending stages). */
+  /** The question posed this stage, if any (absent on ending/autoNext stages). */
   prompt?: string;
-  /** Present on every stage except an ending. */
+  /** Present only on a stage with a real decision point. */
   choices?: StoryChoice[];
-  /** Present only on a terminal stage - mutually exclusive with choices. */
+  /** Present only on a narrative-only beat with no decision - click to
+   * continue straight to exactly one next stage (CR-095). Mutually
+   * exclusive with `choices` and `ending`. This is how a path gets more
+   * depth without inventing a decision at every single stage. */
+  autoNext?: string;
+  /** Present only on a terminal stage - mutually exclusive with
+   * `choices` and `autoNext`. */
   ending?: StoryEnding;
 }
 
@@ -58,6 +74,20 @@ export function advance(
   return choice.nextStageId;
 }
 
+/** Pure: given the story and the current stage id, returns the single
+ * next stage id for a narrative-only (autoNext) beat. Mirrors advance()
+ * for the no-real-choice case. Throws if the stage has no autoNext. */
+export function advanceAuto(story: Story, currentStageId: string): string {
+  const stage = story.stages[currentStageId];
+  if (!stage) {
+    throw new Error(`Unknown stage: "${currentStageId}".`);
+  }
+  if (!stage.autoNext) {
+    throw new Error(`Stage "${currentStageId}" has no autoNext.`);
+  }
+  return stage.autoNext;
+}
+
 export interface StoryStructuralIssue {
   type:
     | "malformed-stage"
@@ -70,9 +100,10 @@ export interface StoryStructuralIssue {
 /**
  * Structural validity, not "one correct answer" - a Story has no single
  * correct answer by design. Checks: every stage has exactly one of
- * choices/ending, every nextStageId resolves, every stage is reachable
- * from startStageId, and at least one reachable ending is "good". See
- * SPEC-story-schema-v1.0.md's Solvability testing section.
+ * choices/ending/autoNext, every nextStageId and autoNext target
+ * resolves, every stage is reachable from startStageId, and at least
+ * one reachable ending is "good". See SPEC-story-schema-v1.0.md's
+ * Solvability testing section.
  */
 export function validateStoryStructure(story: Story): StoryStructuralIssue[] {
   const issues: StoryStructuralIssue[] = [];
@@ -80,10 +111,14 @@ export function validateStoryStructure(story: Story): StoryStructuralIssue[] {
   for (const stage of Object.values(story.stages)) {
     const hasChoices = Boolean(stage.choices && stage.choices.length > 0);
     const hasEnding = Boolean(stage.ending);
-    if (hasChoices === hasEnding) {
+    const hasAutoNext = Boolean(stage.autoNext);
+    const modeCount = [hasChoices, hasEnding, hasAutoNext].filter(
+      Boolean,
+    ).length;
+    if (modeCount !== 1) {
       issues.push({
         type: "malformed-stage",
-        detail: `Stage "${stage.id}" must have exactly one of a non-empty choices array or an ending.`,
+        detail: `Stage "${stage.id}" must have exactly one of a non-empty choices array, an ending, or autoNext.`,
       });
     }
     for (const choice of stage.choices ?? []) {
@@ -94,6 +129,12 @@ export function validateStoryStructure(story: Story): StoryStructuralIssue[] {
         });
       }
     }
+    if (stage.autoNext && !story.stages[stage.autoNext]) {
+      issues.push({
+        type: "dangling-next-stage",
+        detail: `Stage "${stage.id}" autoNext points to unknown stage "${stage.autoNext}".`,
+      });
+    }
   }
 
   const reachable = new Set<string>();
@@ -102,8 +143,12 @@ export function validateStoryStructure(story: Story): StoryStructuralIssue[] {
     const id = queue.shift()!;
     if (reachable.has(id)) continue;
     reachable.add(id);
-    for (const choice of story.stages[id]?.choices ?? []) {
+    const stage = story.stages[id];
+    for (const choice of stage?.choices ?? []) {
       queue.push(choice.nextStageId);
+    }
+    if (stage?.autoNext) {
+      queue.push(stage.autoNext);
     }
   }
   for (const id of Object.keys(story.stages)) {
