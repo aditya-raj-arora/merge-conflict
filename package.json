@@ -1,6 +1,6 @@
 {
   "name": "merge-conflict",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "private": true,
   "type": "module",
   "description": "A narrative browser game that teaches Software Configuration Management.",
