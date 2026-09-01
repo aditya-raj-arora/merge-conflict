@@ -8,6 +8,13 @@ This file is auto-maintained going forward by `release-please` off our
 Conventional Commit history — we just keep the `[Unreleased]` section honest
 in the meantime.
 
+## [0.6.0](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.5.0...v0.6.0) (2026-09-01)
+
+
+### Features
+
+* **content:** Chapter 6 first playable slice - Which Tag Lied? ([#84](https://github.com/aditya-raj-arora/merge-conflict/issues/84)) ([3839a25](https://github.com/aditya-raj-arora/merge-conflict/commit/3839a25f1b99b88f3c34a79e9ad963510a2d0787))
+
 ## [0.5.0](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.4.0...v0.5.0) (2026-08-20)
 
 
