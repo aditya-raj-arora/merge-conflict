@@ -10,7 +10,7 @@ would actually check first).
 
 | Item                                               | Current Version                                | Environment                         | Last Change                                | Open CRs |
 | -------------------------------------------------- | ---------------------------------------------- | ----------------------------------- | ------------------------------------------ | -------- |
-| CSCI-MC (whole app)                                | `v0.8.3` / `BL-13-ch04-vn-story`               | staging + prod (both verified live) | 2026-09-01, Chapter 4 VN redesign (CR-106) | —        |
+| CSCI-MC (whole app)                                | `v0.8.4` / `BL-14-ch05-vn-story`               | staging + prod (both verified live) | 2026-09-01, Chapter 5 VN redesign (CR-107) | —        |
 | TLCSC-02-UI > LevelSelect                          | `_r1` (new)                                    | staging + prod                      | 2026-08-20                                 | —        |
 | TLCSC-01-ENGINE (commit graph + level mechanics)   | `_r1` (all units)                              | staging + prod                      | 2026-08-06                                 | —        |
 | TLCSC-02-UI (GraphCanvas, LevelView)               | `_r1`                                          | staging + prod                      | 2026-08-06                                 | —        |
@@ -21,7 +21,7 @@ would actually check first).
 | TLCSC-04-CONTENT > LLCSC-04-02-CH02 (STORY-02-01)  | `_r1` (supersedes retired LVL-02-01)           | staging + prod                      | 2026-09-01                                 | —        |
 | TLCSC-04-CONTENT > LLCSC-04-03-CH03 (STORY-03-01)  | `_r1` (supersedes retired LVL-03-01)           | staging + prod                      | 2026-09-01                                 | —        |
 | TLCSC-04-CONTENT > LLCSC-04-04-CH04 (STORY-04-01)  | `_r1` (supersedes retired LVL-04-01)           | staging + prod                      | 2026-09-01                                 | —        |
-| TLCSC-04-CONTENT > LLCSC-04-05-CH05 (LVL-05-01)    | `_r1`                                          | staging + prod                      | 2026-08-20                                 | —        |
+| TLCSC-04-CONTENT > LLCSC-04-05-CH05 (STORY-05-01)  | `_r1` (supersedes retired LVL-05-01)           | staging + prod                      | 2026-09-01                                 | —        |
 | TLCSC-04-CONTENT > LLCSC-04-06-CH06 (LVL-06-01)    | `_r1` (new)                                    | staging + prod                      | 2026-08-20                                 | —        |
 
 _(Table grows one row per top-level CI as they come online. `staging` =
