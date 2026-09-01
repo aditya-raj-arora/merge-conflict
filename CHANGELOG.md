@@ -8,6 +8,18 @@ This file is auto-maintained going forward by `release-please` off our
 Conventional Commit history — we just keep the `[Unreleased]` section honest
 in the meantime.
 
+## [0.8.2](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.8.1...v0.8.2) (2026-09-01)
+
+
+### Features
+
+* **content:** redesign Chapter 3 as a branching VN story ([#106](https://github.com/aditya-raj-arora/merge-conflict/issues/106)) ([a111c4b](https://github.com/aditya-raj-arora/merge-conflict/commit/a111c4bfd5c7a14cbfd9b984cd0925b1decb3452))
+
+
+### Continuous Integration
+
+* force v0.8.2 for the Chapter 3 story redesign ([0e4406c](https://github.com/aditya-raj-arora/merge-conflict/commit/0e4406c6e39d5c53cde48016ff4c8e83e7cab3b7))
+
 ## [0.8.1](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.8.0...v0.8.1) (2026-09-01)
 
 
