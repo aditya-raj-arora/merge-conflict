@@ -1,0 +1,423 @@
+{
+  "id": "STORY-03-01-who-skipped-review",
+  "chapterId": "ch03-change-control",
+  "title": "Who Skipped Review?",
+  "startStageId": "start",
+  "stages": {
+    "start": {
+      "id": "start",
+      "speaker": "Narrator",
+      "mood": "tense",
+      "narrative": "The library hit the front page of a link aggregator overnight and downloads 10x'd in a day. Contributors you've never heard of started opening PRs, and in the rush to keep up, some things got merged fast. Now there's a bug in production - a config default got flipped that never should have shipped. Every commit on main this week is signed. Only one has no linked change request explaining why it happened.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "chore: prep repo for the surge - add contributing guide",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "feat: add response caching (Refs: CR-112)",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c2"],
+            "message": "fix: correct off-by-one in pagination (Refs: CR-115)",
+            "authorSigned": true,
+            "timestamp": 2
+          },
+          "c4": {
+            "id": "c4",
+            "parentIds": ["c3"],
+            "message": "chore: flip default timeout to 100ms",
+            "authorSigned": true,
+            "timestamp": 3
+          },
+          "c5": {
+            "id": "c5",
+            "parentIds": ["c4"],
+            "message": "docs: update README badges (Refs: CR-118)",
+            "authorSigned": true,
+            "timestamp": 4
+          }
+        },
+        "refs": { "main": { "name": "main", "commitId": "c5" } },
+        "head": { "type": "branch", "name": "main" }
+      },
+      "prompt": "Every commit here is properly signed. Which one skipped Change Control - no linked CR, no record of who approved it or why?",
+      "choices": [
+        {
+          "id": "c2",
+          "label": "feat: add response caching",
+          "nextStageId": "wrong-c2-open"
+        },
+        {
+          "id": "c3",
+          "label": "fix: correct off-by-one in pagination",
+          "nextStageId": "wrong-c3-open"
+        },
+        {
+          "id": "c4",
+          "label": "chore: flip default timeout to 100ms",
+          "nextStageId": "correct-open"
+        },
+        {
+          "id": "c5",
+          "label": "docs: update README badges",
+          "nextStageId": "wrong-c5-open"
+        }
+      ]
+    },
+
+    "correct-open": {
+      "id": "correct-open",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You're right - \"flip default timeout to 100ms\" has no Refs: CR-NNN anywhere in it. Every other commit does.",
+      "autoNext": "correct-report"
+    },
+    "correct-report": {
+      "id": "correct-report",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You flag it before touching anything else. The maintainers revert the change and open a proper CR to actually discuss what the timeout should be.",
+      "ending": {
+        "kind": "good",
+        "debrief": "Signed and reviewed aren't the same thing, and you didn't confuse them. \"chore: flip default timeout to 100ms\" is properly authored - nobody's impersonating anybody - but it's the one commit with no record of why it happened or who approved it as a change. That gap is exactly what let a bad default reach production with nobody accountable for the decision."
+      }
+    },
+
+    "wrong-c2-open": {
+      "id": "wrong-c2-open",
+      "speaker": "Narrator",
+      "mood": "tense",
+      "narrative": "You point to the caching commit. It's got a CR reference right there - CR-112 - but you didn't look closely enough to notice.",
+      "autoNext": "wrong-c2-team-beat"
+    },
+    "wrong-c2-team-beat": {
+      "id": "wrong-c2-team-beat",
+      "speaker": "Maintainer",
+      "mood": "tense",
+      "narrative": "\"That caching change has been reviewed and running fine for weeks - are you sure that's the one causing trouble?\"",
+      "autoNext": "wrong-c2-consequence"
+    },
+    "wrong-c2-consequence": {
+      "id": "wrong-c2-consequence",
+      "speaker": "You",
+      "mood": "danger",
+      "narrative": "You've got a maintainer pushing back with real history behind that commit, and you haven't actually re-read its message.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "chore: prep repo for the surge - add contributing guide",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "feat: add response caching (Refs: CR-112)",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c2"],
+            "message": "fix: correct off-by-one in pagination (Refs: CR-115)",
+            "authorSigned": true,
+            "timestamp": 2
+          },
+          "c4": {
+            "id": "c4",
+            "parentIds": ["c3"],
+            "message": "chore: flip default timeout to 100ms",
+            "authorSigned": true,
+            "timestamp": 3
+          },
+          "c5": {
+            "id": "c5",
+            "parentIds": ["c4"],
+            "message": "docs: update README badges (Refs: CR-118)",
+            "authorSigned": true,
+            "timestamp": 4
+          }
+        },
+        "refs": { "main": { "name": "main", "commitId": "c5" } },
+        "head": { "type": "branch", "name": "main" }
+      },
+      "prompt": "Do you go back and check each commit's message for a CR reference, or defend your answer?",
+      "choices": [
+        {
+          "id": "recheck",
+          "label": "Go back and check every commit's message",
+          "nextStageId": "c2-recover"
+        },
+        {
+          "id": "defend",
+          "label": "Defend your answer - it's the caching commit",
+          "nextStageId": "c2-worse"
+        }
+      ]
+    },
+    "c2-recover": {
+      "id": "c2-recover",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "You look again, properly this time. The caching commit does have Refs: CR-112. The one missing a reference is the timeout change.",
+      "autoNext": "c2-recover-end"
+    },
+    "c2-recover-end": {
+      "id": "c2-recover-end",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You correct your answer before anyone reverts the wrong thing.",
+      "ending": {
+        "kind": "neutral",
+        "debrief": "You got there - but only because a maintainer with direct knowledge of that commit's history pushed back first. If they hadn't spoken up, a properly-reviewed, working feature might have been reverted while the actual unreviewed change kept running in production. Checking every commit's message the first time isn't optional busywork; it's the only way \"which one skipped review\" doesn't depend on who happens to remember the history."
+      }
+    },
+    "c2-worse": {
+      "id": "c2-worse",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "You insist the caching commit is the problem. The maintainers, trusting your read, revert it - a properly-reviewed, working feature - while the actual unreviewed change keeps running.",
+      "autoNext": "c2-worse-end"
+    },
+    "c2-worse-end": {
+      "id": "c2-worse-end",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "The outage continues. Two days later someone finally reads every commit message line by line and finds it: the timeout change, still sitting there, still with no CR.",
+      "ending": {
+        "kind": "bad",
+        "debrief": "A working, reviewed feature got reverted for nothing, and the real problem stayed live for two more days because an accusation was trusted over an actual check of the commit messages. \"Signed\" was never the question - CR-112 was right there the whole time. The cost of skipping the check wasn't just being wrong, it was actively removing something that was fine."
+      }
+    },
+
+    "wrong-c3-open": {
+      "id": "wrong-c3-open",
+      "speaker": "Narrator",
+      "mood": "tense",
+      "narrative": "You point to the pagination fix. It's got a CR reference right there - CR-115 - but you didn't look closely enough to notice.",
+      "autoNext": "wrong-c3-team-beat"
+    },
+    "wrong-c3-team-beat": {
+      "id": "wrong-c3-team-beat",
+      "speaker": "Maintainer",
+      "mood": "tense",
+      "narrative": "\"That pagination fix went through review last week - a bunch of users were hitting that bug. Is that really the one?\"",
+      "autoNext": "wrong-c3-consequence"
+    },
+    "wrong-c3-consequence": {
+      "id": "wrong-c3-consequence",
+      "speaker": "You",
+      "mood": "danger",
+      "narrative": "You've got a maintainer pushing back with real history behind that commit, and you haven't actually re-read its message.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "chore: prep repo for the surge - add contributing guide",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "feat: add response caching (Refs: CR-112)",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c2"],
+            "message": "fix: correct off-by-one in pagination (Refs: CR-115)",
+            "authorSigned": true,
+            "timestamp": 2
+          },
+          "c4": {
+            "id": "c4",
+            "parentIds": ["c3"],
+            "message": "chore: flip default timeout to 100ms",
+            "authorSigned": true,
+            "timestamp": 3
+          },
+          "c5": {
+            "id": "c5",
+            "parentIds": ["c4"],
+            "message": "docs: update README badges (Refs: CR-118)",
+            "authorSigned": true,
+            "timestamp": 4
+          }
+        },
+        "refs": { "main": { "name": "main", "commitId": "c5" } },
+        "head": { "type": "branch", "name": "main" }
+      },
+      "prompt": "Do you go back and check each commit's message for a CR reference, or defend your answer?",
+      "choices": [
+        {
+          "id": "recheck",
+          "label": "Go back and check every commit's message",
+          "nextStageId": "c3-recover"
+        },
+        {
+          "id": "defend",
+          "label": "Defend your answer - it's the pagination fix",
+          "nextStageId": "c3-worse"
+        }
+      ]
+    },
+    "c3-recover": {
+      "id": "c3-recover",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "You look again, properly this time. The pagination fix does have Refs: CR-115. The one missing a reference is the timeout change.",
+      "autoNext": "c3-recover-end"
+    },
+    "c3-recover-end": {
+      "id": "c3-recover-end",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You correct your answer before anyone reverts the wrong thing.",
+      "ending": {
+        "kind": "good",
+        "debrief": "You caught the mistake before it cost anything real. Still worth noticing: it took a maintainer's pushback to get you to actually re-read the commit rather than trust your first impression. The habit that scales is reading every message for a CR reference before naming a culprit, not after someone questions you."
+      }
+    },
+    "c3-worse": {
+      "id": "c3-worse",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "You insist the pagination fix is the problem. The maintainers, trusting your read, revert it - and the users who were hitting that pagination bug start filing the same reports all over again.",
+      "autoNext": "c3-worse-end"
+    },
+    "c3-worse-end": {
+      "id": "c3-worse-end",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "Now there are two problems: the original outage, still live, and a pagination bug that had already been fixed once, back and biting users a second time.",
+      "ending": {
+        "kind": "bad",
+        "debrief": "Reverting the pagination fix didn't touch the actual problem - it just reopened a bug that was already closed, on top of the outage that was still running. CR-115 was sitting right there in the commit message. The accusation replaced the check instead of following from it."
+      }
+    },
+
+    "wrong-c5-open": {
+      "id": "wrong-c5-open",
+      "speaker": "Narrator",
+      "mood": "tense",
+      "narrative": "You point to the README badges commit. It's got a CR reference right there - CR-118 - but you didn't look closely enough to notice.",
+      "autoNext": "wrong-c5-team-beat"
+    },
+    "wrong-c5-team-beat": {
+      "id": "wrong-c5-team-beat",
+      "speaker": "Maintainer",
+      "mood": "tense",
+      "narrative": "\"The badges commit? That's just markdown, it doesn't touch any code path that could cause an outage.\"",
+      "autoNext": "wrong-c5-consequence"
+    },
+    "wrong-c5-consequence": {
+      "id": "wrong-c5-consequence",
+      "speaker": "You",
+      "mood": "danger",
+      "narrative": "The maintainer's got a point about what the commit actually touches, and you haven't actually re-read its message for a CR reference either.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "chore: prep repo for the surge - add contributing guide",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "feat: add response caching (Refs: CR-112)",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c2"],
+            "message": "fix: correct off-by-one in pagination (Refs: CR-115)",
+            "authorSigned": true,
+            "timestamp": 2
+          },
+          "c4": {
+            "id": "c4",
+            "parentIds": ["c3"],
+            "message": "chore: flip default timeout to 100ms",
+            "authorSigned": true,
+            "timestamp": 3
+          },
+          "c5": {
+            "id": "c5",
+            "parentIds": ["c4"],
+            "message": "docs: update README badges (Refs: CR-118)",
+            "authorSigned": true,
+            "timestamp": 4
+          }
+        },
+        "refs": { "main": { "name": "main", "commitId": "c5" } },
+        "head": { "type": "branch", "name": "main" }
+      },
+      "prompt": "Do you go back and check every commit's message for a CR reference, or defend your answer?",
+      "choices": [
+        {
+          "id": "recheck",
+          "label": "Go back and check every commit's message",
+          "nextStageId": "c5-recover"
+        },
+        {
+          "id": "defend",
+          "label": "Defend your answer - keep looking at the badges commit",
+          "nextStageId": "c5-worse"
+        }
+      ]
+    },
+    "c5-recover": {
+      "id": "c5-recover",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "You look again, properly this time. The badges commit does have Refs: CR-118. The one missing a reference is the timeout change - and it's the only commit that actually touches runtime behavior at all.",
+      "autoNext": "c5-recover-end"
+    },
+    "c5-recover-end": {
+      "id": "c5-recover-end",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You correct your answer and point everyone at the actual culprit.",
+      "ending": {
+        "kind": "good",
+        "debrief": "You got there, and the maintainer's comment about what the commit actually touches was true but beside the point - a docs change being harmless doesn't tell you whether it has a CR, and neither does anything else except actually reading the message. That's the whole habit Change Control depends on: read for the reference, don't reason your way to a conclusion about what \"seems risky.\""
+      }
+    },
+    "c5-worse": {
+      "id": "c5-worse",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "You keep insisting it's the badges commit, arguing a docs change could still somehow be involved. Precious time goes into investigating a commit that never touched any code path, while the actual timeout change sits untouched.",
+      "autoNext": "c5-worse-end"
+    },
+    "c5-worse-end": {
+      "id": "c5-worse-end",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "By the time someone else finally reads every commit message in order, the outage has been running for hours longer than it needed to.",
+      "ending": {
+        "kind": "bad",
+        "debrief": "The badges commit was never going to be the answer, and clinging to it wasted hours that a two-minute read of every commit message would have saved. CR-118 was right there. \"Which commit skipped Change Control\" isn't a question you reason your way to from what a commit sounds like it might do - it's a question you answer by actually checking for the reference, every single time."
+      }
+    }
+  }
+}
