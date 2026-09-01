@@ -1,0 +1,300 @@
+{
+  "id": "STORY-01-01-which-one-shipped",
+  "chapterId": "ch01-identification",
+  "title": "Which One Shipped?",
+  "startStageId": "start",
+  "stages": {
+    "start": {
+      "id": "start",
+      "narrative": "Three days before the investor demo, and there's been zero process - everyone just branches off whatever looked newest. Right now there are three builds sitting around: build-a, build-b, build-c. You have to tell the team which one is ready to show investors tomorrow.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "chore: initial scaffold",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "feat: core gameplay loop",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c2"],
+            "message": "feat: experimental procedural levels (WIP)",
+            "authorSigned": false,
+            "timestamp": 2
+          },
+          "c4": {
+            "id": "c4",
+            "parentIds": ["c2"],
+            "message": "fix: crash on level load",
+            "authorSigned": true,
+            "timestamp": 2
+          },
+          "c5": {
+            "id": "c5",
+            "parentIds": ["c4"],
+            "message": "polish: UI pass for demo",
+            "authorSigned": true,
+            "timestamp": 3
+          },
+          "c6": {
+            "id": "c6",
+            "parentIds": ["c5"],
+            "message": "chore: approved for investor demo",
+            "authorSigned": true,
+            "timestamp": 4
+          }
+        },
+        "refs": {
+          "build-a": { "name": "build-a", "commitId": "c3" },
+          "build-b": { "name": "build-b", "commitId": "c6" },
+          "build-c": { "name": "build-c", "commitId": "c2" }
+        },
+        "head": { "type": "branch", "name": "build-b" }
+      },
+      "prompt": "Which build do you flag as ready for the demo?",
+      "choices": [
+        { "id": "pick-a", "label": "build-a", "nextStageId": "a-consequence" },
+        { "id": "pick-b", "label": "build-b", "nextStageId": "b-good" },
+        { "id": "pick-c", "label": "build-c", "nextStageId": "c-consequence" }
+      ]
+    },
+    "a-consequence": {
+      "id": "a-consequence",
+      "narrative": "You flag build-a. The team ships it to the demo laptop without a second look - after all, you said it was ready.\n\nTwenty minutes before investors arrive, someone actually opens the app. build-a still has the experimental procedural-levels feature half-wired in - the commit that added it was never signed, never reviewed, and clearly says \"(WIP)\" right in the message. It crashes on the very first level generated.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "chore: initial scaffold",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "feat: core gameplay loop",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c2"],
+            "message": "feat: experimental procedural levels (WIP)",
+            "authorSigned": false,
+            "timestamp": 2
+          },
+          "c4": {
+            "id": "c4",
+            "parentIds": ["c2"],
+            "message": "fix: crash on level load",
+            "authorSigned": true,
+            "timestamp": 2
+          },
+          "c5": {
+            "id": "c5",
+            "parentIds": ["c4"],
+            "message": "polish: UI pass for demo",
+            "authorSigned": true,
+            "timestamp": 3
+          },
+          "c6": {
+            "id": "c6",
+            "parentIds": ["c5"],
+            "message": "chore: approved for investor demo",
+            "authorSigned": true,
+            "timestamp": 4
+          }
+        },
+        "refs": {
+          "build-a": { "name": "build-a", "commitId": "c3" },
+          "build-b": { "name": "build-b", "commitId": "c6" },
+          "build-c": { "name": "build-c", "commitId": "c2" }
+        },
+        "head": { "type": "branch", "name": "build-a" }
+      },
+      "prompt": "What do you do with twenty minutes on the clock?",
+      "choices": [
+        {
+          "id": "swap-immediately",
+          "label": "Swap to a signed build right now",
+          "nextStageId": "a-recover"
+        },
+        {
+          "id": "patch-live",
+          "label": "Try to patch it live before doors open",
+          "nextStageId": "a-worse"
+        }
+      ]
+    },
+    "a-recover": {
+      "id": "a-recover",
+      "narrative": "You swap to build-b on the spot - the one commit in the whole graph that's actually signed all the way back to root and ends in a commit that says, in so many words, \"approved for the demo.\" It's not glamorous, scrambling minutes before doors open, but the demo itself goes fine.\n\nAfterward, someone asks the obvious question: why didn't anyone know which build was approved *before* today?",
+      "ending": {
+        "kind": "neutral",
+        "debrief": "You avoided disaster, but only barely, and only because someone happened to actually open the app before investors did. That's not a process - that's luck. A real baseline record would have made \"which build is approved\" a lookup, not a scramble. Configuration Identification exists so this isn't the first time anyone checks."
+      }
+    },
+    "a-worse": {
+      "id": "a-worse",
+      "narrative": "You try to patch it live - comment out the broken feature, hope nothing else breaks, do it while investors are already walking in. It doesn't go well. The crash happens again, mid-sentence, in front of everyone.",
+      "ending": {
+        "kind": "bad",
+        "debrief": "The demo crashed live. Nobody in that room is thinking about your roadmap anymore, only about the app that broke in front of them. The root cause wasn't the crash - plenty of software has bugs. It's that nobody could say with any confidence which build was actually supposed to ship, so an unreviewed, unsigned, work-in-progress commit ended up on stage."
+      }
+    },
+    "b-good": {
+      "id": "b-good",
+      "narrative": "You flag build-b. It's the one commit that's signed all the way back to the very first commit, and its own message says, plainly, \"approved for the investor demo.\" The team ships it without incident. Investors see exactly what was meant to be shown, nothing more, nothing less.",
+      "ending": {
+        "kind": "good",
+        "debrief": "Correct call, and for the right reason: not a guess, but because build-b was the only build with a clean, fully-signed history ending in an explicit approval. That's what a real baseline gives you - the ability to answer \"which one shipped\" as a fact, not a bet."
+      }
+    },
+    "c-consequence": {
+      "id": "c-consequence",
+      "narrative": "You flag build-c. It's an older point in history - stable, sure, but it's missing the crash fix and the UI polish pass that landed afterward. Someone on the team frowns: \"Wait, doesn't the demo script mention the new level-load fix?\"",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "chore: initial scaffold",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "feat: core gameplay loop",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c2"],
+            "message": "feat: experimental procedural levels (WIP)",
+            "authorSigned": false,
+            "timestamp": 2
+          },
+          "c4": {
+            "id": "c4",
+            "parentIds": ["c2"],
+            "message": "fix: crash on level load",
+            "authorSigned": true,
+            "timestamp": 2
+          },
+          "c5": {
+            "id": "c5",
+            "parentIds": ["c4"],
+            "message": "polish: UI pass for demo",
+            "authorSigned": true,
+            "timestamp": 3
+          },
+          "c6": {
+            "id": "c6",
+            "parentIds": ["c5"],
+            "message": "chore: approved for investor demo",
+            "authorSigned": true,
+            "timestamp": 4
+          }
+        },
+        "refs": {
+          "build-a": { "name": "build-a", "commitId": "c3" },
+          "build-b": { "name": "build-b", "commitId": "c6" },
+          "build-c": { "name": "build-c", "commitId": "c2" }
+        },
+        "head": { "type": "branch", "name": "build-c" }
+      },
+      "prompt": "Do you present build-c anyway, or go back and check the refs again first?",
+      "choices": [
+        {
+          "id": "present-anyway",
+          "label": "Present build-c anyway",
+          "nextStageId": "c-bad"
+        },
+        {
+          "id": "double-check",
+          "label": "Go back and check the refs again",
+          "nextStageId": "c-recover"
+        }
+      ]
+    },
+    "c-bad": {
+      "id": "c-bad",
+      "narrative": "You present build-c anyway, betting nobody will notice. Someone notices. An investor asks directly about the fix that was supposedly already shipped, and there's no good answer ready - because it isn't in this build at all.",
+      "ending": {
+        "kind": "bad",
+        "debrief": "build-c wasn't broken, it just wasn't current - and \"not current\" turned into an unprepared answer to a direct question in the room. Configuration Identification isn't only about catching outright breakage; it's about knowing exactly what state you're actually showing people, so you're never caught flat-footed by your own history."
+      }
+    },
+    "c-recover": {
+      "id": "c-recover",
+      "narrative": "You go back and actually walk the graph instead of trusting the first name that sounded familiar. build-c is two commits behind - it's missing both the crash fix and the polish pass. There's exactly one build with a fully signed history ending in an explicit \"approved for the demo\" commit: build-b.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "chore: initial scaffold",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "feat: core gameplay loop",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "c3": {
+            "id": "c3",
+            "parentIds": ["c2"],
+            "message": "feat: experimental procedural levels (WIP)",
+            "authorSigned": false,
+            "timestamp": 2
+          },
+          "c4": {
+            "id": "c4",
+            "parentIds": ["c2"],
+            "message": "fix: crash on level load",
+            "authorSigned": true,
+            "timestamp": 2
+          },
+          "c5": {
+            "id": "c5",
+            "parentIds": ["c4"],
+            "message": "polish: UI pass for demo",
+            "authorSigned": true,
+            "timestamp": 3
+          },
+          "c6": {
+            "id": "c6",
+            "parentIds": ["c5"],
+            "message": "chore: approved for investor demo",
+            "authorSigned": true,
+            "timestamp": 4
+          }
+        },
+        "refs": {
+          "build-a": { "name": "build-a", "commitId": "c3" },
+          "build-b": { "name": "build-b", "commitId": "c6" },
+          "build-c": { "name": "build-c", "commitId": "c2" }
+        },
+        "head": { "type": "branch", "name": "build-b" }
+      },
+      "ending": {
+        "kind": "good",
+        "debrief": "Catching your own mistake before it reaches the room is still a win, and it's the exact habit Configuration Identification is trying to build: don't trust a build name or a gut feeling, walk the actual signed history and let it tell you what's approved. This time it cost you a few extra minutes. Without that habit, it costs you the demo."
+      }
+    }
+  }
+}
