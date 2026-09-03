@@ -227,6 +227,69 @@ describe("App", () => {
     ).toBeInTheDocument();
   });
 
+  describe("tier progression (CR-118)", () => {
+    it("the Next Level shortcut disappears at a tier boundary when the next chapter isn't earned yet", () => {
+      usePlayerStore.getState().setName("Test Player");
+      usePlayerStore.setState({
+        progress: {
+          "STORY-01-01-which-one-shipped": { passed: true, totalRuns: 1 },
+          "STORY-02-01-whose-fix-made-it": { passed: true, totalRuns: 1 },
+          "STORY-03-01-who-skipped-review": { passed: true, totalRuns: 1 },
+        },
+        // Just under Tier 3's 4,000 threshold - clearing Chapter 4 with a
+        // good ending (+1,000) lands at 3,800, still short.
+        totalEarned: 2_800,
+      });
+      render(<App />);
+      fireEvent.click(screen.getByRole("button", { name: /^Continue/ }));
+      fireEvent.click(
+        screen.getByRole("button", { name: "What Does Prod Actually Run?" }),
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Begin" }));
+
+      const skip = () =>
+        fireEvent.click(
+          screen.getByRole("button", { name: /click to skip text reveal/i }),
+        );
+      const pick = (label: string) => {
+        skip();
+        fireEvent.click(screen.getByRole("button", { name: label }));
+        fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+      };
+      const autoContinue = () => {
+        skip();
+        fireEvent.click(screen.getByRole("button", { name: "▼ Continue" }));
+      };
+
+      autoContinue(); // start -> check-lighthouse
+      pick("No - prod's ref doesn't land on v1.4.2 at all");
+      pick("Yes - prod's ref is exactly v2.3.0's commit");
+      pick(
+        "No - prod is actually on v5.2.1, two releases ahead of the dashboard",
+      );
+      pick("Yes - prod's ref is exactly v3.0.0's commit");
+      pick(
+        'No - the dashboard still says "in progress" hours after it finished',
+      );
+      autoContinue(); // resolution-clean -> good-ending
+      skip();
+
+      // The chapter was cleared, but Tier 3 still isn't unlocked.
+      expect(usePlayerStore.getState().totalEarned).toBe(3_800);
+      expect(
+        screen.queryByRole("button", { name: /^Next Level:/ }),
+      ).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: /back to levels/i }));
+      expect(
+        screen.getByText(/unlocks at 4,000 earned — you have 3,800/i),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /^Does It Still Match\?/ }),
+      ).toBeDisabled();
+    });
+  });
+
   describe("project brief (CR-112)", () => {
     function renderUnlockedThroughChapter3() {
       usePlayerStore.getState().setName("Test Player");
@@ -235,6 +298,10 @@ describe("App", () => {
           "STORY-01-01-which-one-shipped": { passed: true, totalRuns: 1 },
           "STORY-02-01-whose-fix-made-it": { passed: true, totalRuns: 1 },
         },
+        // CR-118: Chapter 3 is Tier 2's first chapter, so passing
+        // Chapters 1-2 alone no longer unlocks it - it also needs
+        // Tier 2's earn threshold met.
+        totalEarned: 2_000,
       });
       render(<App />);
       fireEvent.click(screen.getByRole("button", { name: /^Continue/ }));

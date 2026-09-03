@@ -1,14 +1,16 @@
-// CSU-03.03.001-SRC-usePlayerStore_r2
+// CSU-03.03.001-SRC-usePlayerStore_r3
 // TLCSC-03-STATE: the player's profile - name, budget, and per-level
-// progress (CR-109), plus the last level they had open (CR-111).
-// Persisted to localStorage only, via zustand's `persist` middleware;
-// nothing here ever leaves the browser. Separate from useGameStore/
-// useStoryStore on purpose - those two hold the in-progress state of
-// whichever level is currently open, this one holds state that outlives
-// any single level and survives a reload.
+// progress (CR-109), the last level they had open (CR-111), and total
+// lifetime earnings for tier gating (CR-118). Persisted to localStorage
+// only, via zustand's `persist` middleware; nothing here ever leaves the
+// browser. Separate from useGameStore/useStoryStore on purpose - those
+// two hold the in-progress state of whichever level is currently open,
+// this one holds state that outlives any single level and survives a
+// reload.
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import {
+  computeEarnedDelta,
   computeQuizReward,
   computeStoryReward,
   STARTING_BUDGET,
@@ -28,6 +30,14 @@ interface LastReward {
 interface PlayerState {
   name: string | null;
   budget: number;
+  /** Cumulative sum of the positive part of every reward ever applied
+   * (CR-118) - unlike `budget`, this never decreases, even when a
+   * mistake costs real budget. Tier gates (isChapterTierUnlocked) read
+   * this instead of `budget`, specifically so a tier that's already
+   * unlocked can't re-lock itself because of a later bad ending
+   * elsewhere. Purely a gate input; not shown to the player as its own
+   * number anywhere but the tier-progress hint on level select. */
+  totalEarned: number;
   progress: Record<string, LevelProgress>;
   lastReward: LastReward | null;
   /** The manifest id of the level most recently opened, so a returning
@@ -62,6 +72,7 @@ export const usePlayerStore = create<PlayerState>()(
     (set, get) => ({
       name: null,
       budget: STARTING_BUDGET,
+      totalEarned: 0,
       progress: {},
       lastReward: null,
       lastPlayedLevelId: null,
@@ -71,11 +82,12 @@ export const usePlayerStore = create<PlayerState>()(
       setLastPlayedLevel: (levelId) => set({ lastPlayedLevelId: levelId }),
 
       recordQuizAttempt: (levelId, correct) => {
-        const { progress, budget } = get();
+        const { progress, budget, totalEarned } = get();
         const entry = progress[levelId] ?? { passed: false, totalRuns: 0 };
         const amount = computeQuizReward(entry.totalRuns, correct);
         set({
           budget: budget + amount,
+          totalEarned: totalEarned + computeEarnedDelta(amount),
           progress: {
             ...progress,
             [levelId]: {
@@ -89,11 +101,12 @@ export const usePlayerStore = create<PlayerState>()(
       },
 
       recordStoryEnding: (levelId, kind) => {
-        const { progress, budget } = get();
+        const { progress, budget, totalEarned } = get();
         const entry = progress[levelId] ?? { passed: false, totalRuns: 0 };
         const amount = computeStoryReward(kind);
         set({
           budget: budget + amount,
+          totalEarned: totalEarned + computeEarnedDelta(amount),
           progress: {
             ...progress,
             [levelId]: {
@@ -112,6 +125,7 @@ export const usePlayerStore = create<PlayerState>()(
         set({
           name: null,
           budget: STARTING_BUDGET,
+          totalEarned: 0,
           progress: {},
           lastReward: null,
           lastPlayedLevelId: null,
