@@ -8,6 +8,107 @@
     "stakeholder": "Riley Chen, Engineering Manager",
     "ticket": "Release sign-off — Sprint 14"
   },
+  "graph": {
+    "commits": {
+      "c1": {
+        "id": "c1",
+        "parentIds": [],
+        "message": "chore: branch off for sprint 14 fixes",
+        "authorSigned": true,
+        "timestamp": 0
+      },
+      "c2": {
+        "id": "c2",
+        "parentIds": ["c1"],
+        "message": "fix: null check crash on checkout",
+        "authorSigned": true,
+        "timestamp": 1
+      },
+      "c3": {
+        "id": "c3",
+        "parentIds": ["c1"],
+        "message": "fix: race condition in save queue",
+        "authorSigned": true,
+        "timestamp": 1
+      },
+      "c4": {
+        "id": "c4",
+        "parentIds": ["c1"],
+        "message": "fix: memory leak in asset loader",
+        "authorSigned": true,
+        "timestamp": 1
+      },
+      "c5": {
+        "id": "c5",
+        "parentIds": ["c2", "c4"],
+        "message": "merge: combine checkout fix and asset-loader fix",
+        "authorSigned": true,
+        "timestamp": 2
+      },
+      "c6": {
+        "id": "c6",
+        "parentIds": ["c1"],
+        "message": "fix: validation edge case on empty cart",
+        "authorSigned": true,
+        "timestamp": 1
+      },
+      "c7": {
+        "id": "c7",
+        "parentIds": ["c1"],
+        "message": "fix: timeout bug in payment retry",
+        "authorSigned": true,
+        "timestamp": 1
+      },
+      "c8": {
+        "id": "c8",
+        "parentIds": ["c7"],
+        "message": "merge: cherry-pick timeout fix into release/hotfix",
+        "authorSigned": true,
+        "timestamp": 2
+      },
+      "c9": {
+        "id": "c9",
+        "parentIds": ["c5", "c6"],
+        "message": "merge: combine sprint 14 fixes into main",
+        "authorSigned": true,
+        "timestamp": 3
+      }
+    },
+    "refs": {
+      "priya-fix": {
+        "name": "priya-fix",
+        "commitId": "c2"
+      },
+      "sam-fix": {
+        "name": "sam-fix",
+        "commitId": "c3"
+      },
+      "devon-fix": {
+        "name": "devon-fix",
+        "commitId": "c4"
+      },
+      "aisha-fix": {
+        "name": "aisha-fix",
+        "commitId": "c6"
+      },
+      "marcus-fix": {
+        "name": "marcus-fix",
+        "commitId": "c7"
+      },
+      "release/hotfix": {
+        "name": "release/hotfix",
+        "commitId": "c8"
+      },
+      "main": {
+        "name": "main",
+        "commitId": "c9"
+      }
+    },
+    "head": {
+      "type": "branch",
+      "name": "main"
+    }
+  },
   "startStageId": "start",
   "stages": {
     "start": {
@@ -15,86 +116,8 @@
       "speaker": "Narrator",
       "mood": "tense",
       "narrative": "You pull up the graph. Five devs, five branches, one claim that all of it made it into main. You decide to check each fix one at a time instead of taking the standup update at face value.",
-      "graph": {
-        "commits": {
-          "c1": {
-            "id": "c1",
-            "parentIds": [],
-            "message": "chore: branch off for sprint 14 fixes",
-            "authorSigned": true,
-            "timestamp": 0
-          },
-          "c2": {
-            "id": "c2",
-            "parentIds": ["c1"],
-            "message": "fix: null check crash on checkout",
-            "authorSigned": true,
-            "timestamp": 1
-          },
-          "c3": {
-            "id": "c3",
-            "parentIds": ["c1"],
-            "message": "fix: race condition in save queue",
-            "authorSigned": true,
-            "timestamp": 1
-          },
-          "c4": {
-            "id": "c4",
-            "parentIds": ["c1"],
-            "message": "fix: memory leak in asset loader",
-            "authorSigned": true,
-            "timestamp": 1
-          },
-          "c5": {
-            "id": "c5",
-            "parentIds": ["c2", "c4"],
-            "message": "merge: combine checkout fix and asset-loader fix",
-            "authorSigned": true,
-            "timestamp": 2
-          },
-          "c6": {
-            "id": "c6",
-            "parentIds": ["c1"],
-            "message": "fix: validation edge case on empty cart",
-            "authorSigned": true,
-            "timestamp": 1
-          },
-          "c7": {
-            "id": "c7",
-            "parentIds": ["c1"],
-            "message": "fix: timeout bug in payment retry",
-            "authorSigned": true,
-            "timestamp": 1
-          },
-          "c8": {
-            "id": "c8",
-            "parentIds": ["c7"],
-            "message": "merge: cherry-pick timeout fix into release/hotfix",
-            "authorSigned": true,
-            "timestamp": 2
-          },
-          "c9": {
-            "id": "c9",
-            "parentIds": ["c5", "c6"],
-            "message": "merge: combine sprint 14 fixes into main",
-            "authorSigned": true,
-            "timestamp": 3
-          }
-        },
-        "refs": {
-          "priya-fix": { "name": "priya-fix", "commitId": "c2" },
-          "sam-fix": { "name": "sam-fix", "commitId": "c3" },
-          "devon-fix": { "name": "devon-fix", "commitId": "c4" },
-          "aisha-fix": { "name": "aisha-fix", "commitId": "c6" },
-          "marcus-fix": { "name": "marcus-fix", "commitId": "c7" },
-          "release/hotfix": { "name": "release/hotfix", "commitId": "c8" },
-          "main": { "name": "main", "commitId": "c9" }
-        },
-        "head": { "type": "branch", "name": "main" }
-      },
       "autoNext": "check-priya"
     },
-
     "check-priya": {
       "id": "check-priya",
       "speaker": "You",
@@ -121,7 +144,6 @@
       "narrative": "You walk it again anyway. It holds up - Priya's commit is main's ancestor, two hops back through the merges.",
       "autoNext": "check-sam"
     },
-
     "check-sam": {
       "id": "check-sam",
       "speaker": "You",
@@ -191,7 +213,6 @@
         "debrief": "Priya gave you a direct, correct signal, and you overruled it with an answer that was never traced against the graph in the first place. Sam's commit was never an ancestor of main - it was just sitting on its own branch. Version Control exists precisely so \"whose fix is live\" doesn't depend on who argues more confidently in the room."
       }
     },
-
     "check-devon": {
       "id": "check-devon",
       "speaker": "You",
@@ -261,7 +282,6 @@
         "debrief": "\"Not the direct parent of the tip\" and \"not an ancestor\" got treated as the same thing, and they aren't - a merge commit's ancestry runs through every one of its parents, not just the most recent one. Devon's fix was two hops back but genuinely live, and treating it as missing sent him to redo work that was already done, then conflict with it."
       }
     },
-
     "check-aisha": {
       "id": "check-aisha",
       "speaker": "You",
@@ -288,7 +308,6 @@
       "narrative": "You walk it again anyway. It holds up - Aisha's commit is a direct parent of main's tip.",
       "autoNext": "check-marcus"
     },
-
     "check-marcus": {
       "id": "check-marcus",
       "speaker": "You",
@@ -358,7 +377,6 @@
         "debrief": "\"It's merged\" and \"it's merged into main\" are different claims, and the gap between them shipped a known bug straight into a release. Marcus's fix genuinely exists, signed and merged - just onto release/hotfix, a ref nobody was releasing today. Version Control means checking which ref a commit actually reaches, not just whether a merge happened somewhere."
       }
     },
-
     "resolution-clean": {
       "id": "resolution-clean",
       "speaker": "Narrator",
@@ -376,7 +394,6 @@
         "debrief": "Five fixes, two different reasons two of them weren't actually live: one branch never merged at all, one merged onto the wrong ref entirely. Neither would have shown up from trusting the standup update - only from actually tracing each fix's ancestry against main's real tip. That's what Version Control is for: the graph settles \"is it live,\" not who says so most confidently."
       }
     },
-
     "resolution-recovered": {
       "id": "resolution-recovered",
       "speaker": "Narrator",

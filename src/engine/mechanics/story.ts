@@ -63,6 +63,33 @@ export interface Story {
   /** Optional project-brief framing (CR-112), shown once via
    * ProjectBriefScreen before the story itself. */
   project?: ProjectBrief;
+  /** A graph every stage shows unless it carries its own (CR-122).
+   *
+   * Chapters 1-3 are each a single repository the whole chapter asks
+   * about, so before this they drew their graph once on the opening
+   * stage and nothing thereafter - which meant the player was asked five
+   * questions about a graph that wasn't on screen, and CR-121's
+   * inspector had nothing to inspect. Declaring it once here beats
+   * copying an identical 9-commit graph into six stages, where the
+   * copies would inevitably drift apart.
+   *
+   * Chapters 4-6 ask about a different repository per check, so they set
+   * `graph` per stage instead and leave this unset. */
+  graph?: Graph;
+}
+
+/**
+ * The graph a stage should render: its own if it has one, otherwise the
+ * story's shared graph, otherwise none (CR-122). Pure and tiny, but it
+ * lives here rather than in the view so the rule has exactly one
+ * definition - the content sweep in the GraphCanvas tests resolves
+ * graphs the same way the player sees them.
+ */
+export function graphForStage(
+  story: Story,
+  stageId: string,
+): Graph | undefined {
+  return story.stages[stageId]?.graph ?? story.graph;
 }
 
 /** Pure: given the story, the current stage id, and a chosen choice id,

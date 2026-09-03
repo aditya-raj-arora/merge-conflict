@@ -8,6 +8,85 @@
     "stakeholder": "Jordan Alvarez, Founder",
     "ticket": "Demo readiness check — investor pitch in 3 days"
   },
+  "graph": {
+    "commits": {
+      "c1": {
+        "id": "c1",
+        "parentIds": [],
+        "message": "chore: initial scaffold",
+        "authorSigned": true,
+        "timestamp": 0
+      },
+      "c2": {
+        "id": "c2",
+        "parentIds": ["c1"],
+        "message": "feat: core gameplay loop",
+        "authorSigned": true,
+        "timestamp": 1
+      },
+      "c3": {
+        "id": "c3",
+        "parentIds": ["c2"],
+        "message": "feat: experimental procedural levels (WIP)",
+        "authorSigned": false,
+        "timestamp": 2
+      },
+      "c4": {
+        "id": "c4",
+        "parentIds": ["c2"],
+        "message": "fix: crash on level load",
+        "authorSigned": true,
+        "timestamp": 2
+      },
+      "c5": {
+        "id": "c5",
+        "parentIds": ["c4"],
+        "message": "polish: UI pass for demo",
+        "authorSigned": true,
+        "timestamp": 3
+      },
+      "c6": {
+        "id": "c6",
+        "parentIds": ["c5"],
+        "message": "chore: approved for investor demo",
+        "authorSigned": true,
+        "timestamp": 4
+      },
+      "c7": {
+        "id": "c7",
+        "parentIds": ["c4"],
+        "message": "chore: cut for internal testing only - not for external demo",
+        "authorSigned": true,
+        "timestamp": 3
+      }
+    },
+    "refs": {
+      "build-a": {
+        "name": "build-a",
+        "commitId": "c3"
+      },
+      "build-b": {
+        "name": "build-b",
+        "commitId": "c6"
+      },
+      "build-c": {
+        "name": "build-c",
+        "commitId": "c2"
+      },
+      "build-d": {
+        "name": "build-d",
+        "commitId": "c7"
+      },
+      "build-e": {
+        "name": "build-e",
+        "commitId": "c5"
+      }
+    },
+    "head": {
+      "type": "branch",
+      "name": "build-b"
+    }
+  },
   "startStageId": "start",
   "stages": {
     "start": {
@@ -15,70 +94,8 @@
       "speaker": "Narrator",
       "mood": "tense",
       "narrative": "You pull up the graph. Five refs, five builds, all named like they could plausibly be the one. You decide to go through them one at a time instead of guessing from the names.",
-      "graph": {
-        "commits": {
-          "c1": {
-            "id": "c1",
-            "parentIds": [],
-            "message": "chore: initial scaffold",
-            "authorSigned": true,
-            "timestamp": 0
-          },
-          "c2": {
-            "id": "c2",
-            "parentIds": ["c1"],
-            "message": "feat: core gameplay loop",
-            "authorSigned": true,
-            "timestamp": 1
-          },
-          "c3": {
-            "id": "c3",
-            "parentIds": ["c2"],
-            "message": "feat: experimental procedural levels (WIP)",
-            "authorSigned": false,
-            "timestamp": 2
-          },
-          "c4": {
-            "id": "c4",
-            "parentIds": ["c2"],
-            "message": "fix: crash on level load",
-            "authorSigned": true,
-            "timestamp": 2
-          },
-          "c5": {
-            "id": "c5",
-            "parentIds": ["c4"],
-            "message": "polish: UI pass for demo",
-            "authorSigned": true,
-            "timestamp": 3
-          },
-          "c6": {
-            "id": "c6",
-            "parentIds": ["c5"],
-            "message": "chore: approved for investor demo",
-            "authorSigned": true,
-            "timestamp": 4
-          },
-          "c7": {
-            "id": "c7",
-            "parentIds": ["c4"],
-            "message": "chore: cut for internal testing only - not for external demo",
-            "authorSigned": true,
-            "timestamp": 3
-          }
-        },
-        "refs": {
-          "build-a": { "name": "build-a", "commitId": "c3" },
-          "build-b": { "name": "build-b", "commitId": "c6" },
-          "build-c": { "name": "build-c", "commitId": "c2" },
-          "build-d": { "name": "build-d", "commitId": "c7" },
-          "build-e": { "name": "build-e", "commitId": "c5" }
-        },
-        "head": { "type": "branch", "name": "build-b" }
-      },
       "autoNext": "check-build-a"
     },
-
     "check-build-a": {
       "id": "check-build-a",
       "speaker": "You",
@@ -177,7 +194,6 @@
         "debrief": "The excuse doesn't survive the walk back to the office. Worse than the crash itself is watching your own team quietly stop trusting what you tell them about a build's status - because this time, when it mattered, you reached for a story instead of the graph. An unsigned, work-in-progress commit got cleared as ready, and then the mistake got compounded by refusing to admit it."
       }
     },
-
     "check-build-c": {
       "id": "check-build-c",
       "speaker": "You",
@@ -247,7 +263,6 @@
         "debrief": "build-c wasn't broken, it just wasn't current - and \"not current\" turned into an unprepared answer to a direct question in the room. Configuration Identification isn't only about catching outright breakage; it's about knowing exactly what state you're actually showing people, so you're never caught flat-footed by your own history."
       }
     },
-
     "check-build-d": {
       "id": "check-build-d",
       "speaker": "You",
@@ -274,7 +289,6 @@
       "narrative": "You look again. The commit says, in plain words, \"not for external demo.\" You correct yourself before it goes anywhere.",
       "autoNext": "check-build-e"
     },
-
     "check-build-e": {
       "id": "check-build-e",
       "speaker": "You",
@@ -337,7 +351,6 @@
         "debrief": "Nothing crashed, and that's exactly what makes this one easy to miss - \"worked fine\" and \"was approved\" got treated as the same thing, and they aren't. build-e has the right fixes, but no commit anywhere says anyone actually signed off on shipping it. Configuration Identification means being able to point at the record, not just point at something that happened to work."
       }
     },
-
     "check-build-b-late": {
       "id": "check-build-b-late",
       "speaker": "You",
@@ -381,7 +394,6 @@
         "debrief": "You got to the right build in the end, but only because someone else asked the question you should have asked yourself: does this build's history actually say it was approved, or does it just happen to work? \"Functionally ready\" and \"formally approved\" look identical right up until someone asks who signed off - and the whole point of Configuration Identification is having that answer before anyone has to ask."
       }
     },
-
     "check-build-b": {
       "id": "check-build-b",
       "speaker": "You",
