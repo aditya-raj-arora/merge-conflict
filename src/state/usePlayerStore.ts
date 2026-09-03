@@ -1,10 +1,11 @@
-// CSU-03.03.001-SRC-usePlayerStore_r1
+// CSU-03.03.001-SRC-usePlayerStore_r2
 // TLCSC-03-STATE: the player's profile - name, budget, and per-level
-// progress (CR-109). Persisted to localStorage only, via zustand's
-// `persist` middleware; nothing here ever leaves the browser. Separate
-// from useGameStore/useStoryStore on purpose - those two hold the
-// in-progress state of whichever level is currently open, this one
-// holds state that outlives any single level and survives a reload.
+// progress (CR-109), plus the last level they had open (CR-111).
+// Persisted to localStorage only, via zustand's `persist` middleware;
+// nothing here ever leaves the browser. Separate from useGameStore/
+// useStoryStore on purpose - those two hold the in-progress state of
+// whichever level is currently open, this one holds state that outlives
+// any single level and survives a reload.
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import {
@@ -29,8 +30,14 @@ interface PlayerState {
   budget: number;
   progress: Record<string, LevelProgress>;
   lastReward: LastReward | null;
+  /** The manifest id of the level most recently opened, so a returning
+   * player's title screen can say "Continue - last played: X" (CR-111).
+   * Purely informational - it doesn't gate or change anything else. */
+  lastPlayedLevelId: string | null;
 
   setName: (name: string) => void;
+
+  setLastPlayedLevel: (levelId: string) => void;
 
   /** Records one quiz submission's outcome for `levelId`, updates the
    * budget, and marks the level passed if correct. Returns the amount
@@ -44,9 +51,9 @@ interface PlayerState {
 
   clearLastReward: () => void;
 
-  /** Wipes the whole save - name, budget, and all progress. Not exposed
-   * in the UI yet (CR-109 explicitly left a reset UI out of scope); it
-   * exists so tests don't have to reach into localStorage directly. */
+  /** Wipes the whole save - name, budget, progress, and last-played
+   * level. Exposed in the UI as LevelSelect's "Reset progress" (CR-110)
+   * and the title screen's "New Game" (CR-111). */
   resetProfile: () => void;
 }
 
@@ -57,8 +64,11 @@ export const usePlayerStore = create<PlayerState>()(
       budget: STARTING_BUDGET,
       progress: {},
       lastReward: null,
+      lastPlayedLevelId: null,
 
       setName: (name) => set({ name }),
+
+      setLastPlayedLevel: (levelId) => set({ lastPlayedLevelId: levelId }),
 
       recordQuizAttempt: (levelId, correct) => {
         const { progress, budget } = get();
@@ -104,6 +114,7 @@ export const usePlayerStore = create<PlayerState>()(
           budget: STARTING_BUDGET,
           progress: {},
           lastReward: null,
+          lastPlayedLevelId: null,
         }),
     }),
     { name: "merge-conflict:player" },

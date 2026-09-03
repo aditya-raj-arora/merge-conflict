@@ -106,9 +106,34 @@ logic needed for this.
 `WelcomeScreen` (CR-109) renders when `usePlayerStore().name` is `null`,
 i.e. on a genuinely fresh browser/profile. It explains the budget and
 progression rules in plain terms and collects the player's name (up to
-40 characters, trimmed, required to proceed). Once a name is set,
-`App.tsx` never shows this screen again for that profile - a returning
-player goes straight to `LevelSelect`.
+40 characters, trimmed, required to proceed). A brand-new player who
+just entered a name goes straight to `LevelSelect` from there - the
+title screen below is skipped, since there's nothing yet to continue.
+
+## Title screen (returning players)
+
+`TitleScreen` (CR-111) renders once per app session for a player whose
+name is already saved (from a previous visit) - a "Continue" button and
+a confirm-gated "New Game" (wipes the profile via `resetProfile()` and
+drops back to `WelcomeScreen`). `App.tsx` tracks whether the title
+screen has been acknowledged this session in local component state
+(not persisted - it's meant to appear once per app load, not once
+ever). If `usePlayerStore().lastPlayedLevelId` is set, "Continue" shows
+"Last played: {title}" underneath it.
+
+## Remembering the last played level and jumping to the next one
+
+`usePlayerStore().lastPlayedLevelId` (CR-111) is set to a level's id
+whenever it's opened (and unlocked) - purely informational, surfaced on
+the title screen. It doesn't gate or resume anything on its own.
+
+Separately, once a level is passed, `LevelView`/`StoryView` show a
+"Next Level: {title} →" button (quiz: `result === "correct"`; story:
+an ending with `kind === "good"`) that jumps directly into the next
+level in manifest order, bypassing `LevelSelect` entirely. `App.tsx`
+computes the next manifest entry from the currently open level's index
+and passes it down; the button is omitted when there is no next level
+(finishing the last chapter).
 
 ## Solvability / testing note
 
