@@ -10,7 +10,7 @@ would actually check first).
 
 | Item                                                 | Current Version                                        | Environment                         | Last Change                                                        | Open CRs |
 | ---------------------------------------------------- | ------------------------------------------------------ | ----------------------------------- | ------------------------------------------------------------------ | -------- |
-| CSCI-MC (whole app)                                  | `v0.10.2` / `BL-21-ch02-5-questions-project-brief`     | staging + prod (both verified live) | 2026-09-03, Chapter 2 5-question redesign + project brief (CR-114) | —        |
+| CSCI-MC (whole app)                                  | `v0.10.3` / `BL-22-ch04-5-questions-project-brief`     | staging + prod (both verified live) | 2026-09-03, Chapter 4 5-question redesign + project brief (CR-115) | —        |
 | TLCSC-01-ENGINE > LLCSC-01-02-MECHANICS > project.ts | `_r1` (new)                                            | staging + prod                      | 2026-09-03                                                         | —        |
 | TLCSC-02-UI > ProjectBriefScreen                     | `_r1` (new)                                            | staging + prod                      | 2026-09-03                                                         | —        |
 | TLCSC-02-UI > LevelSelect                            | `_r3` (adds the Reset progress control, confirm-gated) | staging + prod                      | 2026-09-03                                                         | —        |
@@ -28,7 +28,7 @@ would actually check first).
 | TLCSC-01-ENGINE > LLCSC-01-02-MECHANICS > story.ts   | `_r3` (adds optional `project`)                        | staging + prod                      | 2026-09-03                                                         | —        |
 | TLCSC-04-CONTENT > LLCSC-04-02-CH02 (STORY-02-01)    | `_r2` (5-question redesign; supersedes prior `_r1`)    | staging + prod                      | 2026-09-03                                                         | —        |
 | TLCSC-04-CONTENT > LLCSC-04-03-CH03 (STORY-03-01)    | `_r2` (5-question redesign; supersedes prior `_r1`)    | staging + prod                      | 2026-09-03                                                         | —        |
-| TLCSC-04-CONTENT > LLCSC-04-04-CH04 (STORY-04-01)    | `_r1` (supersedes retired LVL-04-01)                   | staging + prod                      | 2026-09-01                                                         | —        |
+| TLCSC-04-CONTENT > LLCSC-04-04-CH04 (STORY-04-01)    | `_r2` (5-question redesign; supersedes prior `_r1`)    | staging + prod                      | 2026-09-03                                                         | —        |
 | TLCSC-04-CONTENT > LLCSC-04-05-CH05 (STORY-05-01)    | `_r1` (supersedes retired LVL-05-01)                   | staging + prod                      | 2026-09-01                                                         | —        |
 | TLCSC-04-CONTENT > LLCSC-04-06-CH06 (STORY-06-01)    | `_r1` (supersedes retired LVL-06-01)                   | staging + prod                      | 2026-09-01                                                         | —        |
 
