@@ -8,6 +8,14 @@ This file is auto-maintained going forward by `release-please` off our
 Conventional Commit history — we just keep the `[Unreleased]` section honest
 in the meantime.
 
+## [0.13.0](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.12.0...v0.13.0) (2026-09-03)
+
+
+### Features
+
+* **story:** let a chapter share one graph across all its stages ([ba87fc3](https://github.com/aditya-raj-arora/merge-conflict/commit/ba87fc39494829396ff279e0522fdf03e1baf118)), closes [#173](https://github.com/aditya-raj-arora/merge-conflict/issues/173)
+* **story:** let a chapter share one graph across all its stages ([#174](https://github.com/aditya-raj-arora/merge-conflict/issues/174)) ([ba87fc3](https://github.com/aditya-raj-arora/merge-conflict/commit/ba87fc39494829396ff279e0522fdf03e1baf118))
+
 ## [0.12.0](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.11.1...v0.12.0) (2026-09-03)
 
 
