@@ -58,15 +58,21 @@ function estimateTextWidth(text: string, fontSize: number): number {
 
 export interface GraphCanvasProps {
   graph: Graph;
-  selectedCommitId?: string | null;
+  /** Commits to highlight. More than one because CR-121's whole point is
+   * comparing two of them; the ring is drawn per selected node. */
+  selectedCommitIds?: string[];
+  /** When given, nodes become real buttons - clickable and keyboard
+   * reachable. Omitted, the graph stays a static picture. */
   onSelectCommit?: (commitId: string) => void;
 }
 
 export function GraphCanvas({
   graph,
-  selectedCommitId,
+  selectedCommitIds,
   onSelectCommit,
 }: GraphCanvasProps) {
+  const selected = new Set(selectedCommitIds ?? []);
+  const interactive = Boolean(onSelectCommit);
   const layout = layoutGraph(graph);
 
   // Refs pointing at the same commit stack upward from the node instead
@@ -174,9 +180,19 @@ export function GraphCanvas({
       {Object.values(graph.commits).map((c) => {
         const cx = nodeX(c.id);
         const cy = nodeY(c.id);
-        const isSelected = selectedCommitId === c.id;
+        const isSelected = selected.has(c.id);
         return (
           <g key={c.id}>
+            {isSelected && (
+              <circle
+                cx={cx}
+                cy={cy}
+                r={NODE_RADIUS + 5}
+                fill="none"
+                strokeWidth={2}
+                className="stroke-sky-300"
+              />
+            )}
             <circle
               cx={cx}
               cy={cy}
@@ -185,9 +201,23 @@ export function GraphCanvas({
               stroke="currentColor"
               strokeWidth={2}
               opacity={isSelected ? 1 : 0.85}
-              onClick={() => onSelectCommit?.(c.id)}
-              style={{ cursor: onSelectCommit ? "pointer" : "default" }}
-              role={onSelectCommit ? "button" : undefined}
+              onClick={interactive ? () => onSelectCommit?.(c.id) : undefined}
+              onKeyDown={
+                interactive
+                  ? (event) => {
+                      // SVG shapes given role=button don't get Enter/Space
+                      // activation for free the way a <button> does.
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        onSelectCommit?.(c.id);
+                      }
+                    }
+                  : undefined
+              }
+              style={{ cursor: interactive ? "pointer" : "default" }}
+              role={interactive ? "button" : undefined}
+              tabIndex={interactive ? 0 : undefined}
+              aria-pressed={interactive ? isSelected : undefined}
               aria-label={`Commit ${c.id}: ${c.message}`}
             />
             <text
@@ -196,6 +226,9 @@ export function GraphCanvas({
               fontSize={MESSAGE_FONT}
               dominantBaseline="middle"
               fill="currentColor"
+              // Clicks on the label should behave like clicks on its node.
+              onClick={interactive ? () => onSelectCommit?.(c.id) : undefined}
+              style={{ cursor: interactive ? "pointer" : "default" }}
             >
               {c.message}
             </text>

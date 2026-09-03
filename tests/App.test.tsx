@@ -424,4 +424,113 @@ describe("App", () => {
       ).toBeInTheDocument();
     });
   });
+
+  describe("inspecting the graph inside a story (CR-121)", () => {
+    /** Opens Chapter 5 and advances to its first check. Chapter 5 is used
+     * rather than Chapter 1 because Chapters 1-3 only carry a graph on
+     * their opening stage - their individual checks render none, so there
+     * is nothing to inspect there. Chapters 4-6 carry one per check. */
+    function openFirstGraphStage() {
+      usePlayerStore.getState().setName("Test Player");
+      usePlayerStore.setState({
+        progress: Object.fromEntries(
+          [
+            "STORY-01-01-which-one-shipped",
+            "STORY-02-01-whose-fix-made-it",
+            "STORY-03-01-who-skipped-review",
+            "STORY-04-01-what-does-prod-actually-run",
+          ].map((id) => [id, { passed: true, totalRuns: 1 }]),
+        ),
+        totalEarned: 4_000,
+      });
+      render(<App />);
+      fireEvent.click(screen.getByRole("button", { name: /^Continue/ }));
+      fireEvent.click(
+        screen.getByRole("button", { name: "Does It Still Match?" }),
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Begin" }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /click to skip text reveal/i }),
+      );
+      fireEvent.click(screen.getByRole("button", { name: "▼ Continue" }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /click to skip text reveal/i }),
+      );
+    }
+
+    it("invites the player to inspect, before anything is selected", () => {
+      openFirstGraphStage();
+      expect(
+        screen.getByText(/click a commit to inspect it/i),
+      ).toBeInTheDocument();
+    });
+
+    it("selecting a commit shows what it actually is", () => {
+      openFirstGraphStage();
+      const nodes = document.querySelectorAll('circle[role="button"]');
+      expect(nodes.length).toBeGreaterThan(0);
+
+      fireEvent.click(nodes[0]);
+
+      expect(
+        screen.queryByText(/click a commit to inspect it/i),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /clear selection/i }),
+      ).toBeInTheDocument();
+    });
+
+    it("selecting two commits states how they relate", () => {
+      openFirstGraphStage();
+      const nodes = [...document.querySelectorAll('circle[role="button"]')];
+      fireEvent.click(nodes[0]);
+      fireEvent.click(nodes[1]);
+
+      // Whatever the pair, the panel has to say something concrete about
+      // the relationship rather than leaving the player to guess.
+      expect(
+        screen.getByText(
+          /(commits? ahead of|commits? behind|are the same commit|separate lines of history)/i,
+        ),
+      ).toBeInTheDocument();
+    });
+
+    it("clicking a selected commit again deselects it", () => {
+      openFirstGraphStage();
+      const node = document.querySelectorAll('circle[role="button"]')[0];
+
+      fireEvent.click(node);
+      expect(node.getAttribute("aria-pressed")).toBe("true");
+
+      fireEvent.click(node);
+      expect(node.getAttribute("aria-pressed")).toBe("false");
+      expect(
+        screen.getByText(/click a commit to inspect it/i),
+      ).toBeInTheDocument();
+    });
+
+    it("a selection made on one stage does not carry into the next", () => {
+      openFirstGraphStage();
+      fireEvent.click(document.querySelectorAll('circle[role="button"]')[0]);
+      expect(
+        screen.getByRole("button", { name: /clear selection/i }),
+      ).toBeInTheDocument();
+
+      // Answer the check and move on - the next stage asks about its own
+      // graph, so the old selection would be meaningless.
+      fireEvent.click(
+        screen.getByRole("button", {
+          name: "Drifted - prod has moved past the commit BL-01 names",
+        }),
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /click to skip text reveal/i }),
+      );
+
+      expect(
+        screen.getByText(/click a commit to inspect it/i),
+      ).toBeInTheDocument();
+    });
+  });
 });
