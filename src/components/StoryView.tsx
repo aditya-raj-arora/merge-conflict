@@ -1,6 +1,7 @@
-// CSU-02.04.001-SRC-StoryView_r3
+// CSU-02.04.001-SRC-StoryView_r4
 // CR-109: reaching an ending now also records it against the player's
 // budget/progress (usePlayerStore), on top of everything below.
+// CR-111: a good ending also offers a "Next Level" shortcut.
 // TLCSC-02-UI: renders a branching Story (CR-091) as a visual-novel
 // dialogue-box UI (CR-095) - a fixed bottom text panel with a speaker
 // name plate and a typewriter reveal, a mood-themed backdrop, and a
