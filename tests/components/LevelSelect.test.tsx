@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { LevelSelect } from "../../src/components/LevelSelect";
 import { usePlayerStore } from "../../src/state/usePlayerStore";
+import { STARTING_BUDGET } from "../../src/engine/economy";
 import type { ManifestEntry } from "../../content/levelManifest";
 import { toQuizEntry } from "../../content/levelManifest";
 
@@ -114,5 +115,52 @@ describe("LevelSelect", () => {
     render(<LevelSelect entries={entries} onSelect={() => {}} />);
     expect(screen.getByText("Ada")).toBeInTheDocument();
     expect(screen.getByText("Budget: 12,345")).toBeInTheDocument();
+  });
+
+  describe("reset progress (CR-110)", () => {
+    it("clicking Reset progress shows an inline confirm step, not an immediate wipe", () => {
+      usePlayerStore.setState({ name: "Ada", budget: 5_000 });
+      render(<LevelSelect entries={entries} onSelect={() => {}} />);
+
+      fireEvent.click(screen.getByRole("button", { name: "Reset progress" }));
+
+      expect(
+        screen.getByText(/wipes your name, budget, and all progress/i),
+      ).toBeInTheDocument();
+      // Nothing was actually reset yet.
+      expect(usePlayerStore.getState().name).toBe("Ada");
+      expect(usePlayerStore.getState().budget).toBe(5_000);
+    });
+
+    it("Cancel dismisses the confirm step without resetting anything", () => {
+      usePlayerStore.setState({ name: "Ada", budget: 5_000 });
+      render(<LevelSelect entries={entries} onSelect={() => {}} />);
+
+      fireEvent.click(screen.getByRole("button", { name: "Reset progress" }));
+      fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+      expect(
+        screen.queryByText(/wipes your name, budget, and all progress/i),
+      ).not.toBeInTheDocument();
+      expect(usePlayerStore.getState().name).toBe("Ada");
+      expect(usePlayerStore.getState().budget).toBe(5_000);
+    });
+
+    it("Yes, reset wipes name, budget, and progress back to defaults", () => {
+      usePlayerStore.setState({
+        name: "Ada",
+        budget: 5_000,
+        progress: { "LVL-TEST-01-synthetic": { passed: true, totalRuns: 1 } },
+      });
+      render(<LevelSelect entries={entries} onSelect={() => {}} />);
+
+      fireEvent.click(screen.getByRole("button", { name: "Reset progress" }));
+      fireEvent.click(screen.getByRole("button", { name: "Yes, reset" }));
+
+      const state = usePlayerStore.getState();
+      expect(state.name).toBeNull();
+      expect(state.budget).toBe(STARTING_BUDGET);
+      expect(state.progress).toEqual({});
+    });
   });
 });

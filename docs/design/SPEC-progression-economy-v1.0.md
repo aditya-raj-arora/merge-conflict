@@ -90,6 +90,17 @@ running consequence tracker, not a lockout - it can go negative and
 nothing else in the game reacts to that fact (explicit scope decision,
 CR-109).
 
+## Resetting progress
+
+`LevelSelect` exposes `usePlayerStore().resetProfile()` (CR-110) as a
+"Reset progress" control at the bottom of the screen, behind an inline
+confirm step - it's destructive and irreversible, so it isn't a
+one-click action. Confirming wipes name, budget, and all per-level
+progress back to defaults in one call; since `resetProfile()` also
+clears the name, `App.tsx`'s existing welcome-screen gate sends the
+player straight back to `WelcomeScreen` afterward - no separate routing
+logic needed for this.
+
 ## First-launch screen
 
 `WelcomeScreen` (CR-109) renders when `usePlayerStore().name` is `null`,
