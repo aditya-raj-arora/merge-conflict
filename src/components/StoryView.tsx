@@ -8,6 +8,7 @@
 // levels keep using LevelView unchanged.
 import { useEffect, useRef, useState } from "react";
 import { useStoryStore } from "../state/useStoryStore";
+import { usePlayerStore } from "../state/usePlayerStore";
 import { GraphCanvas } from "./GraphCanvas";
 import type { Story, StoryMood } from "../engine/mechanics/story";
 
@@ -43,9 +44,18 @@ export function StoryView({ story, onBack }: StoryViewProps) {
     restart,
   } = useStoryStore();
 
+  const recordStoryEnding = usePlayerStore((s) => s.recordStoryEnding);
+  const lastReward = usePlayerStore((s) => s.lastReward);
+
   const [revealedLength, setRevealedLength] = useState(0);
   const [revealedForStageId, setRevealedForStageId] = useState(currentStageId);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  /** Which ending-stage arrival has already had a reward recorded for it
+   * (CR-109) - cleared whenever the current stage isn't an ending, so
+   * replaying back to the very same ending stage id after "Play again"
+   * still records again, while a StrictMode double-render of the same
+   * arrival doesn't double-apply the reward. */
+  const recordedEndingStageRef = useRef<string | null>(null);
 
   useEffect(() => {
     loadStory(story);
@@ -87,6 +97,20 @@ export function StoryView({ story, onBack }: StoryViewProps) {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [currentStageId, fullText]);
+
+  // Record the ending's reward/punishment exactly once per arrival
+  // (CR-109) - not in render phase, since applying a reward is a real
+  // mutation with side effects, unlike the reveal-reset above which is
+  // pure state.
+  useEffect(() => {
+    if (!stage?.ending) {
+      recordedEndingStageRef.current = null;
+      return;
+    }
+    if (recordedEndingStageRef.current === currentStageId) return;
+    recordedEndingStageRef.current = currentStageId;
+    recordStoryEnding(story.id, stage.ending.kind);
+  }, [currentStageId, stage, story.id, recordStoryEnding]);
 
   if (!stage) {
     return null;
@@ -192,13 +216,21 @@ export function StoryView({ story, onBack }: StoryViewProps) {
           )}
 
           {isFullyRevealed && stage.ending && (
-            <button
-              type="button"
-              onClick={restart}
-              className="mt-4 rounded border border-slate-600 px-4 py-2"
-            >
-              Play again
-            </button>
+            <>
+              {lastReward?.levelId === story.id && (
+                <p className="mt-4 font-semibold">
+                  Budget {lastReward.amount >= 0 ? "+" : ""}
+                  {lastReward.amount.toLocaleString()}
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={restart}
+                className="mt-4 rounded border border-slate-600 px-4 py-2"
+              >
+                Play again
+              </button>
+            </>
           )}
         </div>
       </div>

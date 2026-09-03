@@ -1,6 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { LevelSelect } from "../../src/components/LevelSelect";
+import { usePlayerStore } from "../../src/state/usePlayerStore";
 import type { ManifestEntry } from "../../content/levelManifest";
 import { toQuizEntry } from "../../content/levelManifest";
 
@@ -10,38 +11,57 @@ import { toQuizEntry } from "../../content/levelManifest";
 // level, built with the same toQuizEntry() helper the manifest itself uses,
 // exercises the "quiz" branch of LevelSelect's polymorphic entry rendering
 // without depending on any particular chapter staying in quiz format.
-const syntheticQuizLevel = {
-  id: "LVL-TEST-01-synthetic",
-  chapterId: "ch-test-synthetic",
-  title: "Synthetic Test Level",
-  narrative: {
-    intro: "intro",
-    correctDebrief: "correct",
-    incorrectDebrief: "incorrect",
-  },
-  graph: {
-    commits: {
-      c1: {
-        id: "c1",
-        parentIds: [],
-        message: "init",
-        authorSigned: true,
-        timestamp: 0,
-      },
+function makeSyntheticQuizLevel(id: string, title: string) {
+  return {
+    id,
+    chapterId: "ch-test-synthetic",
+    title,
+    narrative: {
+      intro: "intro",
+      correctDebrief: "correct",
+      incorrectDebrief: "incorrect",
     },
-    refs: { main: { name: "main", commitId: "c1" } },
-    head: { type: "branch", name: "main" },
-  },
-  prompt: "prompt",
-  options: [{ id: "a", label: "A" }],
-  correctOptionId: "a",
-};
+    graph: {
+      commits: {
+        c1: {
+          id: "c1",
+          parentIds: [],
+          message: "init",
+          authorSigned: true,
+          timestamp: 0,
+        },
+      },
+      refs: { main: { name: "main", commitId: "c1" } },
+      head: { type: "branch", name: "main" },
+    },
+    prompt: "prompt",
+    options: [{ id: "a", label: "A" }],
+    correctOptionId: "a",
+  };
+}
 
-const entries: ManifestEntry[] = [toQuizEntry(syntheticQuizLevel)];
+const entries: ManifestEntry[] = [
+  toQuizEntry(
+    makeSyntheticQuizLevel("LVL-TEST-01-synthetic", "Synthetic Test Level"),
+  ),
+];
+
+const twoEntries: ManifestEntry[] = [
+  toQuizEntry(
+    makeSyntheticQuizLevel("LVL-TEST-01-first", "First Synthetic Level"),
+  ),
+  toQuizEntry(
+    makeSyntheticQuizLevel("LVL-TEST-02-second", "Second Synthetic Level"),
+  ),
+];
+
+beforeEach(() => {
+  usePlayerStore.getState().resetProfile();
+});
 
 describe("LevelSelect", () => {
   it("renders one button per entry, grouped under its chapter", () => {
-    render(<LevelSelect entries={entries} onSelect={vi.fn()} />);
+    render(<LevelSelect entries={entries} onSelect={() => {}} />);
     expect(
       screen.getByRole("heading", { name: "ch-test-synthetic" }),
     ).toBeInTheDocument();
@@ -51,13 +71,48 @@ describe("LevelSelect", () => {
   });
 
   it("calls onSelect with the entry's id when clicked", () => {
-    const onSelect = vi.fn();
-    render(<LevelSelect entries={entries} onSelect={onSelect} />);
+    let selected: string | null = null;
+    render(
+      <LevelSelect entries={entries} onSelect={(id) => (selected = id)} />,
+    );
 
     fireEvent.click(
       screen.getByRole("button", { name: "Synthetic Test Level" }),
     );
 
-    expect(onSelect).toHaveBeenCalledWith("LVL-TEST-01-synthetic");
+    expect(selected).toBe("LVL-TEST-01-synthetic");
+  });
+
+  it("the first level is always unlocked, even with no progress yet", () => {
+    render(<LevelSelect entries={twoEntries} onSelect={() => {}} />);
+    expect(
+      screen.getByRole("button", { name: "First Synthetic Level" }),
+    ).toBeEnabled();
+  });
+
+  it("a later level is locked (disabled) until the previous one is passed", () => {
+    render(<LevelSelect entries={twoEntries} onSelect={() => {}} />);
+    // The button's accessible name includes the "Locked" icon label
+    // appended after the title (CR-109), hence the regex.
+    expect(
+      screen.getByRole("button", { name: /^Second Synthetic Level/ }),
+    ).toBeDisabled();
+  });
+
+  it("a later level unlocks once the previous one is marked passed", () => {
+    usePlayerStore.setState({
+      progress: { "LVL-TEST-01-first": { passed: true, totalRuns: 1 } },
+    });
+    render(<LevelSelect entries={twoEntries} onSelect={() => {}} />);
+    expect(
+      screen.getByRole("button", { name: "Second Synthetic Level" }),
+    ).toBeEnabled();
+  });
+
+  it("shows the player's name and budget", () => {
+    usePlayerStore.setState({ name: "Ada", budget: 12_345 });
+    render(<LevelSelect entries={entries} onSelect={() => {}} />);
+    expect(screen.getByText("Ada")).toBeInTheDocument();
+    expect(screen.getByText("Budget: 12,345")).toBeInTheDocument();
   });
 });

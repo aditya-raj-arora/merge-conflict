@@ -1,8 +1,13 @@
-// CSU-02.02.001-SRC-LevelView_r1
+// CSU-02.02.001-SRC-LevelView_r2
+// CR-109: submitting an answer now also records the attempt against the
+// player's budget/progress (usePlayerStore), independently of
+// useGameStore's own in-progress quiz state - useGameStore stays purely
+// about the current level's UI state, same as before.
 import { useEffect } from "react";
 import { useGameStore } from "../state/useGameStore";
+import { usePlayerStore } from "../state/usePlayerStore";
 import { GraphCanvas } from "./GraphCanvas";
-import type { Level } from "../engine/mechanics/level";
+import { evaluateAnswer, type Level } from "../engine/mechanics/level";
 
 export interface LevelViewProps {
   level: Level;
@@ -18,10 +23,22 @@ export function LevelView({ level, onBack }: LevelViewProps) {
     submitAnswer,
     reset,
   } = useGameStore();
+  const recordQuizAttempt = usePlayerStore((s) => s.recordQuizAttempt);
+  const lastReward = usePlayerStore((s) => s.lastReward);
 
   useEffect(() => {
     loadLevel(level);
   }, [level, loadLevel]);
+
+  const handleSubmit = () => {
+    if (!selectedOptionId) return;
+    const correct = evaluateAnswer(level, selectedOptionId);
+    submitAnswer();
+    recordQuizAttempt(level.id, correct);
+  };
+
+  const rewardForThisResult =
+    lastReward?.levelId === level.id ? lastReward.amount : null;
 
   return (
     <div className="mx-auto max-w-2xl p-6 text-slate-100">
@@ -63,7 +80,7 @@ export function LevelView({ level, onBack }: LevelViewProps) {
       <div className="mt-4 flex gap-2">
         <button
           type="button"
-          onClick={submitAnswer}
+          onClick={handleSubmit}
           disabled={!selectedOptionId}
           className="rounded bg-sky-600 px-4 py-2 font-medium disabled:opacity-40"
         >
@@ -81,14 +98,26 @@ export function LevelView({ level, onBack }: LevelViewProps) {
       </div>
 
       {result === "correct" && (
-        <p className="mt-4 rounded border border-emerald-600 bg-emerald-950/40 p-4 text-emerald-300">
-          {level.narrative.correctDebrief}
-        </p>
+        <div className="mt-4 rounded border border-emerald-600 bg-emerald-950/40 p-4 text-emerald-300">
+          <p>{level.narrative.correctDebrief}</p>
+          {rewardForThisResult !== null && (
+            <p className="mt-2 font-semibold">
+              Budget {rewardForThisResult >= 0 ? "+" : ""}
+              {rewardForThisResult.toLocaleString()}
+            </p>
+          )}
+        </div>
       )}
       {result === "incorrect" && (
-        <p className="mt-4 rounded border border-rose-600 bg-rose-950/40 p-4 text-rose-300">
-          {level.narrative.incorrectDebrief}
-        </p>
+        <div className="mt-4 rounded border border-rose-600 bg-rose-950/40 p-4 text-rose-300">
+          <p>{level.narrative.incorrectDebrief}</p>
+          {rewardForThisResult !== null && (
+            <p className="mt-2 font-semibold">
+              Budget {rewardForThisResult >= 0 ? "+" : ""}
+              {rewardForThisResult.toLocaleString()}
+            </p>
+          )}
+        </div>
       )}
     </div>
   );
