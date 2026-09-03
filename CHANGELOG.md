@@ -8,6 +8,14 @@ This file is auto-maintained going forward by `release-please` off our
 Conventional Commit history — we just keep the `[Unreleased]` section honest
 in the meantime.
 
+## [0.9.2](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.9.1...v0.9.2) (2026-09-03)
+
+
+### Features
+
+* **progression:** title screen, last-played memory, and Next Level shortcut ([c7a5a10](https://github.com/aditya-raj-arora/merge-conflict/commit/c7a5a10b75d4b7b7bd739b4e5b27525eb4f4f763))
+* **progression:** title screen, last-played memory, and Next Level shortcut ([#133](https://github.com/aditya-raj-arora/merge-conflict/issues/133)) ([c7a5a10](https://github.com/aditya-raj-arora/merge-conflict/commit/c7a5a10b75d4b7b7bd739b4e5b27525eb4f4f763))
+
 ## [0.9.1](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.9.0...v0.9.1) (2026-09-03)
 
 
