@@ -4,6 +4,7 @@ import { LevelView } from "./components/LevelView";
 import { StoryView } from "./components/StoryView";
 import { WelcomeScreen } from "./components/WelcomeScreen";
 import { TitleScreen } from "./components/TitleScreen";
+import { ProjectBriefScreen } from "./components/ProjectBriefScreen";
 import { levelManifest } from "../content/levelManifest";
 import { isLevelUnlocked } from "./engine/economy";
 import { usePlayerStore } from "./state/usePlayerStore";
@@ -21,6 +22,15 @@ function App() {
   // brand-new player (WelcomeScreen's onStart) skips it entirely, since
   // there's nothing yet to "continue".
   const [titleAcknowledged, setTitleAcknowledged] = useState(false);
+
+  // Which level's project brief has already been shown this "visit"
+  // (CR-112) - compared against the currently selected level's id, not
+  // just a boolean, so opening a different level (including via the
+  // Next Level shortcut) shows its own brief again, but replaying the
+  // same level ("Play again") doesn't re-show it.
+  const [briefAcknowledgedFor, setBriefAcknowledgedFor] = useState<
+    string | null
+  >(null);
 
   const selectedIndex = levelManifest.findIndex(
     (e) => e.id === selectedLevelId,
@@ -47,6 +57,9 @@ function App() {
     (e) => e.id === lastPlayedLevelId,
   )?.title;
 
+  const needsBrief =
+    selectedEntry?.project && briefAcknowledgedFor !== selectedEntry.id;
+
   return (
     <main className="min-h-screen bg-slate-900">
       {!name ? (
@@ -64,7 +77,13 @@ function App() {
           onNewGame={resetProfile}
         />
       ) : selectedEntry && canOpenSelected ? (
-        selectedEntry.kind === "story" ? (
+        needsBrief ? (
+          <ProjectBriefScreen
+            project={selectedEntry.project!}
+            onBegin={() => setBriefAcknowledgedFor(selectedEntry.id)}
+            onBack={() => setSelectedLevelId(null)}
+          />
+        ) : selectedEntry.kind === "story" ? (
           <StoryView
             story={selectedEntry.story}
             onBack={() => setSelectedLevelId(null)}

@@ -191,4 +191,70 @@ describe("App", () => {
       screen.getByRole("heading", { name: "Whose Fix Made It?" }),
     ).toBeInTheDocument();
   });
+
+  describe("project brief (CR-112)", () => {
+    function renderUnlockedThroughChapter3() {
+      usePlayerStore.getState().setName("Test Player");
+      usePlayerStore.setState({
+        progress: {
+          "STORY-01-01-which-one-shipped": { passed: true, totalRuns: 1 },
+          "STORY-02-01-whose-fix-made-it": { passed: true, totalRuns: 1 },
+        },
+      });
+      render(<App />);
+      fireEvent.click(screen.getByRole("button", { name: /^Continue/ }));
+    }
+
+    it("shows the project brief before the story, for a level that has one", () => {
+      renderUnlockedThroughChapter3();
+      fireEvent.click(
+        screen.getByRole("button", { name: "Who Skipped Review?" }),
+      );
+
+      expect(
+        screen.getByText("Lighthouse Sync — Post-Surge Change Audit"),
+      ).toBeInTheDocument();
+      expect(screen.getByText(/priya nandan/i)).toBeInTheDocument();
+      expect(
+        screen.queryByRole("heading", { name: "Who Skipped Review?" }),
+      ).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: "Begin" }));
+
+      expect(
+        screen.getByRole("heading", { name: "Who Skipped Review?" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByText("Lighthouse Sync — Post-Surge Change Audit"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("does not re-show the brief on the same level after Back and reselecting", () => {
+      renderUnlockedThroughChapter3();
+      fireEvent.click(
+        screen.getByRole("button", { name: "Who Skipped Review?" }),
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Begin" }));
+      fireEvent.click(screen.getByRole("button", { name: /back to levels/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: "Who Skipped Review?" }),
+      );
+
+      expect(
+        screen.getByRole("heading", { name: "Who Skipped Review?" }),
+      ).toBeInTheDocument();
+    });
+
+    it("skips straight to the level for one with no project brief", () => {
+      renderAsReturningPlayer();
+      fireEvent.click(
+        screen.getByRole("button", { name: "Which One Shipped?" }),
+      );
+
+      expect(
+        screen.getByRole("heading", { name: "Which One Shipped?" }),
+      ).toBeInTheDocument();
+      expect(screen.queryByText("Project brief")).not.toBeInTheDocument();
+    });
+  });
 });

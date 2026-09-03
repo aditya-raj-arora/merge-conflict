@@ -5,6 +5,7 @@
 // its own ending. Additive alongside level.ts's single-question
 // mechanic (CR-091) - existing quiz-format levels are untouched.
 import type { Graph } from "../graph/commitGraph";
+import type { ProjectBrief } from "../project";
 
 export interface StoryChoice {
   id: string;
@@ -58,6 +59,9 @@ export interface Story {
   title: string;
   startStageId: string;
   stages: Record<string, StoryStage>;
+  /** Optional project-brief framing (CR-112), shown once via
+   * ProjectBriefScreen before the story itself. */
+  project?: ProjectBrief;
 }
 
 /** Pure: given the story, the current stage id, and a chosen choice id,

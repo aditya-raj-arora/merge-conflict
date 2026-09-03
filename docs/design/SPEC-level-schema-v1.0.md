@@ -35,6 +35,7 @@ interface Level {
   prompt: string; // the actual question
   options: LevelOption[]; // the multiple-choice answers
   correctOptionId: string; // must match one of options[].id
+  project?: ProjectBrief; // optional project-brief framing (CR-112) - see SPEC-project-brief-v1.0.md
 }
 
 interface LevelOption {
@@ -139,3 +140,4 @@ the engine agrees is correct.
 | ------- | ---------- | ---------------------------------------------------------------------- |
 | 1.0     | 2026-08-06 | Initial spec, written alongside LVL-01-01                              |
 | 1.0     | 2026-08-20 | Added the Merge commits section, verified alongside LVL-02-01 (CR-051) |
+| 1.0     | 2026-09-03 | Added optional `project` (CR-112) - not used by any active fixture yet |

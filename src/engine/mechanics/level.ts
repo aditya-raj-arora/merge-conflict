@@ -3,6 +3,7 @@
 // multiple-choice-over-a-commit-graph puzzles, plus the pure "did they
 // get it right" evaluator so it's testable without any UI involved.
 import type { Graph } from "../graph/commitGraph";
+import type { ProjectBrief } from "../project";
 
 export interface LevelOption {
   id: string;
@@ -22,6 +23,11 @@ export interface Level {
   prompt: string;
   options: LevelOption[];
   correctOptionId: string;
+  /** Optional project-brief framing (CR-112), shown once via
+   * ProjectBriefScreen before the level itself. No active quiz-format
+   * level uses this yet, but the field exists so one can without any
+   * further engine change. */
+  project?: ProjectBrief;
 }
 
 export function evaluateAnswer(level: Level, optionId: string): boolean {
