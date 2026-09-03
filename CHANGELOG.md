@@ -8,6 +8,14 @@ This file is auto-maintained going forward by `release-please` off our
 Conventional Commit history — we just keep the `[Unreleased]` section honest
 in the meantime.
 
+## [0.12.0](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.11.1...v0.12.0) (2026-09-03)
+
+
+### Features
+
+* **story:** make the graph inspectable and stop Chapter 5 narrating its answers ([5e8456b](https://github.com/aditya-raj-arora/merge-conflict/commit/5e8456bf3762335793dc57f538f108cd299270c5)), closes [#168](https://github.com/aditya-raj-arora/merge-conflict/issues/168) [#169](https://github.com/aditya-raj-arora/merge-conflict/issues/169)
+* **story:** make the graph inspectable and stop Chapter 5 narrating its answers ([#170](https://github.com/aditya-raj-arora/merge-conflict/issues/170)) ([5e8456b](https://github.com/aditya-raj-arora/merge-conflict/commit/5e8456bf3762335793dc57f538f108cd299270c5))
+
 ## [0.11.1](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.11.0...v0.11.1) (2026-09-03)
 
 
