@@ -2,13 +2,27 @@
   "id": "STORY-04-01-what-does-prod-actually-run",
   "chapterId": "ch04-status-accounting",
   "title": "What Does Prod Actually Run?",
+  "project": {
+    "name": "Fleet Status Audit — Weekly Accuracy Check",
+    "description": "Five different services, five status dashboards, all supposedly showing what's actually running in production right now. Before this week's status report goes out, you've been asked to verify each one against its real deployed ref - not by trusting the dashboard, but by checking what's actually tagged and running.",
+    "stakeholder": "Morgan Ito, Platform Reliability Lead",
+    "ticket": "Weekly status report — accuracy check"
+  },
   "startStageId": "start",
   "stages": {
     "start": {
       "id": "start",
       "speaker": "Narrator",
       "mood": "tense",
-      "narrative": "Customers are reporting the app is slow. The team's internal status page says \"v1.4.2 - deployed and healthy\" - the perf-improvements release everyone's been excited about. But the status page hasn't been touched in weeks, and the on-call channel mentions some kind of rollback last month, in passing, with no follow-up. You pull up prod's actual ref to find out what's really running.",
+      "narrative": "Five status dashboards, all green, all claiming to show what's live. You decide to check each one against its actual ref before the report goes out - one service at a time.",
+      "autoNext": "check-lighthouse"
+    },
+
+    "check-lighthouse": {
+      "id": "check-lighthouse",
+      "speaker": "You",
+      "mood": "tense",
+      "narrative": "Service 1 of 5: Lighthouse Sync. Its dashboard says \"v1.4.2 - deployed and healthy.\" Customers are reporting the app is slow, and the on-call channel mentions some kind of rollback last month, in passing, with no follow-up.",
       "graph": {
         "commits": {
           "c1": {
@@ -48,359 +62,386 @@
         },
         "head": { "type": "branch", "name": "prod" }
       },
-      "prompt": "The status page says v1.4.2 is live. What does prod's ref actually point to?",
+      "prompt": "Does Lighthouse Sync's dashboard match what's actually running?",
       "choices": [
-        { "id": "v140", "label": "v1.4.0", "nextStageId": "wrong-140-open" },
-        { "id": "v141", "label": "v1.4.1", "nextStageId": "wrong-141-open" },
         {
-          "id": "v142",
-          "label": "v1.4.2, exactly what the status page claims",
-          "nextStageId": "wrong-142-open"
+          "id": "lighthouse-drifted",
+          "label": "No - prod's ref doesn't land on v1.4.2 at all",
+          "nextStageId": "check-anchor"
         },
         {
-          "id": "rollback",
-          "label": "A rollback commit with no release tag at all",
-          "nextStageId": "correct-open"
+          "id": "lighthouse-compliant",
+          "label": "Yes - the dashboard says v1.4.2, that's the latest tag",
+          "nextStageId": "lighthouse-pushback"
         }
       ]
     },
-
-    "correct-open": {
-      "id": "correct-open",
-      "speaker": "Narrator",
-      "mood": "calm",
-      "narrative": "You're right - prod's ref doesn't land on any tag. It points at an untagged revert commit, built on top of v1.4.1, with a message that says exactly what happened: the perf change caused a memory leak and got rolled back.",
-      "autoNext": "correct-report"
-    },
-    "correct-report": {
-      "id": "correct-report",
-      "speaker": "Narrator",
-      "mood": "calm",
-      "narrative": "You report the real ref, not the status page's claim. The team fixes the status page and opens a ticket to make sure rollbacks always get recorded somewhere official from now on.",
-      "ending": {
-        "kind": "good",
-        "debrief": "Prod isn't on v1.4.2 at all - it's on an untagged revert commit built on top of v1.4.1, from a rollback nobody ever recorded anywhere official. The status page kept claiming v1.4.2 because updating it was never part of the rollback; the actual deployed state and the claimed state just quietly drifted apart. That's the whole failure mode Status Accounting exists to prevent: a claim about \"what's in prod\" is worthless unless something's actually keeping it in sync with prod's real ref."
-      }
-    },
-
-    "wrong-140-open": {
-      "id": "wrong-140-open",
-      "speaker": "Narrator",
+    "lighthouse-pushback": {
+      "id": "lighthouse-pushback",
+      "speaker": "Morgan",
       "mood": "tense",
-      "narrative": "You say prod is still on v1.4.0. But prod's ref is two commits ahead of v1.4.0 - you didn't actually follow the chain, you guessed at the oldest tag you recognized.",
-      "autoNext": "wrong-140-team-beat"
+      "narrative": "\"Wait, didn't we roll v1.4.2 back last month over that memory leak? Did you actually compare prod's commit against v1.4.2's tagged commit, or just trust the dashboard?\"",
+      "autoNext": "lighthouse-escalate"
     },
-    "wrong-140-team-beat": {
-      "id": "wrong-140-team-beat",
-      "speaker": "On-call Engineer",
-      "mood": "tense",
-      "narrative": "\"v1.4.0? That's ancient - we shipped the auth hotfix ages after that. Are you sure you traced the ref, not just picked the earliest tag?\"",
-      "autoNext": "wrong-140-consequence"
-    },
-    "wrong-140-consequence": {
-      "id": "wrong-140-consequence",
+    "lighthouse-escalate": {
+      "id": "lighthouse-escalate",
       "speaker": "You",
       "mood": "danger",
-      "narrative": "You've got an on-call engineer questioning your read, and you haven't actually walked prod's ref back through its own parent chain yet.",
-      "graph": {
-        "commits": {
-          "c1": {
-            "id": "c1",
-            "parentIds": [],
-            "message": "release: cut v1.4.0",
-            "authorSigned": true,
-            "timestamp": 0
-          },
-          "c2": {
-            "id": "c2",
-            "parentIds": ["c1"],
-            "message": "release: cut v1.4.1 - hotfix for auth bug",
-            "authorSigned": true,
-            "timestamp": 1
-          },
-          "c3": {
-            "id": "c3",
-            "parentIds": ["c2"],
-            "message": "release: cut v1.4.2 - perf improvements",
-            "authorSigned": true,
-            "timestamp": 2
-          },
-          "c4": {
-            "id": "c4",
-            "parentIds": ["c2"],
-            "message": "revert: roll back v1.4.2 - perf change caused a memory leak",
-            "authorSigned": true,
-            "timestamp": 3
-          }
-        },
-        "refs": {
-          "v1.4.0": { "name": "v1.4.0", "commitId": "c1" },
-          "v1.4.1": { "name": "v1.4.1", "commitId": "c2" },
-          "v1.4.2": { "name": "v1.4.2", "commitId": "c3" },
-          "prod": { "name": "prod", "commitId": "c4" }
-        },
-        "head": { "type": "branch", "name": "prod" }
-      },
-      "prompt": "Do you walk prod's ref back through its own parent chain, or defend your answer?",
-      "choices": [
-        {
-          "id": "recheck",
-          "label": "Walk prod's ref back through its parent chain",
-          "nextStageId": "v140-recover"
-        },
-        {
-          "id": "defend",
-          "label": "Defend your answer - it's v1.4.0",
-          "nextStageId": "v140-worse"
-        }
-      ]
-    },
-    "v140-recover": {
-      "id": "v140-recover",
-      "speaker": "You",
-      "mood": "calm",
-      "narrative": "You trace it properly this time. Prod's parent is the v1.4.1 hotfix commit, not v1.4.0 - and prod itself is a revert commit sitting on top of that, with no tag of its own.",
-      "autoNext": "v140-recover-end"
-    },
-    "v140-recover-end": {
-      "id": "v140-recover-end",
-      "speaker": "Narrator",
-      "mood": "calm",
-      "narrative": "You correct your answer before anyone reports the wrong version upstream.",
-      "ending": {
-        "kind": "neutral",
-        "debrief": "You got there - but only because an on-call engineer with a rough sense of the timeline pushed back first. If they hadn't spoken up, \"prod is on v1.4.0\" might have gone straight into an incident report. Walking the ref's actual parent chain the first time isn't optional busywork; it's the only way \"what's live\" doesn't depend on who happens to remember the release history."
-      }
-    },
-    "v140-worse": {
-      "id": "v140-worse",
-      "speaker": "Narrator",
-      "mood": "danger",
-      "narrative": "You insist prod is on v1.4.0. The incident report goes out claiming customers are on a build from before the auth hotfix even existed - which sends the security team scrambling to check whether the old auth bug is back in production.",
-      "autoNext": "v140-worse-end"
-    },
-    "v140-worse-end": {
-      "id": "v140-worse-end",
-      "speaker": "Narrator",
-      "mood": "danger",
-      "narrative": "Hours later, someone finally walks the actual parent chain and finds the truth: prod was never anywhere near v1.4.0, and the security team's scramble was for nothing.",
-      "ending": {
-        "kind": "bad",
-        "debrief": "A guess at \"the oldest tag I recognize\" triggered a false security scare that had nothing to do with what prod actually runs. Prod's ref was one hop past v1.4.1, not anywhere near v1.4.0 - and the only way to know that is to actually follow the parent chain, not estimate from memory."
-      }
-    },
-
-    "wrong-141-open": {
-      "id": "wrong-141-open",
-      "speaker": "Narrator",
-      "mood": "tense",
-      "narrative": "You say prod is on v1.4.1, the hotfix release. It's close - prod's parent commit is v1.4.1 - but prod itself is one commit further, a revert sitting on top of it.",
-      "autoNext": "wrong-141-team-beat"
-    },
-    "wrong-141-team-beat": {
-      "id": "wrong-141-team-beat",
-      "speaker": "On-call Engineer",
-      "mood": "tense",
-      "narrative": "\"v1.4.1? That tracks with the hotfix timeline, but didn't something get rolled back on top of that a few weeks later? Did you check what's actually sitting on the ref right now, or just the nearest tag?\"",
-      "autoNext": "wrong-141-consequence"
-    },
-    "wrong-141-consequence": {
-      "id": "wrong-141-consequence",
-      "speaker": "You",
-      "mood": "danger",
-      "narrative": "The engineer's right to ask - you matched the nearest tag instead of checking what commit the ref actually names.",
-      "graph": {
-        "commits": {
-          "c1": {
-            "id": "c1",
-            "parentIds": [],
-            "message": "release: cut v1.4.0",
-            "authorSigned": true,
-            "timestamp": 0
-          },
-          "c2": {
-            "id": "c2",
-            "parentIds": ["c1"],
-            "message": "release: cut v1.4.1 - hotfix for auth bug",
-            "authorSigned": true,
-            "timestamp": 1
-          },
-          "c3": {
-            "id": "c3",
-            "parentIds": ["c2"],
-            "message": "release: cut v1.4.2 - perf improvements",
-            "authorSigned": true,
-            "timestamp": 2
-          },
-          "c4": {
-            "id": "c4",
-            "parentIds": ["c2"],
-            "message": "revert: roll back v1.4.2 - perf change caused a memory leak",
-            "authorSigned": true,
-            "timestamp": 3
-          }
-        },
-        "refs": {
-          "v1.4.0": { "name": "v1.4.0", "commitId": "c1" },
-          "v1.4.1": { "name": "v1.4.1", "commitId": "c2" },
-          "v1.4.2": { "name": "v1.4.2", "commitId": "c3" },
-          "prod": { "name": "prod", "commitId": "c4" }
-        },
-        "head": { "type": "branch", "name": "prod" }
-      },
-      "prompt": "Do you check exactly what commit prod's ref names, or defend your answer?",
-      "choices": [
-        {
-          "id": "recheck",
-          "label": "Check exactly what commit prod's ref names",
-          "nextStageId": "v141-recover"
-        },
-        {
-          "id": "defend",
-          "label": "Defend your answer - it's v1.4.1",
-          "nextStageId": "v141-worse"
-        }
-      ]
-    },
-    "v141-recover": {
-      "id": "v141-recover",
-      "speaker": "You",
-      "mood": "calm",
-      "narrative": "You check the ref itself, not the nearest tag to it. Prod names c4 - the revert commit - which is one commit past v1.4.1, not v1.4.1 itself. Close, but not the same thing.",
-      "autoNext": "v141-recover-end"
-    },
-    "v141-recover-end": {
-      "id": "v141-recover-end",
-      "speaker": "Narrator",
-      "mood": "calm",
-      "narrative": "You correct your answer and report what's actually deployed - a revert, not a tagged release.",
-      "ending": {
-        "kind": "good",
-        "debrief": "You caught the mistake before it went out as fact. \"Close to a tag\" and \"is that tag\" aren't the same claim - prod's ref names the revert commit sitting one hop past v1.4.1, not v1.4.1 itself. The habit that scales is checking exactly what the ref names, not the nearest release you recognize near it."
-      }
-    },
-    "v141-worse": {
-      "id": "v141-worse",
-      "speaker": "Narrator",
-      "mood": "danger",
-      "narrative": "You insist prod is on v1.4.1. The team spends the next hour trying to reproduce the slowness on a clean v1.4.1 build - and can't, because that's not what's actually running.",
-      "autoNext": "v141-worse-end"
-    },
-    "v141-worse-end": {
-      "id": "v141-worse-end",
-      "speaker": "Narrator",
-      "mood": "danger",
-      "narrative": "By the time someone thinks to check the ref directly instead of trusting your answer, an hour of reproduction effort has gone toward the wrong build entirely.",
-      "ending": {
-        "kind": "bad",
-        "debrief": "An hour went into reproducing a bug on v1.4.1 - a build nobody was actually running. Prod's ref named the revert commit built on top of v1.4.1, one hop further along. \"Close enough to the nearest tag\" cost real debugging time that a direct check of the ref would have saved."
-      }
-    },
-
-    "wrong-142-open": {
-      "id": "wrong-142-open",
-      "speaker": "Narrator",
-      "mood": "tense",
-      "narrative": "You confirm the status page: prod is on v1.4.2. But v1.4.2's tag points at c3, and prod's ref points at c4 - a different commit entirely, one that isn't a descendant of c3 at all.",
-      "autoNext": "wrong-142-team-beat"
-    },
-    "wrong-142-team-beat": {
-      "id": "wrong-142-team-beat",
-      "speaker": "On-call Engineer",
-      "mood": "tense",
-      "narrative": "\"Wait, the status page says that, but didn't we roll v1.4.2 back last month? Did you actually compare prod's commit against v1.4.2's, or just trust the page?\"",
-      "autoNext": "wrong-142-consequence"
-    },
-    "wrong-142-consequence": {
-      "id": "wrong-142-consequence",
-      "speaker": "You",
-      "mood": "danger",
-      "narrative": "You trusted the status page's claim instead of comparing prod's actual commit against v1.4.2's tagged commit.",
-      "graph": {
-        "commits": {
-          "c1": {
-            "id": "c1",
-            "parentIds": [],
-            "message": "release: cut v1.4.0",
-            "authorSigned": true,
-            "timestamp": 0
-          },
-          "c2": {
-            "id": "c2",
-            "parentIds": ["c1"],
-            "message": "release: cut v1.4.1 - hotfix for auth bug",
-            "authorSigned": true,
-            "timestamp": 1
-          },
-          "c3": {
-            "id": "c3",
-            "parentIds": ["c2"],
-            "message": "release: cut v1.4.2 - perf improvements",
-            "authorSigned": true,
-            "timestamp": 2
-          },
-          "c4": {
-            "id": "c4",
-            "parentIds": ["c2"],
-            "message": "revert: roll back v1.4.2 - perf change caused a memory leak",
-            "authorSigned": true,
-            "timestamp": 3
-          }
-        },
-        "refs": {
-          "v1.4.0": { "name": "v1.4.0", "commitId": "c1" },
-          "v1.4.1": { "name": "v1.4.1", "commitId": "c2" },
-          "v1.4.2": { "name": "v1.4.2", "commitId": "c3" },
-          "prod": { "name": "prod", "commitId": "c4" }
-        },
-        "head": { "type": "branch", "name": "prod" }
-      },
-      "prompt": "Do you compare prod's commit directly against v1.4.2's tagged commit, or defend your answer?",
+      "narrative": "You trusted the dashboard's claim instead of comparing prod's actual commit against v1.4.2's tagged commit.",
+      "prompt": "Do you compare the two commits directly, or defend your answer?",
       "choices": [
         {
           "id": "recheck",
           "label": "Compare prod's commit directly against v1.4.2's",
-          "nextStageId": "v142-recover"
+          "nextStageId": "lighthouse-recover"
         },
         {
           "id": "defend",
-          "label": "Defend your answer - the status page says v1.4.2",
-          "nextStageId": "v142-worse"
+          "label": "Defend it - the dashboard says v1.4.2",
+          "nextStageId": "lighthouse-worse"
         }
       ]
     },
-    "v142-recover": {
-      "id": "v142-recover",
+    "lighthouse-recover": {
+      "id": "lighthouse-recover",
       "speaker": "You",
       "mood": "calm",
-      "narrative": "You compare the two commits directly. v1.4.2 is c3. Prod is c4 - a sibling built on v1.4.1, not a descendant of c3 at all. The status page was simply wrong, and had been for weeks.",
-      "autoNext": "v142-recover-end"
+      "narrative": "You compare the two commits directly. v1.4.2 is c3. Prod is c4 - an untagged rollback built on v1.4.1, not a descendant of c3 at all. The dashboard was simply wrong.",
+      "autoNext": "check-anchor"
     },
-    "v142-recover-end": {
-      "id": "v142-recover-end",
-      "speaker": "Narrator",
-      "mood": "calm",
-      "narrative": "You report the real ref and flag the status page as stale before the customer-facing team repeats the wrong claim.",
-      "ending": {
-        "kind": "good",
-        "debrief": "The status page's claim and prod's actual ref were never the same fact, and only comparing the two commits directly exposed that. v1.4.2 is c3; prod is c4, a sibling revert built on v1.4.1 that never descends from c3 at all. A status page is a claim about prod, not a substitute for checking prod - that's the entire discipline Status Accounting is testing here."
-      }
-    },
-    "v142-worse": {
-      "id": "v142-worse",
+    "lighthouse-worse": {
+      "id": "lighthouse-worse",
       "speaker": "Narrator",
       "mood": "danger",
-      "narrative": "You insist the status page is right and prod is on v1.4.2. The perf team spends the afternoon trying to figure out why the shipped memory-leak fix isn't helping - because it was never actually deployed.",
-      "autoNext": "v142-worse-end"
+      "narrative": "You report Lighthouse Sync as compliant. The real fix for the memory leak - the reason it was rolled back in the first place - never gets prioritized, because the record says v1.4.2 is already live and healthy.",
+      "autoNext": "lighthouse-bad-ending"
     },
-    "v142-worse-end": {
-      "id": "v142-worse-end",
+    "lighthouse-bad-ending": {
+      "id": "lighthouse-bad-ending",
       "speaker": "Narrator",
       "mood": "danger",
-      "narrative": "By evening, someone finally diffs prod against v1.4.2's tag directly and finds they share only a grandparent commit. The whole afternoon's investigation was aimed at code that was never running.",
+      "narrative": "Weeks later, someone finally diffs prod against v1.4.2's tag directly and finds they share only a grandparent commit. The whole time, the actual deployed state and the claimed state had quietly drifted apart.",
       "ending": {
         "kind": "bad",
-        "debrief": "A whole afternoon went into debugging a \"live\" release that was never actually deployed - because the status page's claim was trusted over a direct check of prod's own ref. v1.4.2 and prod diverge at c2; they aren't the same commit, and no amount of trusting the status page changes that. The only fact that matters is what the ref names, checked directly."
+        "debrief": "Prod was never on v1.4.2 - it was an untagged rollback built on v1.4.1, from a fix nobody ever recorded anywhere official. A dashboard claiming \"v1.4.2 - deployed and healthy\" is worthless unless something's actually keeping it in sync with prod's real ref, and this time nothing was."
+      }
+    },
+
+    "check-anchor": {
+      "id": "check-anchor",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "Service 2 of 5: Anchor Auth. Its dashboard says \"v2.3.0 - deployed and healthy.\"",
+      "graph": {
+        "commits": {
+          "a1": {
+            "id": "a1",
+            "parentIds": [],
+            "message": "release: cut v2.2.0",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "a2": {
+            "id": "a2",
+            "parentIds": ["a1"],
+            "message": "release: cut v2.3.0",
+            "authorSigned": true,
+            "timestamp": 1
+          }
+        },
+        "refs": {
+          "v2.2.0": { "name": "v2.2.0", "commitId": "a1" },
+          "v2.3.0": { "name": "v2.3.0", "commitId": "a2" },
+          "prod": { "name": "prod", "commitId": "a2" }
+        },
+        "head": { "type": "branch", "name": "prod" }
+      },
+      "prompt": "Does Anchor Auth's dashboard match what's actually running?",
+      "choices": [
+        {
+          "id": "anchor-compliant",
+          "label": "Yes - prod's ref is exactly v2.3.0's commit",
+          "nextStageId": "check-beacon"
+        },
+        {
+          "id": "anchor-drifted",
+          "label": "No - can't be sure without comparing the commits again",
+          "nextStageId": "anchor-flag-note"
+        }
+      ]
+    },
+    "anchor-flag-note": {
+      "id": "anchor-flag-note",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You compare them again anyway. They match exactly - prod's ref names the same commit as v2.3.0's tag.",
+      "autoNext": "check-beacon"
+    },
+
+    "check-beacon": {
+      "id": "check-beacon",
+      "speaker": "You",
+      "mood": "tense",
+      "narrative": "Service 3 of 5: Beacon Search. Its dashboard says \"v5.1.0 - deployed and healthy\" - last updated several weeks ago.",
+      "graph": {
+        "commits": {
+          "b1": {
+            "id": "b1",
+            "parentIds": [],
+            "message": "release: cut v5.1.0",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "b2": {
+            "id": "b2",
+            "parentIds": ["b1"],
+            "message": "release: cut v5.2.0 - ranking algorithm improvements",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "b3": {
+            "id": "b3",
+            "parentIds": ["b2"],
+            "message": "release: cut v5.2.1 - hotfix for empty query crash",
+            "authorSigned": true,
+            "timestamp": 2
+          }
+        },
+        "refs": {
+          "v5.1.0": { "name": "v5.1.0", "commitId": "b1" },
+          "v5.2.0": { "name": "v5.2.0", "commitId": "b2" },
+          "v5.2.1": { "name": "v5.2.1", "commitId": "b3" },
+          "prod": { "name": "prod", "commitId": "b3" }
+        },
+        "head": { "type": "branch", "name": "prod" }
+      },
+      "prompt": "Does Beacon Search's dashboard match what's actually running?",
+      "choices": [
+        {
+          "id": "beacon-drifted",
+          "label": "No - prod is actually on v5.2.1, two releases ahead of the dashboard",
+          "nextStageId": "check-cargo"
+        },
+        {
+          "id": "beacon-compliant",
+          "label": "Yes, close enough - it's not like prod is behind",
+          "nextStageId": "beacon-pushback"
+        }
+      ]
+    },
+    "beacon-pushback": {
+      "id": "beacon-pushback",
+      "speaker": "Morgan",
+      "mood": "tense",
+      "narrative": "\"'Close enough' - so the dashboard's wrong, just not in the scary direction? That's still wrong for the report.\"",
+      "autoNext": "beacon-escalate"
+    },
+    "beacon-escalate": {
+      "id": "beacon-escalate",
+      "speaker": "You",
+      "mood": "danger",
+      "narrative": "Morgan's right - you let \"prod is ahead, not behind\" excuse a dashboard that's still factually wrong about what's live.",
+      "prompt": "Do you correct the record, or defend calling it close enough?",
+      "choices": [
+        {
+          "id": "recheck",
+          "label": "Correct the record - drift is drift, in either direction",
+          "nextStageId": "beacon-recover"
+        },
+        {
+          "id": "defend",
+          "label": "Defend it - it's not behind, so it's fine for the report",
+          "nextStageId": "beacon-worse"
+        }
+      ]
+    },
+    "beacon-recover": {
+      "id": "beacon-recover",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "You correct yourself. The dashboard claims v5.1.0; prod is actually on v5.2.1. The direction of the drift doesn't change that the record is wrong.",
+      "autoNext": "check-cargo"
+    },
+    "beacon-worse": {
+      "id": "beacon-worse",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "You report Beacon Search as close enough to compliant. Two releases' worth of changes - including the empty-query crash fix - go completely untracked in the official record, even though they're live.",
+      "autoNext": "beacon-bad-ending"
+    },
+    "beacon-bad-ending": {
+      "id": "beacon-bad-ending",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "When a customer later asks whether the empty-query crash was ever fixed, nobody can answer confidently - the only official record says v5.1.0 is what's live, and that release never touched it.",
+      "ending": {
+        "kind": "bad",
+        "debrief": "\"Prod is ahead of the dashboard, not behind\" isn't a reason to call it compliant - it's still a claim that doesn't match reality. Status Accounting exists to answer \"what's actually running\" reliably in both directions, not just to catch the failures that look scary."
+      }
+    },
+
+    "check-cargo": {
+      "id": "check-cargo",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "Service 4 of 5: Cargo Billing. Its dashboard says \"v3.0.0 - deployed and healthy.\"",
+      "graph": {
+        "commits": {
+          "d1": {
+            "id": "d1",
+            "parentIds": [],
+            "message": "release: cut v3.0.0",
+            "authorSigned": true,
+            "timestamp": 0
+          }
+        },
+        "refs": {
+          "v3.0.0": { "name": "v3.0.0", "commitId": "d1" },
+          "prod": { "name": "prod", "commitId": "d1" }
+        },
+        "head": { "type": "branch", "name": "prod" }
+      },
+      "prompt": "Does Cargo Billing's dashboard match what's actually running?",
+      "choices": [
+        {
+          "id": "cargo-compliant",
+          "label": "Yes - prod's ref is exactly v3.0.0's commit",
+          "nextStageId": "check-drift-notify"
+        },
+        {
+          "id": "cargo-drifted",
+          "label": "No - can't be sure without comparing again",
+          "nextStageId": "cargo-flag-note"
+        }
+      ]
+    },
+    "cargo-flag-note": {
+      "id": "cargo-flag-note",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You compare them again anyway. They match exactly.",
+      "autoNext": "check-drift-notify"
+    },
+
+    "check-drift-notify": {
+      "id": "check-drift-notify",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "Service 5 of 5: Drift Notify. Its dashboard says \"Deploying v1.9.0... (in progress).\" You check the deploy log - it finished six hours ago, and prod's ref is properly tagged v1.9.0.",
+      "graph": {
+        "commits": {
+          "e1": {
+            "id": "e1",
+            "parentIds": [],
+            "message": "release: cut v1.9.0",
+            "authorSigned": true,
+            "timestamp": 0
+          }
+        },
+        "refs": {
+          "v1.9.0": { "name": "v1.9.0", "commitId": "e1" },
+          "prod": { "name": "prod", "commitId": "e1" }
+        },
+        "head": { "type": "branch", "name": "prod" }
+      },
+      "prompt": "Does Drift Notify's dashboard match what's actually running?",
+      "choices": [
+        {
+          "id": "drift-drifted",
+          "label": "No - the dashboard still says \"in progress\" hours after it finished",
+          "nextStageId": "resolution-clean"
+        },
+        {
+          "id": "drift-compliant",
+          "label": "Yes - the code that's running is exactly v1.9.0, so it's fine",
+          "nextStageId": "drift-pushback"
+        }
+      ]
+    },
+    "drift-pushback": {
+      "id": "drift-pushback",
+      "speaker": "Morgan",
+      "mood": "tense",
+      "narrative": "\"The ref being right doesn't mean the dashboard's right, though - anyone glancing at 'in progress' six hours after it shipped is going to assume the deploy is stuck.\"",
+      "autoNext": "drift-escalate"
+    },
+    "drift-escalate": {
+      "id": "drift-escalate",
+      "speaker": "You",
+      "mood": "danger",
+      "narrative": "You treated \"the underlying code is correct\" and \"the status record is correct\" as the same claim, and they aren't.",
+      "prompt": "Do you flag the stale status label, or defend it as fine?",
+      "choices": [
+        {
+          "id": "recheck",
+          "label": "Flag it - the status label itself is stale",
+          "nextStageId": "drift-recover"
+        },
+        {
+          "id": "defend",
+          "label": "Defend it - the deployed code is correct, that's what matters",
+          "nextStageId": "drift-worse"
+        }
+      ]
+    },
+    "drift-recover": {
+      "id": "drift-recover",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "You flag it properly. The deployed artifact is fine - the status label is what's out of date, and that's still a real Status Accounting gap.",
+      "autoNext": "resolution-recovered"
+    },
+    "drift-worse": {
+      "id": "drift-worse",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "You defend Drift Notify as compliant since the code is right. The stale \"in progress\" banner stays up for another two days, and an on-call engineer wastes an hour investigating a \"stuck deploy\" that finished days ago.",
+      "autoNext": "drift-bad-ending"
+    },
+    "drift-bad-ending": {
+      "id": "drift-bad-ending",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "The investigation turns up nothing wrong with the deploy - because there was nothing wrong with it. The only thing that was actually broken was the status record nobody flagged.",
+      "ending": {
+        "kind": "bad",
+        "debrief": "A correct artifact behind a stale status label is still a Status Accounting failure - the whole discipline is about the record matching reality, and a label stuck on \"in progress\" hours after completion is exactly the kind of drift it exists to catch, even when the underlying code is perfectly fine."
+      }
+    },
+
+    "resolution-clean": {
+      "id": "resolution-clean",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "Five dashboards checked: two genuinely drifted (Lighthouse Sync's untagged rollback, Beacon Search's stale-but-ahead version), one stale status label with correct code underneath (Drift Notify), two actually compliant (Anchor Auth, Cargo Billing). You report exactly that.",
+      "autoNext": "good-ending"
+    },
+    "good-ending": {
+      "id": "good-ending",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "This week's status report goes out accurate, drift and all - not a wall of green checkmarks that don't hold up.",
+      "ending": {
+        "kind": "good",
+        "debrief": "Three different kinds of drift, caught the same way each time: by comparing what a dashboard claims against what a ref actually names, not by trusting the dashboard's own color. A status page is a claim about prod, not a substitute for checking prod - and that's true whether the claim is stale in the bad direction, the good direction, or just stuck on a label nobody updated."
+      }
+    },
+
+    "resolution-recovered": {
+      "id": "resolution-recovered",
+      "speaker": "Narrator",
+      "mood": "neutral",
+      "narrative": "You get to the right call on all five services in the end. But it took Morgan's question to catch that Drift Notify's stale label counted as drift too.",
+      "autoNext": "neutral-ending"
+    },
+    "neutral-ending": {
+      "id": "neutral-ending",
+      "speaker": "Narrator",
+      "mood": "neutral",
+      "narrative": "The status report goes out accurate, corrected just before it was due.",
+      "ending": {
+        "kind": "neutral",
+        "debrief": "You got there - but only because someone else asked whether a correct deploy behind a stale label still counts as drift. It does: Status Accounting is about the record's accuracy, not just the artifact's. Catching that the first time, without needing the question asked back at you, is the habit worth building."
       }
     }
   }
