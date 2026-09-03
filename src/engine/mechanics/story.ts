@@ -1,4 +1,5 @@
-// CSU-01.02.002-SRC-story_r2
+// CSU-01.02.002-SRC-story_r3
+// CR-112: adds an optional `project` field (ProjectBrief).
 // LLCSC-01-02-MECHANICS: a branching, multi-stage story - a choice
 // doesn't just get graded right/wrong, it moves the player to a
 // genuinely different stage with its own consequences and, eventually,

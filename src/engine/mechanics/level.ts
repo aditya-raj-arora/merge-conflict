@@ -1,4 +1,5 @@
-// CSU-01.02.001-SRC-level_r1
+// CSU-01.02.001-SRC-level_r2
+// CR-112: adds an optional `project` field (ProjectBrief).
 // LLCSC-01-02-MECHANICS: the level model shared by every chapter's
 // multiple-choice-over-a-commit-graph puzzles, plus the pure "did they
 // get it right" evaluator so it's testable without any UI involved.
