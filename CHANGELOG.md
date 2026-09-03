@@ -8,6 +8,14 @@ This file is auto-maintained going forward by `release-please` off our
 Conventional Commit history — we just keep the `[Unreleased]` section honest
 in the meantime.
 
+## [0.11.0](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.10.5...v0.11.0) (2026-09-03)
+
+
+### Features
+
+* **progression:** gate tier crossing on total money earned ([d586267](https://github.com/aditya-raj-arora/merge-conflict/commit/d5862671605244109119d6f854787695205a16e0)), closes [#160](https://github.com/aditya-raj-arora/merge-conflict/issues/160)
+* **progression:** gate tier crossing on total money earned ([#161](https://github.com/aditya-raj-arora/merge-conflict/issues/161)) ([d586267](https://github.com/aditya-raj-arora/merge-conflict/commit/d5862671605244109119d6f854787695205a16e0))
+
 ## [0.10.5](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.10.4...v0.10.5) (2026-09-03)
 
 
