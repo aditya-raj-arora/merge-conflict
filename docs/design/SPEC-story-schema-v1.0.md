@@ -30,6 +30,7 @@ interface Story {
   startStageId: string; // must be a key in stages
   stages: Record<string, StoryStage>;
   project?: ProjectBrief; // optional project-brief framing (CR-112) - see SPEC-project-brief-v1.0.md
+  graph?: Graph; // optional chapter-wide graph every stage inherits unless it sets its own (CR-122)
 }
 
 interface StoryStage {
@@ -37,7 +38,7 @@ interface StoryStage {
   narrative: string; // scene text shown this stage; \n\n for paragraph breaks
   speaker?: string; // who's "speaking" this beat, e.g. "Narrator", "You", "Teammate" - StoryView falls back to "Narrator" if omitted
   mood?: "calm" | "tense" | "danger" | "neutral"; // drives StoryView's backdrop theme (CR-095); falls back to "neutral"
-  graph?: Graph; // optional - reuses the exact same Graph shape as Level (see SPEC-level-schema-v1.0.md)
+  graph?: Graph; // optional - reuses the exact same Graph shape as Level (see SPEC-level-schema-v1.0.md); overrides the story-level graph for this stage (CR-122)
   prompt?: string; // the question posed this stage - only on a stage with choices
   choices?: StoryChoice[]; // a real decision point
   autoNext?: string; // a narrative-only beat, click to continue straight to this stage id (CR-095) - no decision, just pacing/depth
@@ -55,6 +56,29 @@ interface StoryEnding {
   debrief: string;
 }
 ```
+
+### Which graph a stage shows (CR-122)
+
+A stage renders `stage.graph` if it has one, otherwise the story's
+`graph`, otherwise nothing. `graphForStage(story, stageId)` in
+`src/engine/mechanics/story.ts` is the single definition of that rule -
+the view and the tests both go through it.
+
+Which to use follows from what the chapter is about:
+
+- **One repository per chapter** (Chapters 1-3): set `graph` once at the
+  story level. Every stage inherits it, so the evidence stays on screen
+  for all five checks and for the escalation beats that tell the player
+  to go and compare things. Before this, these chapters drew the graph
+  on the opening stage only, and then asked five questions about a graph
+  that was no longer visible.
+- **A different repository per check** (Chapters 4-6): set `graph` per
+  stage and leave the story-level one unset. There is no chapter-wide
+  graph to inherit, because each check is a separate service.
+
+Do not copy an identical graph into several stages to fake inheritance.
+Six copies of one 9-commit graph drift apart the first time a commit
+message is edited, and nothing would catch it.
 
 ## Rules a story fixture must follow
 
@@ -122,3 +146,4 @@ including assertions on minimum path depth for the consequence branches.
 | 1.0     | 2026-09-01 | Initial spec, written alongside STORY-01-01 (CR-091)                           |
 | 1.0     | 2026-09-01 | Added `speaker`, `mood`, `autoNext` for the VN UI and deeper branches (CR-095) |
 | 1.0     | 2026-09-03 | Added optional `project` (CR-112)                                              |
+| 1.0     | 2026-09-04 | Added optional story-level `graph` that stages inherit (CR-122)                |

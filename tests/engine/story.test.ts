@@ -2,10 +2,28 @@ import { describe, expect, it } from "vitest";
 import {
   advance,
   advanceAuto,
+  graphForStage,
   parseStory,
   validateStoryStructure,
   type Story,
 } from "../../src/engine/mechanics/story";
+import type { Graph } from "../../src/engine/graph/commitGraph";
+
+function graphWith(commitId: string): Graph {
+  return {
+    commits: {
+      [commitId]: {
+        id: commitId,
+        parentIds: [],
+        message: `commit ${commitId}`,
+        authorSigned: true,
+        timestamp: 0,
+      },
+    },
+    refs: { main: { name: "main", commitId } },
+    head: { type: "branch", name: "main" },
+  };
+}
 
 function validStory(): Story {
   return {
@@ -90,6 +108,45 @@ describe("advanceAuto()", () => {
 
   it("throws when the stage has no autoNext", () => {
     expect(() => advanceAuto(storyWithAutoNext(), "middle")).toThrow();
+  });
+});
+
+describe("graphForStage() (CR-122)", () => {
+  it("returns nothing when neither the stage nor the story has a graph", () => {
+    expect(graphForStage(validStory(), "start")).toBeUndefined();
+  });
+
+  it("falls back to the story's shared graph for a stage without its own", () => {
+    const story = { ...validStory(), graph: graphWith("shared") };
+    // Every stage in the chapter sees it, not just the opening one -
+    // which is the whole point: Chapters 1-3 ask five questions about a
+    // graph that used to leave the screen after the intro.
+    for (const stageId of Object.keys(story.stages)) {
+      expect(graphForStage(story, stageId)).toBe(story.graph);
+    }
+  });
+
+  it("lets a stage's own graph win over the story's", () => {
+    const own = graphWith("own");
+    const story: Story = {
+      ...validStory(),
+      graph: graphWith("shared"),
+    };
+    story.stages["good-end"] = { ...story.stages["good-end"], graph: own };
+
+    expect(graphForStage(story, "good-end")).toBe(own);
+    expect(graphForStage(story, "start")).toBe(story.graph);
+  });
+
+  it("returns nothing for a stage that doesn't exist, rather than throwing", () => {
+    expect(graphForStage(validStory(), "no-such-stage")).toBeUndefined();
+  });
+
+  it("still returns the shared graph when asked about a missing stage id", () => {
+    // Reading the shared graph is not a claim that the stage exists;
+    // callers that care check the stage separately.
+    const story = { ...validStory(), graph: graphWith("shared") };
+    expect(graphForStage(story, "no-such-stage")).toBe(story.graph);
   });
 });
 

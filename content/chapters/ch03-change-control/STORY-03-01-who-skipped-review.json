@@ -8,6 +8,55 @@
     "stakeholder": "Priya Nandan, Release Manager",
     "ticket": "INC-4471 — response timeouts spiking since last deploy"
   },
+  "graph": {
+    "commits": {
+      "c1": {
+        "id": "c1",
+        "parentIds": [],
+        "message": "chore: prep repo for the surge - add contributing guide",
+        "authorSigned": true,
+        "timestamp": 0
+      },
+      "c2": {
+        "id": "c2",
+        "parentIds": ["c1"],
+        "message": "feat: add response caching (Refs: CR-112)",
+        "authorSigned": true,
+        "timestamp": 1
+      },
+      "c3": {
+        "id": "c3",
+        "parentIds": ["c2"],
+        "message": "fix: correct off-by-one in pagination (Refs: CR-115)",
+        "authorSigned": true,
+        "timestamp": 2
+      },
+      "c4": {
+        "id": "c4",
+        "parentIds": ["c3"],
+        "message": "chore: flip default timeout to 100ms",
+        "authorSigned": true,
+        "timestamp": 3
+      },
+      "c5": {
+        "id": "c5",
+        "parentIds": ["c4"],
+        "message": "docs: update README badges (Refs: CR-118)",
+        "authorSigned": true,
+        "timestamp": 4
+      }
+    },
+    "refs": {
+      "main": {
+        "name": "main",
+        "commitId": "c5"
+      }
+    },
+    "head": {
+      "type": "branch",
+      "name": "main"
+    }
+  },
   "startStageId": "start",
   "stages": {
     "start": {
@@ -15,50 +64,8 @@
       "speaker": "Narrator",
       "mood": "tense",
       "narrative": "You pull up the last five commits on main. All signed. All merged this week, in the middle of the surge. You start at the top and work your way down, one commit at a time.",
-      "graph": {
-        "commits": {
-          "c1": {
-            "id": "c1",
-            "parentIds": [],
-            "message": "chore: prep repo for the surge - add contributing guide",
-            "authorSigned": true,
-            "timestamp": 0
-          },
-          "c2": {
-            "id": "c2",
-            "parentIds": ["c1"],
-            "message": "feat: add response caching (Refs: CR-112)",
-            "authorSigned": true,
-            "timestamp": 1
-          },
-          "c3": {
-            "id": "c3",
-            "parentIds": ["c2"],
-            "message": "fix: correct off-by-one in pagination (Refs: CR-115)",
-            "authorSigned": true,
-            "timestamp": 2
-          },
-          "c4": {
-            "id": "c4",
-            "parentIds": ["c3"],
-            "message": "chore: flip default timeout to 100ms",
-            "authorSigned": true,
-            "timestamp": 3
-          },
-          "c5": {
-            "id": "c5",
-            "parentIds": ["c4"],
-            "message": "docs: update README badges (Refs: CR-118)",
-            "authorSigned": true,
-            "timestamp": 4
-          }
-        },
-        "refs": { "main": { "name": "main", "commitId": "c5" } },
-        "head": { "type": "branch", "name": "main" }
-      },
       "autoNext": "check-c1"
     },
-
     "check-c1": {
       "id": "check-c1",
       "speaker": "You",
@@ -128,7 +135,6 @@
         "debrief": "\"No CR reference\" was never the same question as \"needed a CR and didn't get one.\" A docs-only commit that touches no runtime behavior doesn't need a Change Request just because the field is empty - and insisting otherwise burned the time and goodwill you needed for the commit that actually mattered. Change Control exists to catch real risk, not to flag every empty field on principle."
       }
     },
-
     "check-c2": {
       "id": "check-c2",
       "speaker": "You",
@@ -198,7 +204,6 @@
         "debrief": "Flagging a compliant commit because the change \"sounds risky\" - despite a real CR reference sitting right in the message - trains the person relying on your review to stop trusting your flags. That cost showed up exactly where it mattered: a genuinely unreferenced change further down the list got waved through because you'd already cried wolf twice. Compliance is about whether the reference exists, not about your gut feeling on the change."
       }
     },
-
     "check-c3": {
       "id": "check-c3",
       "speaker": "You",
@@ -225,7 +230,6 @@
       "narrative": "You look again. \"Refs: CR-115\" is sitting right there in the message - you skimmed past it the first time. You correct yourself and move on before it costs you anything.",
       "autoNext": "check-c4"
     },
-
     "check-c4": {
       "id": "check-c4",
       "speaker": "You",
@@ -302,7 +306,6 @@
         "debrief": "\"chore: flip default timeout to 100ms\" is properly signed - nobody's impersonating anybody - but it's the one commit in the whole list with a real behavior change and no record of why it happened or who approved it. Diff size was never the test; impact was. Clearing it because it \"looked small\" is exactly the gap Change Control exists to catch, and this time it stayed open for a day and a half longer than it needed to."
       }
     },
-
     "check-c5": {
       "id": "check-c5",
       "speaker": "You",
@@ -346,7 +349,6 @@
         "debrief": "Five commits, every one signed - so \"is it signed\" was never the useful question. \"chore: flip default timeout to 100ms\" was the one real behavior change with no linked Change Request, and you caught it by actually reading every commit's message and weighing whether it needed a CR, not by pattern-matching on missing fields or commit size. That's the whole discipline: a signature proves authorship, not that a change was reviewed and approved - and the size of a diff tells you nothing about its impact."
       }
     },
-
     "check-c5-late": {
       "id": "check-c5-late",
       "speaker": "You",

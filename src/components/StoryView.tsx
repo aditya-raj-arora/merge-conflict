@@ -14,6 +14,7 @@ import { useStoryStore } from "../state/useStoryStore";
 import { usePlayerStore } from "../state/usePlayerStore";
 import { GraphCanvas } from "./GraphCanvas";
 import { CommitInspector } from "./CommitInspector";
+import { graphForStage } from "../engine/mechanics/story";
 import type { Story, StoryMood } from "../engine/mechanics/story";
 import type { ManifestEntry } from "../../content/levelManifest";
 
@@ -111,6 +112,10 @@ export function StoryView({
       : stage.narrative
     : "";
 
+  // A stage's own graph, or the chapter-wide one it inherits (CR-122).
+  const stageGraph =
+    stage && currentStageId ? graphForStage(story, currentStageId) : undefined;
+
   useEffect(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     if (!fullText) return;
@@ -168,15 +173,15 @@ export function StoryView({
         )}
         <h1 className="text-2xl font-bold">{story.title}</h1>
 
-        {stage.graph && (
+        {stageGraph && (
           <div className="mt-6 rounded border border-slate-700 bg-slate-800/50 p-4">
             <GraphCanvas
-              graph={stage.graph}
+              graph={stageGraph}
               selectedCommitIds={selectedCommitIds}
               onSelectCommit={toggleCommitSelection}
             />
             <CommitInspector
-              graph={stage.graph}
+              graph={stageGraph}
               selectedCommitIds={selectedCommitIds}
               onClear={() => setSelectedCommitIds([])}
             />

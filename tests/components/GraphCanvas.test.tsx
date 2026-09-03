@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { GraphCanvas } from "../../src/components/GraphCanvas";
 import type { Graph } from "../../src/engine/graph/commitGraph";
 import { levelManifest } from "../../content/levelManifest";
+import { graphForStage } from "../../src/engine/mechanics/story";
 
 /** Two refs on the same commit, plus a long message - the exact shape
  * that used to draw two labels on top of each other and run the message
@@ -141,16 +142,21 @@ function outsideViewBox(container: HTMLElement, boxes: LabelBox[]): string[] {
 }
 
 /** Every graph that actually ships, pulled off the real manifest so new
- * content is covered automatically. */
+ * content is covered automatically. Resolved through graphForStage, so a
+ * stage inheriting its chapter's shared graph (CR-122) is covered the
+ * same as one carrying its own - which is what the player sees. */
 const contentGraphs: Array<{ name: string; graph: Graph }> = levelManifest
   .filter((entry) => entry.kind === "story")
   .flatMap((entry) =>
-    Object.entries(entry.story.stages)
-      .filter(([, stage]) => stage.graph)
-      .map(([stageId, stage]) => ({
+    Object.keys(entry.story.stages)
+      .map((stageId) => ({
         name: `${entry.chapterId}/${stageId}`,
-        graph: stage.graph!,
-      })),
+        graph: graphForStage(entry.story, stageId),
+      }))
+      .filter(
+        (candidate): candidate is { name: string; graph: Graph } =>
+          candidate.graph !== undefined,
+      ),
   );
 
 describe("GraphCanvas legibility (CR-119)", () => {

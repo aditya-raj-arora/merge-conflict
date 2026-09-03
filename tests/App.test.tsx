@@ -465,6 +465,40 @@ describe("App", () => {
       ).toBeInTheDocument();
     });
 
+    it("Chapter 1's checks carry an inspectable graph too (CR-122)", () => {
+      // Chapters 1-3 used to draw their graph once on the opening stage
+      // and nothing after it, so the player was asked five questions
+      // about a graph that had left the screen - and the inspector had
+      // nothing to inspect. They now inherit one chapter-wide graph.
+      renderAsReturningPlayer();
+      fireEvent.click(
+        screen.getByRole("button", { name: "Which One Shipped?" }),
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Begin" }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /click to skip text reveal/i }),
+      );
+      fireEvent.click(screen.getByRole("button", { name: "▼ Continue" }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /click to skip text reveal/i }),
+      );
+
+      // We are on the first real check, not the intro.
+      expect(
+        screen.getByRole("button", {
+          name: "No - unsigned and explicitly marked work-in-progress",
+        }),
+      ).toBeInTheDocument();
+
+      const nodes = document.querySelectorAll('circle[role="button"]');
+      expect(nodes.length).toBeGreaterThan(0);
+
+      fireEvent.click(nodes[0]);
+      expect(
+        screen.getByRole("button", { name: /clear selection/i }),
+      ).toBeInTheDocument();
+    });
+
     it("selecting a commit shows what it actually is", () => {
       openFirstGraphStage();
       const nodes = document.querySelectorAll('circle[role="button"]');
