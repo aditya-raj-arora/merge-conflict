@@ -103,10 +103,13 @@ describe("App", () => {
     ).toBeDisabled();
   });
 
-  it("selecting the unlocked Chapter 1 story loads it; choices appear once the reveal is skipped; back returns to select", () => {
+  it("selecting the unlocked Chapter 1 story loads it (past its project brief); choices appear once the reveal is skipped; back returns to select", () => {
     renderAsReturningPlayer();
 
     fireEvent.click(screen.getByRole("button", { name: "Which One Shipped?" }));
+    // CR-113: Chapter 1 now carries a project brief, shown first.
+    fireEvent.click(screen.getByRole("button", { name: "Begin" }));
+
     expect(
       screen.getByRole("heading", { name: "Which One Shipped?" }),
     ).toBeInTheDocument();
@@ -117,10 +120,23 @@ describe("App", () => {
     fireEvent.click(
       screen.getByRole("button", { name: /click to skip text reveal/i }),
     );
+    // The opening stage is narrative-only (autoNext) - CR-113's 5-question
+    // redesign puts the first real choice one stage in.
+    fireEvent.click(screen.getByRole("button", { name: "▼ Continue" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /click to skip text reveal/i }),
+    );
 
-    expect(screen.getByRole("button", { name: "build-a" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "build-b" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "build-c" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: "No - unsigned and explicitly marked work-in-progress",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: "Looks fine - it's the most recent feature work",
+      }),
+    ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /back to levels/i }));
     expect(
@@ -169,18 +185,31 @@ describe("App", () => {
   it("offers a Next Level shortcut once a level is passed, jumping straight into the next one", () => {
     renderAsReturningPlayer();
     fireEvent.click(screen.getByRole("button", { name: "Which One Shipped?" }));
-    fireEvent.click(
-      screen.getByRole("button", { name: /click to skip text reveal/i }),
-    );
-    fireEvent.click(screen.getByRole("button", { name: "build-b" }));
-    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-    fireEvent.click(
-      screen.getByRole("button", { name: /click to skip text reveal/i }),
-    );
-    fireEvent.click(screen.getByRole("button", { name: "▼ Continue" }));
-    fireEvent.click(
-      screen.getByRole("button", { name: /click to skip text reveal/i }),
-    );
+    // CR-113: Chapter 1 now carries a project brief, shown first.
+    fireEvent.click(screen.getByRole("button", { name: "Begin" }));
+
+    const skip = () =>
+      fireEvent.click(
+        screen.getByRole("button", { name: /click to skip text reveal/i }),
+      );
+    const pick = (label: string) => {
+      skip();
+      fireEvent.click(screen.getByRole("button", { name: label }));
+      fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    };
+    const autoContinue = () => {
+      skip();
+      fireEvent.click(screen.getByRole("button", { name: "▼ Continue" }));
+    };
+
+    autoContinue(); // start -> check-build-a
+    pick("No - unsigned and explicitly marked work-in-progress"); // -> check-build-c
+    pick("No - it's missing fixes that landed afterward"); // -> check-build-d
+    pick("No - it's explicitly marked internal-only"); // -> check-build-e
+    pick("No - it's never actually marked as approved"); // -> check-build-b
+    pick("Yes - fully signed, and explicitly approved"); // -> resolution-clean
+    autoContinue(); // resolution-clean -> good-ending
+    skip();
 
     const nextButton = screen.getByRole("button", {
       name: /^Next Level: Whose Fix Made It\?/,
@@ -246,13 +275,22 @@ describe("App", () => {
     });
 
     it("skips straight to the level for one with no project brief", () => {
-      renderAsReturningPlayer();
+      // Chapter 2 doesn't have a project brief yet (only Chapters 1 and 3
+      // do, as of CR-113) - unlock it and confirm it opens directly.
+      usePlayerStore.getState().setName("Test Player");
+      usePlayerStore.setState({
+        progress: {
+          "STORY-01-01-which-one-shipped": { passed: true, totalRuns: 1 },
+        },
+      });
+      render(<App />);
+      fireEvent.click(screen.getByRole("button", { name: /^Continue/ }));
       fireEvent.click(
-        screen.getByRole("button", { name: "Which One Shipped?" }),
+        screen.getByRole("button", { name: "Whose Fix Made It?" }),
       );
 
       expect(
-        screen.getByRole("heading", { name: "Which One Shipped?" }),
+        screen.getByRole("heading", { name: "Whose Fix Made It?" }),
       ).toBeInTheDocument();
       expect(screen.queryByText("Project brief")).not.toBeInTheDocument();
     });
