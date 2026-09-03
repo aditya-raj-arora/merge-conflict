@@ -33,6 +33,11 @@ describe("STORY-05-01-does-it-still-match structural validity", () => {
     expect(validateStoryStructure(story)).toEqual([]);
   });
 
+  it("carries a project brief (CR-116)", () => {
+    expect(story.project?.name).toBeTruthy();
+    expect(story.project?.description).toBeTruthy();
+  });
+
   it("has good, bad, and neutral endings, with three distinct bad endings", () => {
     const endingKinds = Object.values(story.stages)
       .map((s) => s.ending?.kind)
@@ -44,84 +49,6 @@ describe("STORY-05-01-does-it-still-match structural validity", () => {
     expect(endingKinds.filter((k) => k === "bad")).toHaveLength(3);
   });
 
-  it("picking extra-commit directly reaches a good ending quickly (short path is intentional)", () => {
-    const path = walk(story, [{ choiceId: "extra-commit" }, { auto: true }]);
-    expect(story.stages[path.at(-1)!].ending?.kind).toBe("good");
-    expect(path.length).toBe(3);
-  });
-
-  it("claiming it matches, recheck: depth >= 5, recovers to a neutral ending", () => {
-    const path = walk(story, [
-      { choiceId: "matches" },
-      { auto: true },
-      { auto: true },
-      { choiceId: "recheck" },
-      { auto: true },
-    ]);
-    expect(story.stages[path.at(-1)!].ending?.kind).toBe("neutral");
-    expect(path.length).toBeGreaterThanOrEqual(5);
-  });
-
-  it("claiming it matches, defend: depth >= 5, reaches a bad ending", () => {
-    const path = walk(story, [
-      { choiceId: "matches" },
-      { auto: true },
-      { auto: true },
-      { choiceId: "defend" },
-      { auto: true },
-    ]);
-    expect(story.stages[path.at(-1)!].ending?.kind).toBe("bad");
-    expect(path.length).toBeGreaterThanOrEqual(5);
-  });
-
-  it("claiming a commit is missing, recheck: depth >= 5, reaches a good ending", () => {
-    const path = walk(story, [
-      { choiceId: "missing-commit" },
-      { auto: true },
-      { auto: true },
-      { choiceId: "recheck" },
-      { auto: true },
-    ]);
-    expect(story.stages[path.at(-1)!].ending?.kind).toBe("good");
-    expect(path.length).toBeGreaterThanOrEqual(5);
-  });
-
-  it("claiming a commit is missing, defend: depth >= 5, reaches a bad ending", () => {
-    const path = walk(story, [
-      { choiceId: "missing-commit" },
-      { auto: true },
-      { auto: true },
-      { choiceId: "defend" },
-      { auto: true },
-    ]);
-    expect(story.stages[path.at(-1)!].ending?.kind).toBe("bad");
-    expect(path.length).toBeGreaterThanOrEqual(5);
-  });
-
-  it("claiming it can't be told, recheck: depth >= 5, reaches a good ending", () => {
-    const path = walk(story, [
-      { choiceId: "cant-tell" },
-      { auto: true },
-      { auto: true },
-      { choiceId: "recheck" },
-      { auto: true },
-    ]);
-    expect(story.stages[path.at(-1)!].ending?.kind).toBe("good");
-    expect(path.length).toBeGreaterThanOrEqual(5);
-  });
-
-  it("claiming it can't be told, defend: depth >= 5, reaches a bad ending", () => {
-    const path = walk(story, [
-      { choiceId: "cant-tell" },
-      { auto: true },
-      { auto: true },
-      { choiceId: "defend" },
-      { auto: true },
-    ]);
-    expect(story.stages[path.at(-1)!].ending?.kind).toBe("bad");
-    expect(path.length).toBeGreaterThanOrEqual(5);
-  });
-
   it("every stage's mood, if set, is one of the known set", () => {
     const knownMoods = new Set(["calm", "tense", "danger", "neutral"]);
     for (const stage of Object.values(story.stages)) {
@@ -129,5 +56,152 @@ describe("STORY-05-01-does-it-still-match structural validity", () => {
         expect(knownMoods.has(stage.mood)).toBe(true);
       }
     }
+  });
+
+  describe("the correct path checks all 5 CIs (CR-116: 5+ real decisions)", () => {
+    it("answering all 5 checks correctly reaches a good ending", () => {
+      const path = walk(story, [
+        { auto: true }, // start -> check-nova-api
+        { choiceId: "api-drifted" },
+        { choiceId: "web-compliant" },
+        { choiceId: "worker-drifted" },
+        { choiceId: "cache-compliant" },
+        { choiceId: "gateway-drifted" },
+        { auto: true }, // resolution-clean -> good-ending
+      ]);
+      expect(story.stages[path.at(-1)!].ending?.kind).toBe("good");
+      expect(path.length).toBe(8);
+    });
+  });
+
+  describe("Nova API (unaudited extra commit) - escalation-capable", () => {
+    it("clearing it, then comparing the commit IDs, still reaches a good ending", () => {
+      const path = walk(story, [
+        { auto: true },
+        { choiceId: "api-compliant" },
+        { auto: true },
+        { choiceId: "recheck" },
+        { auto: true },
+        { choiceId: "web-compliant" },
+        { choiceId: "worker-drifted" },
+        { choiceId: "cache-compliant" },
+        { choiceId: "gateway-drifted" },
+        { auto: true },
+      ]);
+      expect(story.stages[path.at(-1)!].ending?.kind).toBe("good");
+      expect(path.length).toBeGreaterThanOrEqual(5);
+    });
+
+    it("clearing it and defending reaches a bad ending", () => {
+      const path = walk(story, [
+        { auto: true },
+        { choiceId: "api-compliant" },
+        { auto: true },
+        { choiceId: "defend" },
+        { auto: true },
+      ]);
+      expect(story.stages[path.at(-1)!].ending?.kind).toBe("bad");
+      expect(path.length).toBeGreaterThanOrEqual(5);
+    });
+  });
+
+  describe("Nova Web (compliant) - light, single-shot", () => {
+    it("misreading it still self-corrects and reaches a good ending", () => {
+      const path = walk(story, [
+        { auto: true },
+        { choiceId: "api-drifted" },
+        { choiceId: "web-drifted" },
+        { auto: true },
+        { choiceId: "worker-drifted" },
+        { choiceId: "cache-compliant" },
+        { choiceId: "gateway-drifted" },
+        { auto: true },
+      ]);
+      expect(story.stages[path.at(-1)!].ending?.kind).toBe("good");
+    });
+  });
+
+  describe("Nova Worker (missing the baseline's retry-cap fix) - escalation-capable", () => {
+    it("clearing it, then checking what the baseline included, still reaches a good ending", () => {
+      const path = walk(story, [
+        { auto: true },
+        { choiceId: "api-drifted" },
+        { choiceId: "web-compliant" },
+        { choiceId: "worker-compliant" },
+        { auto: true },
+        { choiceId: "recheck" },
+        { auto: true },
+        { choiceId: "cache-compliant" },
+        { choiceId: "gateway-drifted" },
+        { auto: true },
+      ]);
+      expect(story.stages[path.at(-1)!].ending?.kind).toBe("good");
+      expect(path.length).toBeGreaterThanOrEqual(5);
+    });
+
+    it("clearing it and defending reaches a bad ending", () => {
+      const path = walk(story, [
+        { auto: true },
+        { choiceId: "api-drifted" },
+        { choiceId: "web-compliant" },
+        { choiceId: "worker-compliant" },
+        { auto: true },
+        { choiceId: "defend" },
+        { auto: true },
+      ]);
+      expect(story.stages[path.at(-1)!].ending?.kind).toBe("bad");
+      expect(path.length).toBeGreaterThanOrEqual(5);
+    });
+  });
+
+  describe("Nova Cache (compliant) - light, single-shot", () => {
+    it("misreading it still self-corrects and reaches a good ending", () => {
+      const path = walk(story, [
+        { auto: true },
+        { choiceId: "api-drifted" },
+        { choiceId: "web-compliant" },
+        { choiceId: "worker-drifted" },
+        { choiceId: "cache-drifted" },
+        { auto: true },
+        { choiceId: "gateway-drifted" },
+        { auto: true },
+      ]);
+      expect(story.stages[path.at(-1)!].ending?.kind).toBe("good");
+    });
+  });
+
+  describe("Nova Gateway (baseline tag silently moved) - escalation-capable, the nuanced one", () => {
+    it("clearing it, then checking the audit log's recorded commit, reaches a neutral ending", () => {
+      const path = walk(story, [
+        { auto: true },
+        { choiceId: "api-drifted" },
+        { choiceId: "web-compliant" },
+        { choiceId: "worker-drifted" },
+        { choiceId: "cache-compliant" },
+        { choiceId: "gateway-compliant" },
+        { auto: true },
+        { choiceId: "recheck" },
+        { auto: true },
+        { auto: true },
+      ]);
+      expect(story.stages[path.at(-1)!].ending?.kind).toBe("neutral");
+      expect(path.length).toBeGreaterThanOrEqual(5);
+    });
+
+    it("clearing it and defending reaches a bad ending", () => {
+      const path = walk(story, [
+        { auto: true },
+        { choiceId: "api-drifted" },
+        { choiceId: "web-compliant" },
+        { choiceId: "worker-drifted" },
+        { choiceId: "cache-compliant" },
+        { choiceId: "gateway-compliant" },
+        { auto: true },
+        { choiceId: "defend" },
+        { auto: true },
+      ]);
+      expect(story.stages[path.at(-1)!].ending?.kind).toBe("bad");
+      expect(path.length).toBeGreaterThanOrEqual(5);
+    });
   });
 });

@@ -2,377 +2,455 @@
   "id": "STORY-05-01-does-it-still-match",
   "chapterId": "ch05-configuration-audit",
   "title": "Does It Still Match?",
+  "project": {
+    "name": "Quarterly Configuration Audit — CI Sweep",
+    "description": "Five configuration items, five approved baselines, one question for each: does what's actually running still match what was signed off? Before this quarter's audit closes, you need to check each one against its recorded baseline - not by trusting whatever a tag currently points to, but by comparing against what was actually approved.",
+    "stakeholder": "Sana Whitfield, Compliance Lead",
+    "ticket": "Q3 Configuration Audit — CI sign-off"
+  },
   "startStageId": "start",
   "stages": {
     "start": {
       "id": "start",
       "speaker": "Narrator",
       "mood": "calm",
-      "narrative": "Compliance wants a quick answer before the quarterly review: does what's actually running in prod match BL-01, the last configuration anyone formally signed off on? You pull up both refs to check. Nothing about this smells like an incident - no unsigned commits, no missing CR reference, nothing that looks like it slipped past review.",
+      "narrative": "Five configuration items, five baselines, one quarterly audit to close out. You decide to check each one against its recorded baseline before signing off - one at a time, comparing actual commits, not just trusting a tag's current position.",
+      "autoNext": "check-nova-api"
+    },
+
+    "check-nova-api": {
+      "id": "check-nova-api",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "CI 1 of 5: Nova API. Its last approved baseline, BL-01, was tagged at a specific commit - \"chore: tag baseline BL-01 - approved launch configuration.\" Since then, one more commit landed: a rate-limit threshold bump, referencing CR-201. Nothing about it looks suspicious - signed, reasonable, with a real CR reference.",
       "graph": {
         "commits": {
-          "c1": {
-            "id": "c1",
+          "a1": {
+            "id": "a1",
             "parentIds": [],
             "message": "release: cut v1.0.0",
             "authorSigned": true,
             "timestamp": 0
           },
-          "c2": {
-            "id": "c2",
-            "parentIds": ["c1"],
+          "a2": {
+            "id": "a2",
+            "parentIds": ["a1"],
             "message": "chore: tag baseline BL-01 - approved launch configuration",
             "authorSigned": true,
             "timestamp": 1
           },
-          "c3": {
-            "id": "c3",
-            "parentIds": ["c2"],
+          "a3": {
+            "id": "a3",
+            "parentIds": ["a2"],
             "message": "fix: bump rate-limit threshold under load (Refs: CR-201)",
             "authorSigned": true,
             "timestamp": 2
           }
         },
         "refs": {
-          "BL-01": { "name": "BL-01", "commitId": "c2" },
-          "prod": { "name": "prod", "commitId": "c3" }
+          "BL-01": { "name": "BL-01", "commitId": "a2" },
+          "prod": { "name": "prod", "commitId": "a3" }
         },
         "head": { "type": "branch", "name": "prod" }
       },
-      "prompt": "Does what's actually running in prod match the last approved baseline, BL-01?",
+      "prompt": "Does Nova API's prod still match its approved baseline?",
       "choices": [
         {
-          "id": "matches",
-          "label": "Yes - prod is exactly at BL-01",
-          "nextStageId": "wrong-matches-open"
+          "id": "api-drifted",
+          "label": "No - prod has a commit on top of BL-01 that was never itself audited",
+          "nextStageId": "check-nova-web"
         },
         {
-          "id": "extra-commit",
-          "label": "No - prod has a commit on top of BL-01 that was never itself audited or baselined",
-          "nextStageId": "correct-open"
-        },
-        {
-          "id": "missing-commit",
-          "label": "No - prod is missing a commit that BL-01 already included",
-          "nextStageId": "wrong-missing-open"
-        },
-        {
-          "id": "cant-tell",
-          "label": "Can't tell from the graph alone",
-          "nextStageId": "wrong-canttell-open"
+          "id": "api-compliant",
+          "label": "Yes - it's signed, reasonable, and references a real CR",
+          "nextStageId": "api-pushback"
         }
       ]
     },
-
-    "correct-open": {
-      "id": "correct-open",
-      "speaker": "Narrator",
-      "mood": "calm",
-      "narrative": "You're right - prod is one commit past BL-01, and that commit was never itself audited or folded into a new baseline. It's signed, the fix looks reasonable, nobody did anything wrong. That's exactly the point.",
-      "autoNext": "correct-report"
-    },
-    "correct-report": {
-      "id": "correct-report",
-      "speaker": "Narrator",
-      "mood": "calm",
-      "narrative": "You report the drift honestly - not as an incident, just as an unaudited change - and compliance schedules a proper re-audit before the quarterly review.",
-      "ending": {
-        "kind": "good",
-        "debrief": "Prod is one commit past BL-01, and that commit was never itself audited or folded into a new baseline. Nothing about it looks suspicious: it's signed, the fix is reasonable, nobody did anything wrong. That's exactly the point Configuration Audit exists to make - it isn't about catching bad actors, it's about catching this: a perfectly fine change that shipped without anyone re-running the approval loop, so the official record (\"BL-01 is what's approved\") quietly stopped being true the moment it landed."
-      }
-    },
-
-    "wrong-matches-open": {
-      "id": "wrong-matches-open",
-      "speaker": "Narrator",
+    "api-pushback": {
+      "id": "api-pushback",
+      "speaker": "Sana",
       "mood": "tense",
-      "narrative": "You tell compliance prod matches BL-01 exactly. But BL-01's ref names c2, and prod's ref names c3 - a different commit, one step further down the chain. You compared the labels, not the actual commit IDs underneath them.",
-      "autoNext": "wrong-matches-team-beat"
+      "narrative": "\"Signed and reasonable isn't the same as audited, though. Did you actually compare prod's commit ID against BL-01's, or just judge the change on its own merits?\"",
+      "autoNext": "api-escalate"
     },
-    "wrong-matches-team-beat": {
-      "id": "wrong-matches-team-beat",
-      "speaker": "Compliance Lead",
-      "mood": "tense",
-      "narrative": "\"Matches exactly? I thought there was a rate-limit fix that went out after the launch baseline - did you actually diff the two commit IDs, or just eyeball the graph?\"",
-      "autoNext": "wrong-matches-consequence"
-    },
-    "wrong-matches-consequence": {
-      "id": "wrong-matches-consequence",
+    "api-escalate": {
+      "id": "api-escalate",
       "speaker": "You",
       "mood": "danger",
-      "narrative": "You've got the compliance lead questioning your read, and you haven't actually compared the two commit IDs directly.",
-      "graph": {
-        "commits": {
-          "c1": {
-            "id": "c1",
-            "parentIds": [],
-            "message": "release: cut v1.0.0",
-            "authorSigned": true,
-            "timestamp": 0
-          },
-          "c2": {
-            "id": "c2",
-            "parentIds": ["c1"],
-            "message": "chore: tag baseline BL-01 - approved launch configuration",
-            "authorSigned": true,
-            "timestamp": 1
-          },
-          "c3": {
-            "id": "c3",
-            "parentIds": ["c2"],
-            "message": "fix: bump rate-limit threshold under load (Refs: CR-201)",
-            "authorSigned": true,
-            "timestamp": 2
-          }
-        },
-        "refs": {
-          "BL-01": { "name": "BL-01", "commitId": "c2" },
-          "prod": { "name": "prod", "commitId": "c3" }
-        },
-        "head": { "type": "branch", "name": "prod" }
-      },
-      "prompt": "Do you compare BL-01's and prod's commit IDs directly, or defend your answer?",
+      "narrative": "You judged whether the change itself looked fine, not whether it matched what was actually approved - those are different questions.",
+      "prompt": "Do you compare the commit IDs directly, or defend your answer?",
       "choices": [
         {
           "id": "recheck",
-          "label": "Compare the two commit IDs directly",
-          "nextStageId": "matches-recover"
+          "label": "Compare BL-01's and prod's commit IDs directly",
+          "nextStageId": "api-recover"
         },
         {
           "id": "defend",
-          "label": "Defend your answer - they match",
-          "nextStageId": "matches-worse"
+          "label": "Defend it - the change itself is fine",
+          "nextStageId": "api-worse"
         }
       ]
     },
-    "matches-recover": {
-      "id": "matches-recover",
+    "api-recover": {
+      "id": "api-recover",
       "speaker": "You",
       "mood": "calm",
-      "narrative": "You compare the IDs directly this time. BL-01 names c2. Prod names c3. They are not the same commit - prod is one step ahead, carrying the rate-limit fix.",
-      "autoNext": "matches-recover-end"
+      "narrative": "You compare the IDs directly. BL-01 names one commit; prod names a different one, one step ahead. A reasonable-looking change is still an unaudited one.",
+      "autoNext": "check-nova-web"
     },
-    "matches-recover-end": {
-      "id": "matches-recover-end",
+    "api-worse": {
+      "id": "api-worse",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "You sign off on Nova API as matching its baseline. The rate-limit change - never itself reviewed against a new baseline - stays permanently unaudited, treated as \"basically part of BL-01\" from now on.",
+      "autoNext": "api-bad-ending"
+    },
+    "api-bad-ending": {
+      "id": "api-bad-ending",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "Months later, an incident traces back to that same rate-limit threshold - and the postmortem discovers it was never actually audited, because the last review certified prod as \"unchanged since BL-01.\"",
+      "ending": {
+        "kind": "bad",
+        "debrief": "\"The change looks reasonable\" was never the question - \"does it match what was actually approved\" was. Prod sat one unaudited commit past BL-01 for the whole quarter because a sensible-looking diff got waved through instead of compared against the baseline's real commit ID."
+      }
+    },
+
+    "check-nova-web": {
+      "id": "check-nova-web",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "CI 2 of 5: Nova Web. Its baseline, BL-04, is tagged directly at prod's current commit.",
+      "graph": {
+        "commits": {
+          "w1": {
+            "id": "w1",
+            "parentIds": [],
+            "message": "chore: initial web config",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "w2": {
+            "id": "w2",
+            "parentIds": ["w1"],
+            "message": "chore: tag baseline BL-04 - approved web configuration",
+            "authorSigned": true,
+            "timestamp": 1
+          }
+        },
+        "refs": {
+          "BL-04": { "name": "BL-04", "commitId": "w2" },
+          "prod": { "name": "prod", "commitId": "w2" }
+        },
+        "head": { "type": "branch", "name": "prod" }
+      },
+      "prompt": "Does Nova Web's prod still match its approved baseline?",
+      "choices": [
+        {
+          "id": "web-compliant",
+          "label": "Yes - prod's commit ID is exactly BL-04's",
+          "nextStageId": "check-nova-worker"
+        },
+        {
+          "id": "web-drifted",
+          "label": "No - can't be sure without comparing again",
+          "nextStageId": "web-flag-note"
+        }
+      ]
+    },
+    "web-flag-note": {
+      "id": "web-flag-note",
       "speaker": "Narrator",
       "mood": "calm",
-      "narrative": "You correct your answer before compliance signs off on a stale claim.",
+      "narrative": "You compare again anyway. They match exactly - same commit ID.",
+      "autoNext": "check-nova-worker"
+    },
+
+    "check-nova-worker": {
+      "id": "check-nova-worker",
+      "speaker": "You",
+      "mood": "tense",
+      "narrative": "CI 3 of 5: Nova Worker. Its baseline, BL-02, includes a retry-cap fix on top of the original retry logic. But prod's ref points further back - before that fix ever landed.",
+      "graph": {
+        "commits": {
+          "n1": {
+            "id": "n1",
+            "parentIds": [],
+            "message": "feat: add retry logic for failed jobs",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "n2": {
+            "id": "n2",
+            "parentIds": ["n1"],
+            "message": "fix: cap retry attempts at 3 to avoid infinite loop",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "n3": {
+            "id": "n3",
+            "parentIds": ["n2"],
+            "message": "chore: tag baseline BL-02 - approved worker configuration",
+            "authorSigned": true,
+            "timestamp": 2
+          }
+        },
+        "refs": {
+          "BL-02": { "name": "BL-02", "commitId": "n3" },
+          "prod": { "name": "prod", "commitId": "n1" }
+        },
+        "head": { "type": "branch", "name": "prod" }
+      },
+      "prompt": "Does Nova Worker's prod still match its approved baseline?",
+      "choices": [
+        {
+          "id": "worker-drifted",
+          "label": "No - prod is missing the retry-cap fix that BL-02 included",
+          "nextStageId": "check-nova-cache"
+        },
+        {
+          "id": "worker-compliant",
+          "label": "Yes - it's the same retry logic, close enough",
+          "nextStageId": "worker-pushback"
+        }
+      ]
+    },
+    "worker-pushback": {
+      "id": "worker-pushback",
+      "speaker": "Sana",
+      "mood": "tense",
+      "narrative": "\"Close enough? BL-02 exists specifically because that unbounded retry logic caused an infinite loop. If prod's missing the cap, that's not a minor gap.\"",
+      "autoNext": "worker-escalate"
+    },
+    "worker-escalate": {
+      "id": "worker-escalate",
+      "speaker": "You",
+      "mood": "danger",
+      "narrative": "You treated \"same feature, roughly\" as compliant instead of checking whether prod actually includes everything the baseline does.",
+      "prompt": "Do you check what BL-02 actually included, or defend it as close enough?",
+      "choices": [
+        {
+          "id": "recheck",
+          "label": "Check exactly what BL-02 included",
+          "nextStageId": "worker-recover"
+        },
+        {
+          "id": "defend",
+          "label": "Defend it - it's fundamentally the same retry logic",
+          "nextStageId": "worker-worse"
+        }
+      ]
+    },
+    "worker-recover": {
+      "id": "worker-recover",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "You check properly. BL-02 is the retry-cap commit; prod is one commit before it. Prod is missing exactly the fix the baseline exists to guarantee.",
+      "autoNext": "check-nova-cache"
+    },
+    "worker-worse": {
+      "id": "worker-worse",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "You sign off on Nova Worker as compliant. The uncapped retry logic stays live in production, believed to be safely covered by an audit that never actually checked for the fix.",
+      "autoNext": "worker-bad-ending"
+    },
+    "worker-bad-ending": {
+      "id": "worker-bad-ending",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "A failed job triggers the exact infinite retry loop BL-02 was created to prevent, taking down the worker fleet during peak hours.",
+      "ending": {
+        "kind": "bad",
+        "debrief": "Configuration Audit isn't just about catching extra, unapproved commits - it's equally about catching when prod is missing something the baseline requires. \"Same feature, roughly\" let an incident BL-02 existed specifically to prevent happen anyway."
+      }
+    },
+
+    "check-nova-cache": {
+      "id": "check-nova-cache",
+      "speaker": "You",
+      "mood": "calm",
+      "narrative": "CI 4 of 5: Nova Cache. Its baseline, BL-03, is tagged directly at prod's current commit.",
+      "graph": {
+        "commits": {
+          "c1": {
+            "id": "c1",
+            "parentIds": [],
+            "message": "chore: cache eviction policy finalized",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "c2": {
+            "id": "c2",
+            "parentIds": ["c1"],
+            "message": "chore: tag baseline BL-03 - approved cache configuration",
+            "authorSigned": true,
+            "timestamp": 1
+          }
+        },
+        "refs": {
+          "BL-03": { "name": "BL-03", "commitId": "c2" },
+          "prod": { "name": "prod", "commitId": "c2" }
+        },
+        "head": { "type": "branch", "name": "prod" }
+      },
+      "prompt": "Does Nova Cache's prod still match its approved baseline?",
+      "choices": [
+        {
+          "id": "cache-compliant",
+          "label": "Yes - prod's commit ID is exactly BL-03's",
+          "nextStageId": "check-nova-gateway"
+        },
+        {
+          "id": "cache-drifted",
+          "label": "No - can't be sure without comparing again",
+          "nextStageId": "cache-flag-note"
+        }
+      ]
+    },
+    "cache-flag-note": {
+      "id": "cache-flag-note",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You compare again anyway. They match exactly.",
+      "autoNext": "check-nova-gateway"
+    },
+
+    "check-nova-gateway": {
+      "id": "check-nova-gateway",
+      "speaker": "You",
+      "mood": "tense",
+      "narrative": "CI 5 of 5: Nova Gateway. Your audit log records BL-05 as approved at a specific commit: \"chore: tag baseline BL-05 - approved gateway configuration.\" But the BL-05 ref right now points somewhere else entirely - at a later, unreviewed config tweak - and prod matches wherever BL-05 currently points.",
+      "graph": {
+        "commits": {
+          "g1": {
+            "id": "g1",
+            "parentIds": [],
+            "message": "release: gateway v1 config core",
+            "authorSigned": true,
+            "timestamp": 0
+          },
+          "g2": {
+            "id": "g2",
+            "parentIds": ["g1"],
+            "message": "chore: tag baseline BL-05 - approved gateway configuration",
+            "authorSigned": true,
+            "timestamp": 1
+          },
+          "g3": {
+            "id": "g3",
+            "parentIds": ["g2"],
+            "message": "chore: quick retry-timeout tweak",
+            "authorSigned": true,
+            "timestamp": 2
+          }
+        },
+        "refs": {
+          "BL-05": { "name": "BL-05", "commitId": "g3" },
+          "prod": { "name": "prod", "commitId": "g3" }
+        },
+        "head": { "type": "branch", "name": "prod" }
+      },
+      "prompt": "Does Nova Gateway's prod still match its approved baseline?",
+      "choices": [
+        {
+          "id": "gateway-drifted",
+          "label": "No - prod matches where BL-05 points now, not the commit the audit log actually approved",
+          "nextStageId": "resolution-clean"
+        },
+        {
+          "id": "gateway-compliant",
+          "label": "Yes - prod's commit ID matches BL-05's tag exactly",
+          "nextStageId": "gateway-pushback"
+        }
+      ]
+    },
+    "gateway-pushback": {
+      "id": "gateway-pushback",
+      "speaker": "Sana",
+      "mood": "tense",
+      "narrative": "\"Matches the tag right now, sure - but a baseline tag isn't supposed to move after it's approved. Did you check what commit BL-05 was actually approved at, back when it was audited?\"",
+      "autoNext": "gateway-escalate"
+    },
+    "gateway-escalate": {
+      "id": "gateway-escalate",
+      "speaker": "You",
+      "mood": "danger",
+      "narrative": "\"Matches the tag's current position\" and \"matches what was actually approved\" stopped being the same claim the moment that tag moved.",
+      "prompt": "Do you check the audit log's recorded commit, or defend matching the tag as good enough?",
+      "choices": [
+        {
+          "id": "recheck",
+          "label": "Check the audit log's recorded commit for BL-05",
+          "nextStageId": "check-nova-gateway-b-late"
+        },
+        {
+          "id": "defend",
+          "label": "Defend it - it matches the tag, that's what compliant means",
+          "nextStageId": "gateway-worse"
+        }
+      ]
+    },
+    "gateway-worse": {
+      "id": "gateway-worse",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "You sign off on Nova Gateway as compliant because it matches BL-05's tag. Nobody notices that the tag itself was quietly moved past a config tweak that never went through review.",
+      "autoNext": "gateway-bad-ending"
+    },
+    "gateway-bad-ending": {
+      "id": "gateway-bad-ending",
+      "speaker": "Narrator",
+      "mood": "danger",
+      "narrative": "The retry-timeout tweak turns out to interact badly with a downstream service. By the time anyone traces it back, three more baselines have been \"approved\" the same unaudited way - by whatever the tag happened to point to.",
+      "ending": {
+        "kind": "bad",
+        "debrief": "A baseline tag that can move after approval isn't a baseline - it's just a label. \"Matches the tag\" was never the same claim as \"matches what the audit log actually approved,\" and treating them as identical let an unreviewed config change get retroactively blessed as part of BL-05."
+      }
+    },
+
+    "resolution-clean": {
+      "id": "resolution-clean",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You catch Nova Gateway directly too: BL-05's tag now points to the retry-timeout tweak, not the commit the audit log actually recorded as approved. Five CIs checked: two genuinely drifted (Nova API's unaudited extra commit, Nova Worker's missing retry-cap fix), one baseline tag quietly moved past review (Nova Gateway), two actually compliant (Nova Web, Nova Cache). You close the quarterly audit with the real findings, not a wall of green checkmarks.",
+      "autoNext": "good-ending"
+    },
+    "good-ending": {
+      "id": "good-ending",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "The audit closes accurate. Nova API and Nova Worker get scheduled for proper review, and Nova Gateway's baseline gets re-pinned to a commit that's actually been through sign-off.",
+      "ending": {
+        "kind": "good",
+        "debrief": "Three different kinds of drift, caught the same way each time: by comparing an actual commit ID against what the audit log recorded as approved, not by trusting a tag's current position or a change's surface-level reasonableness. That's the whole discipline - Configuration Audit isn't about catching bad actors, it's about catching the moment \"approved\" quietly stops being true."
+      }
+    },
+
+    "check-nova-gateway-b-late": {
+      "id": "check-nova-gateway-b-late",
+      "speaker": "Narrator",
+      "mood": "calm",
+      "narrative": "You check the audit log directly. BL-05 was approved at the config-core commit - not the retry-timeout tweak the tag currently points to. You flag it.",
+      "autoNext": "resolution-recovered"
+    },
+    "resolution-recovered": {
+      "id": "resolution-recovered",
+      "speaker": "Narrator",
+      "mood": "neutral",
+      "narrative": "You get to the right call on all five CIs in the end. But it took Sana's question to catch that a moved baseline tag was still drift, just because it currently matches something.",
+      "autoNext": "neutral-ending"
+    },
+    "neutral-ending": {
+      "id": "neutral-ending",
+      "speaker": "Narrator",
+      "mood": "neutral",
+      "narrative": "The quarterly audit closes accurate, corrected just before sign-off.",
       "ending": {
         "kind": "neutral",
-        "debrief": "You got there - but only because the compliance lead remembered the rate-limit fix and pushed back first. If they hadn't, \"prod matches BL-01 exactly\" would have gone into the quarterly review as fact. Comparing commit IDs directly the first time isn't optional busywork; it's the only way \"does it still match\" doesn't depend on who happens to remember what shipped after the baseline."
-      }
-    },
-    "matches-worse": {
-      "id": "matches-worse",
-      "speaker": "Narrator",
-      "mood": "danger",
-      "narrative": "You insist prod matches BL-01 exactly. The quarterly review goes out claiming the launch configuration is still exactly what's running - and nobody re-audits the rate-limit fix that's actually been live for weeks.",
-      "autoNext": "matches-worse-end"
-    },
-    "matches-worse-end": {
-      "id": "matches-worse-end",
-      "speaker": "Narrator",
-      "mood": "danger",
-      "narrative": "Months later, an actual incident traces back to that same rate-limit threshold - and the postmortem discovers it was never audited, because the last review certified prod as \"unchanged since BL-01.\"",
-      "ending": {
-        "kind": "bad",
-        "debrief": "A false \"matches exactly\" claim let a real, unaudited change sit unexamined for months until it mattered. BL-01 names c2; prod names c3. Those are different commits, and no amount of the two looking similar changes that. Comparing labels instead of the actual IDs underneath them is exactly the shortcut Configuration Audit exists to catch."
-      }
-    },
-
-    "wrong-missing-open": {
-      "id": "wrong-missing-open",
-      "speaker": "Narrator",
-      "mood": "tense",
-      "narrative": "You tell compliance prod is missing a commit BL-01 already included. But prod is a descendant of BL-01, not a divergent or earlier point - it has everything BL-01 has, plus one more commit on top. Nothing is missing; something extra was added.",
-      "autoNext": "wrong-missing-team-beat"
-    },
-    "wrong-missing-team-beat": {
-      "id": "wrong-missing-team-beat",
-      "speaker": "Compliance Lead",
-      "mood": "tense",
-      "narrative": "\"Missing something? That's strange - nothing's been reverted that I know of. Did you check whether prod is actually behind BL-01, or ahead of it?\"",
-      "autoNext": "wrong-missing-consequence"
-    },
-    "wrong-missing-consequence": {
-      "id": "wrong-missing-consequence",
-      "speaker": "You",
-      "mood": "danger",
-      "narrative": "The compliance lead's right to ask - you assumed a direction of drift without actually checking which ref is ahead of which.",
-      "graph": {
-        "commits": {
-          "c1": {
-            "id": "c1",
-            "parentIds": [],
-            "message": "release: cut v1.0.0",
-            "authorSigned": true,
-            "timestamp": 0
-          },
-          "c2": {
-            "id": "c2",
-            "parentIds": ["c1"],
-            "message": "chore: tag baseline BL-01 - approved launch configuration",
-            "authorSigned": true,
-            "timestamp": 1
-          },
-          "c3": {
-            "id": "c3",
-            "parentIds": ["c2"],
-            "message": "fix: bump rate-limit threshold under load (Refs: CR-201)",
-            "authorSigned": true,
-            "timestamp": 2
-          }
-        },
-        "refs": {
-          "BL-01": { "name": "BL-01", "commitId": "c2" },
-          "prod": { "name": "prod", "commitId": "c3" }
-        },
-        "head": { "type": "branch", "name": "prod" }
-      },
-      "prompt": "Do you check which ref is actually ahead of which, or defend your answer?",
-      "choices": [
-        {
-          "id": "recheck",
-          "label": "Check which ref is actually ahead",
-          "nextStageId": "missing-recover"
-        },
-        {
-          "id": "defend",
-          "label": "Defend your answer - something's missing",
-          "nextStageId": "missing-worse"
-        }
-      ]
-    },
-    "missing-recover": {
-      "id": "missing-recover",
-      "speaker": "You",
-      "mood": "calm",
-      "narrative": "You check the direction properly. Prod's parent is BL-01's commit - prod is ahead, not behind. Nothing is missing; there's an extra, unaudited commit on top.",
-      "autoNext": "missing-recover-end"
-    },
-    "missing-recover-end": {
-      "id": "missing-recover-end",
-      "speaker": "Narrator",
-      "mood": "calm",
-      "narrative": "You correct your answer and report the drift accurately.",
-      "ending": {
-        "kind": "good",
-        "debrief": "You caught the mistake before it went out backwards. \"Doesn't match\" has a direction, and assuming it without checking almost sent compliance looking for a missing revert that never happened. The habit that scales is checking which ref is actually the descendant, not guessing at the shape of the drift."
-      }
-    },
-    "missing-worse": {
-      "id": "missing-worse",
-      "speaker": "Narrator",
-      "mood": "danger",
-      "narrative": "You insist something's missing from prod. The team spends the afternoon searching for a reverted or rolled-back commit that was never actually removed - while the real issue, an unaudited addition, sits untouched the entire time.",
-      "autoNext": "missing-worse-end"
-    },
-    "missing-worse-end": {
-      "id": "missing-worse-end",
-      "speaker": "Narrator",
-      "mood": "danger",
-      "narrative": "By evening, someone finally checks the parent chain directly and realizes the drift runs the opposite direction from what was reported. The search for a phantom missing commit wasted the whole afternoon.",
-      "ending": {
-        "kind": "bad",
-        "debrief": "An afternoon went into searching for a commit that was never missing, because the direction of the drift was assumed instead of checked. Prod is a strict descendant of BL-01 - it has one commit more, not one commit less. Getting the direction wrong isn't a small error; it sends the entire investigation the wrong way."
-      }
-    },
-
-    "wrong-canttell-open": {
-      "id": "wrong-canttell-open",
-      "speaker": "Narrator",
-      "mood": "tense",
-      "narrative": "You tell compliance it can't be determined from the graph alone. But the graph shows exactly what each ref names and exactly how the commits connect - that's the entire question, answered directly, with nothing left to guess at.",
-      "autoNext": "wrong-canttell-team-beat"
-    },
-    "wrong-canttell-team-beat": {
-      "id": "wrong-canttell-team-beat",
-      "speaker": "Compliance Lead",
-      "mood": "tense",
-      "narrative": "\"Can't tell? Isn't the whole point of the commit graph that we can trace exactly what's where? What would you need that isn't already right there?\"",
-      "autoNext": "wrong-canttell-consequence"
-    },
-    "wrong-canttell-consequence": {
-      "id": "wrong-canttell-consequence",
-      "speaker": "You",
-      "mood": "danger",
-      "narrative": "You don't actually have an answer to that - the graph really does have everything needed, and you reached for \"can't tell\" instead of reading it.",
-      "graph": {
-        "commits": {
-          "c1": {
-            "id": "c1",
-            "parentIds": [],
-            "message": "release: cut v1.0.0",
-            "authorSigned": true,
-            "timestamp": 0
-          },
-          "c2": {
-            "id": "c2",
-            "parentIds": ["c1"],
-            "message": "chore: tag baseline BL-01 - approved launch configuration",
-            "authorSigned": true,
-            "timestamp": 1
-          },
-          "c3": {
-            "id": "c3",
-            "parentIds": ["c2"],
-            "message": "fix: bump rate-limit threshold under load (Refs: CR-201)",
-            "authorSigned": true,
-            "timestamp": 2
-          }
-        },
-        "refs": {
-          "BL-01": { "name": "BL-01", "commitId": "c2" },
-          "prod": { "name": "prod", "commitId": "c3" }
-        },
-        "head": { "type": "branch", "name": "prod" }
-      },
-      "prompt": "Do you actually read what the graph shows, or defend your answer?",
-      "choices": [
-        {
-          "id": "recheck",
-          "label": "Actually read what the graph shows",
-          "nextStageId": "canttell-recover"
-        },
-        {
-          "id": "defend",
-          "label": "Defend your answer - it's genuinely unclear",
-          "nextStageId": "canttell-worse"
-        }
-      ]
-    },
-    "canttell-recover": {
-      "id": "canttell-recover",
-      "speaker": "You",
-      "mood": "calm",
-      "narrative": "You actually read it this time. BL-01 names c2, prod names c3, and c3's parent is c2. That's a complete, unambiguous answer - prod is one audited-free commit past BL-01.",
-      "autoNext": "canttell-recover-end"
-    },
-    "canttell-recover-end": {
-      "id": "canttell-recover-end",
-      "speaker": "Narrator",
-      "mood": "calm",
-      "narrative": "You give compliance the real answer instead of a shrug.",
-      "ending": {
-        "kind": "good",
-        "debrief": "\"Can't tell\" was never true here - the graph names both refs' commits and their exact relationship, which is the whole question. You recovered by actually reading it instead of defending a guess that there wasn't enough information. Configuration Audit depends on someone being willing to read the graph, not decide in advance that it's unreadable."
-      }
-    },
-    "canttell-worse": {
-      "id": "canttell-worse",
-      "speaker": "Narrator",
-      "mood": "danger",
-      "narrative": "You insist it's genuinely unclear and ask for more information that doesn't exist. The quarterly review ships with \"audit inconclusive\" next to the launch configuration - a config that was, in fact, perfectly traceable the whole time.",
-      "autoNext": "canttell-worse-end"
-    },
-    "canttell-worse-end": {
-      "id": "canttell-worse-end",
-      "speaker": "Narrator",
-      "mood": "danger",
-      "narrative": "The \"inconclusive\" result triggers a much heavier follow-up audit weeks later - one that finds the exact same two commits, and the exact same answer that was available from the graph all along.",
-      "ending": {
-        "kind": "bad",
-        "debrief": "\"Can't tell\" turned a two-minute graph read into a full follow-up audit weeks later, for the same answer that was sitting right there in BL-01's and prod's commit IDs. The graph isn't incomplete just because reading it takes a moment of attention - declaring it unreadable instead of reading it is its own kind of audit failure."
+        "debrief": "You got there - but only because someone else asked whether a tag matching its own current position is the same as matching what was actually approved. It isn't. Catching that the first time, without needing the question asked back at you, is the habit a baseline's whole purpose depends on."
       }
     }
   }
