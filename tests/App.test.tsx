@@ -216,6 +216,12 @@ describe("App", () => {
     });
     fireEvent.click(nextButton);
 
+    // CR-114: Chapter 2 now carries a project brief too, shown first.
+    expect(
+      screen.getByText("Sprint 14 — Merge Verification"),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Begin" }));
+
     expect(
       screen.getByRole("heading", { name: "Whose Fix Made It?" }),
     ).toBeInTheDocument();
@@ -275,22 +281,26 @@ describe("App", () => {
     });
 
     it("skips straight to the level for one with no project brief", () => {
-      // Chapter 2 doesn't have a project brief yet (only Chapters 1 and 3
-      // do, as of CR-113) - unlock it and confirm it opens directly.
+      // Chapter 4 doesn't have a project brief yet (only Chapters 1, 2,
+      // and 3 do, as of CR-114) - unlock it and confirm it opens directly.
       usePlayerStore.getState().setName("Test Player");
       usePlayerStore.setState({
         progress: {
           "STORY-01-01-which-one-shipped": { passed: true, totalRuns: 1 },
+          "STORY-02-01-whose-fix-made-it": { passed: true, totalRuns: 1 },
+          "STORY-03-01-who-skipped-review": { passed: true, totalRuns: 1 },
         },
       });
       render(<App />);
       fireEvent.click(screen.getByRole("button", { name: /^Continue/ }));
       fireEvent.click(
-        screen.getByRole("button", { name: "Whose Fix Made It?" }),
+        screen.getByRole("button", {
+          name: "What Does Prod Actually Run?",
+        }),
       );
 
       expect(
-        screen.getByRole("heading", { name: "Whose Fix Made It?" }),
+        screen.getByRole("heading", { name: "What Does Prod Actually Run?" }),
       ).toBeInTheDocument();
       expect(screen.queryByText("Project brief")).not.toBeInTheDocument();
     });
