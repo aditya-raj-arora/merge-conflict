@@ -281,8 +281,8 @@ describe("App", () => {
     });
 
     it("skips straight to the level for one with no project brief", () => {
-      // Chapter 5 doesn't have a project brief yet (only Chapters 1-4
-      // do, as of CR-115) - unlock it and confirm it opens directly.
+      // Chapter 6 doesn't have a project brief yet (only Chapters 1-5
+      // do, as of CR-116) - unlock it and confirm it opens directly.
       usePlayerStore.getState().setName("Test Player");
       usePlayerStore.setState({
         progress: {
@@ -293,18 +293,22 @@ describe("App", () => {
             passed: true,
             totalRuns: 1,
           },
+          "STORY-05-01-does-it-still-match": {
+            passed: true,
+            totalRuns: 1,
+          },
         },
       });
       render(<App />);
       fireEvent.click(screen.getByRole("button", { name: /^Continue/ }));
       fireEvent.click(
         screen.getByRole("button", {
-          name: "Does It Still Match?",
+          name: "Which Tag Lied?",
         }),
       );
 
       expect(
-        screen.getByRole("heading", { name: "Does It Still Match?" }),
+        screen.getByRole("heading", { name: "Which Tag Lied?" }),
       ).toBeInTheDocument();
       expect(screen.queryByText("Project brief")).not.toBeInTheDocument();
     });
