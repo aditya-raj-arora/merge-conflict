@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import App from "../src/App";
 import { usePlayerStore } from "../src/state/usePlayerStore";
+import { TIERS } from "../content/levelManifest";
 
 /** Sets a saved name directly via the store, the way a real returning
  * player's persisted profile would already have one - then renders App
@@ -35,6 +36,40 @@ describe("App", () => {
     expect(
       screen.getByRole("button", { name: "Which One Shipped?" }),
     ).toBeInTheDocument();
+  });
+
+  describe("welcome screen progression blurb (CR-119)", () => {
+    it("explains the tier gate, naming each gated tier and its real threshold", () => {
+      render(<App />);
+
+      // The copy is generated from TIERS rather than written out by hand,
+      // precisely so it can't go stale the way the pre-CR-119 wording did
+      // (it still promised "pass one before the next becomes available"
+      // for a whole release after CR-118 started charging for a tier).
+      for (const tier of TIERS.filter((t) => t.unlockThreshold > 0)) {
+        expect(
+          screen.getByText(
+            new RegExp(
+              `${tier.name} at ${tier.unlockThreshold.toLocaleString()}`,
+            ),
+          ),
+        ).toBeInTheDocument();
+      }
+    });
+
+    it("no longer claims passing the previous chapter is all it takes", () => {
+      render(<App />);
+      expect(
+        screen.queryByText(/pass one before the next becomes available/i),
+      ).not.toBeInTheDocument();
+    });
+
+    it("says earnings are never clawed back by a mistake", () => {
+      render(<App />);
+      expect(
+        screen.getByText(/never takes back a tier you've already opened/i),
+      ).toBeInTheDocument();
+    });
   });
 
   describe("title screen (CR-111)", () => {
