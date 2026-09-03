@@ -8,6 +8,14 @@ This file is auto-maintained going forward by `release-please` off our
 Conventional Commit history — we just keep the `[Unreleased]` section honest
 in the meantime.
 
+## [0.10.1](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.10.0...v0.10.1) (2026-09-03)
+
+
+### Features
+
+* **content:** redesign Chapter 1 with project brief + 5+ decisions ([e584902](https://github.com/aditya-raj-arora/merge-conflict/commit/e5849028d92276af733ad41d3e52ba1078f0119a))
+* **content:** redesign Chapter 1 with project brief + 5+ decisions ([#141](https://github.com/aditya-raj-arora/merge-conflict/issues/141)) ([e584902](https://github.com/aditya-raj-arora/merge-conflict/commit/e5849028d92276af733ad41d3e52ba1078f0119a))
+
 ## [0.10.0](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.9.2...v0.10.0) (2026-09-03)
 
 
