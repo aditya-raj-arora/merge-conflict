@@ -8,6 +8,14 @@ This file is auto-maintained going forward by `release-please` off our
 Conventional Commit history — we just keep the `[Unreleased]` section honest
 in the meantime.
 
+## [0.9.0](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.8.5...v0.9.0) (2026-09-03)
+
+
+### Features
+
+* **progression:** level unlocking, budget economy, and player profile ([f6ac879](https://github.com/aditya-raj-arora/merge-conflict/commit/f6ac879907e9c55ba5a7cf21bee600e11c4709ab))
+* **progression:** level unlocking, budget economy, and player profile ([#125](https://github.com/aditya-raj-arora/merge-conflict/issues/125)) ([f6ac879](https://github.com/aditya-raj-arora/merge-conflict/commit/f6ac879907e9c55ba5a7cf21bee600e11c4709ab))
+
 ## [0.8.5](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.8.4...v0.8.5) (2026-09-01)
 
 
