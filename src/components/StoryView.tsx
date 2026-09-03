@@ -13,10 +13,16 @@ import { useStoryStore } from "../state/useStoryStore";
 import { usePlayerStore } from "../state/usePlayerStore";
 import { GraphCanvas } from "./GraphCanvas";
 import type { Story, StoryMood } from "../engine/mechanics/story";
+import type { ManifestEntry } from "../../content/levelManifest";
 
 export interface StoryViewProps {
   story: Story;
   onBack?: () => void;
+  /** The next level in manifest order, if any (CR-111) - only its title
+   * is used, to label the shortcut button. */
+  nextLevel?: ManifestEntry;
+  /** Present only when there's a next level to jump to. */
+  onNextLevel?: () => void;
 }
 
 const MOOD_BACKDROPS: Record<StoryMood, string> = {
@@ -34,7 +40,12 @@ const ENDING_STYLES = {
 
 const REVEAL_MS_PER_CHAR = 14;
 
-export function StoryView({ story, onBack }: StoryViewProps) {
+export function StoryView({
+  story,
+  onBack,
+  nextLevel,
+  onNextLevel,
+}: StoryViewProps) {
   const {
     story: loadedStory,
     currentStageId,
@@ -225,13 +236,24 @@ export function StoryView({ story, onBack }: StoryViewProps) {
                   {lastReward.amount.toLocaleString()}
                 </p>
               )}
-              <button
-                type="button"
-                onClick={restart}
-                className="mt-4 rounded border border-slate-600 px-4 py-2"
-              >
-                Play again
-              </button>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={restart}
+                  className="rounded border border-slate-600 px-4 py-2"
+                >
+                  Play again
+                </button>
+                {stage.ending.kind === "good" && onNextLevel && nextLevel && (
+                  <button
+                    type="button"
+                    onClick={onNextLevel}
+                    className="rounded bg-emerald-600 px-4 py-2 font-medium text-slate-950"
+                  >
+                    Next Level: {nextLevel.title} →
+                  </button>
+                )}
+              </div>
             </>
           )}
         </div>

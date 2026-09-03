@@ -1,13 +1,17 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import App from "../src/App";
 import { usePlayerStore } from "../src/state/usePlayerStore";
 
-/** Bypasses the welcome screen directly via the store, the same way
- * WelcomeScreen's onStart does - keeps tests that aren't about the
- * welcome flow itself focused on what they're actually testing. */
-function startAsPlayer(name = "Test Player") {
+/** Sets a saved name directly via the store, the way a real returning
+ * player's persisted profile would already have one - then renders App
+ * and clicks past the resulting title screen (CR-111), the same way a
+ * player clicking "Continue" would. Keeps tests that aren't about the
+ * welcome/title flow itself focused on what they're actually testing. */
+function renderAsReturningPlayer(name = "Test Player") {
   usePlayerStore.getState().setName(name);
+  render(<App />);
+  fireEvent.click(screen.getByRole("button", { name: /^Continue/ }));
 }
 
 beforeEach(() => {
@@ -15,7 +19,7 @@ beforeEach(() => {
 });
 
 describe("App", () => {
-  it("shows the welcome screen first for a new player, and proceeds to level-select after entering a name", () => {
+  it("shows the welcome screen first for a new player, and proceeds straight to level-select after entering a name (no title screen)", () => {
     render(<App />);
     expect(
       screen.getByRole("heading", { name: "Merge Conflict" }),
@@ -33,17 +37,65 @@ describe("App", () => {
     ).toBeInTheDocument();
   });
 
-  it("a returning player (name already saved) goes straight to level-select", () => {
-    startAsPlayer();
-    render(<App />);
-    expect(
-      screen.getByRole("button", { name: "Which One Shipped?" }),
-    ).toBeInTheDocument();
+  describe("title screen (CR-111)", () => {
+    it("a returning player (name already saved) sees the title screen, not level-select, first", () => {
+      usePlayerStore.getState().setName("Test Player");
+      render(<App />);
+
+      expect(
+        screen.getByText(/welcome back, test player/i),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: "Which One Shipped?" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("Continue proceeds to level-select", () => {
+      usePlayerStore.getState().setName("Test Player");
+      render(<App />);
+
+      fireEvent.click(screen.getByRole("button", { name: /^Continue/ }));
+
+      expect(
+        screen.getByRole("button", { name: "Which One Shipped?" }),
+      ).toBeInTheDocument();
+    });
+
+    it("shows the last-played level's title on the Continue button, once there is one", () => {
+      usePlayerStore.setState({
+        name: "Test Player",
+        lastPlayedLevelId: "STORY-01-01-which-one-shipped",
+      });
+      render(<App />);
+
+      expect(
+        screen.getByText(/last played: which one shipped\?/i),
+      ).toBeInTheDocument();
+    });
+
+    it("New Game is confirm-gated and wipes the profile back to the welcome screen", () => {
+      usePlayerStore.getState().setName("Test Player");
+      render(<App />);
+
+      fireEvent.click(screen.getByRole("button", { name: "New Game" }));
+      expect(
+        screen.getByText(/wipes your name, budget, and all progress/i),
+      ).toBeInTheDocument();
+      // Not wiped yet.
+      expect(usePlayerStore.getState().name).toBe("Test Player");
+
+      fireEvent.click(screen.getByRole("button", { name: "Yes, start over" }));
+
+      expect(usePlayerStore.getState().name).toBeNull();
+      expect(
+        screen.getByRole("heading", { name: "Merge Conflict" }),
+      ).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("Your name")).toBeInTheDocument();
+    });
   });
 
   it("only Chapter 1 is unlocked at the start - Chapter 2 is locked", () => {
-    startAsPlayer();
-    render(<App />);
+    renderAsReturningPlayer();
     // The button's accessible name includes the "Locked" icon label
     // appended after the title (CR-109), hence the regex.
     expect(
@@ -52,8 +104,7 @@ describe("App", () => {
   });
 
   it("selecting the unlocked Chapter 1 story loads it; choices appear once the reveal is skipped; back returns to select", () => {
-    startAsPlayer();
-    render(<App />);
+    renderAsReturningPlayer();
 
     fireEvent.click(screen.getByRole("button", { name: "Which One Shipped?" }));
     expect(
@@ -78,23 +129,23 @@ describe("App", () => {
   });
 
   it("passing Chapter 1 (reaching a good ending) unlocks Chapter 2", () => {
-    startAsPlayer();
+    renderAsReturningPlayer();
     // Seeded directly - the unlock gate is what's under test here, not
     // the story content itself (that's ch01-story.test.ts's job).
-    usePlayerStore.setState({
-      progress: {
-        "STORY-01-01-which-one-shipped": { passed: true, totalRuns: 1 },
-      },
+    act(() => {
+      usePlayerStore.setState({
+        progress: {
+          "STORY-01-01-which-one-shipped": { passed: true, totalRuns: 1 },
+        },
+      });
     });
-    render(<App />);
     expect(
       screen.getByRole("button", { name: "Whose Fix Made It?" }),
     ).toBeEnabled();
   });
 
   it("cannot open a level that isn't unlocked, even by forcing selectedLevelId (defensive gate)", () => {
-    startAsPlayer();
-    render(<App />);
+    renderAsReturningPlayer();
     // Chapter 2's button is disabled and rendered without an onClick
     // handler firing anything, so clicking it is a no-op - this
     // confirms the level-select screen, not just App's own state, stays
@@ -104,6 +155,40 @@ describe("App", () => {
     );
     expect(
       screen.getByRole("heading", { name: "Merge Conflict" }),
+    ).toBeInTheDocument();
+  });
+
+  it("remembers the last played level once a level is opened", () => {
+    renderAsReturningPlayer();
+    fireEvent.click(screen.getByRole("button", { name: "Which One Shipped?" }));
+    expect(usePlayerStore.getState().lastPlayedLevelId).toBe(
+      "STORY-01-01-which-one-shipped",
+    );
+  });
+
+  it("offers a Next Level shortcut once a level is passed, jumping straight into the next one", () => {
+    renderAsReturningPlayer();
+    fireEvent.click(screen.getByRole("button", { name: "Which One Shipped?" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /click to skip text reveal/i }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "build-b" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /click to skip text reveal/i }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "▼ Continue" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /click to skip text reveal/i }),
+    );
+
+    const nextButton = screen.getByRole("button", {
+      name: /^Next Level: Whose Fix Made It\?/,
+    });
+    fireEvent.click(nextButton);
+
+    expect(
+      screen.getByRole("heading", { name: "Whose Fix Made It?" }),
     ).toBeInTheDocument();
   });
 });
