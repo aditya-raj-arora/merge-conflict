@@ -18,6 +18,11 @@ export interface StoryEnding {
   debrief: string;
 }
 
+/** Convenience alias for the economy layer (CR-109) - reward tables key
+ * off exactly this union, without importing StoryEnding just for its
+ * one field. */
+export type StoryEndingKind = StoryEnding["kind"];
+
 /** Drives StoryView's backdrop theme (CR-095) - purely presentational,
  * the engine never reasons about mood. */
 export type StoryMood = "calm" | "tense" | "danger" | "neutral";
