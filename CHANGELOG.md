@@ -8,6 +8,14 @@ This file is auto-maintained going forward by `release-please` off our
 Conventional Commit history — we just keep the `[Unreleased]` section honest
 in the meantime.
 
+## [0.9.1](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.9.0...v0.9.1) (2026-09-03)
+
+
+### Features
+
+* **progression:** add a reset-progress option to level-select ([7bbfc4d](https://github.com/aditya-raj-arora/merge-conflict/commit/7bbfc4de903941a0144ae7cd4e47c202a432c6b6))
+* **progression:** add a reset-progress option to level-select ([#129](https://github.com/aditya-raj-arora/merge-conflict/issues/129)) ([7bbfc4d](https://github.com/aditya-raj-arora/merge-conflict/commit/7bbfc4de903941a0144ae7cd4e47c202a432c6b6))
+
 ## [0.9.0](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.8.5...v0.9.0) (2026-09-03)
 
 
