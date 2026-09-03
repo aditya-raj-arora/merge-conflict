@@ -1,9 +1,13 @@
-// CSU-02.03.001-SRC-LevelSelect_r2
+// CSU-02.03.001-SRC-LevelSelect_r3
 // TLCSC-02-UI: the level-select screen. Originally shipped with no
 // progress tracking or unlock gating at all (CR-058) - CR-109 adds
 // sequential unlock gating, a passed badge, and the player's name/budget
 // header, reading usePlayerStore directly rather than via props so App
-// doesn't have to thread player state through.
+// doesn't have to thread player state through. CR-110 exposes
+// usePlayerStore's resetProfile() (added but deliberately unexposed at
+// CR-109) as a "Reset progress" control, behind an inline confirm step
+// since it's destructive and irreversible.
+import { useState } from "react";
 import type { ManifestEntry } from "../../content/levelManifest";
 import { isLevelUnlocked } from "../engine/economy";
 import { usePlayerStore } from "../state/usePlayerStore";
@@ -18,8 +22,11 @@ export function LevelSelect({ entries, onSelect }: LevelSelectProps) {
   const name = usePlayerStore((s) => s.name);
   const budget = usePlayerStore((s) => s.budget);
   const progress = usePlayerStore((s) => s.progress);
+  const resetProfile = usePlayerStore((s) => s.resetProfile);
 
   const levelIds = entries.map((e) => e.id);
+
+  const [confirmingReset, setConfirmingReset] = useState(false);
 
   return (
     <div className="mx-auto max-w-2xl p-6 text-slate-100">
@@ -76,6 +83,41 @@ export function LevelSelect({ entries, onSelect }: LevelSelectProps) {
           </ul>
         </section>
       ))}
+
+      <div className="mt-8 border-t border-slate-800 pt-4">
+        {confirmingReset ? (
+          <div className="flex flex-wrap items-center gap-3">
+            <p className="text-sm text-rose-300">
+              This wipes your name, budget, and all progress. Are you sure?
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                resetProfile();
+                setConfirmingReset(false);
+              }}
+              className="rounded border border-rose-600 bg-rose-950/40 px-3 py-1 text-sm text-rose-300 hover:border-rose-400"
+            >
+              Yes, reset
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirmingReset(false)}
+              className="rounded border border-slate-600 px-3 py-1 text-sm hover:border-slate-400"
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setConfirmingReset(true)}
+            className="text-sm text-slate-500 hover:text-slate-300"
+          >
+            Reset progress
+          </button>
+        )}
+      </div>
     </div>
   );
 }
