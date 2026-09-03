@@ -8,21 +8,21 @@ would actually check first).
 
 ## Ledger
 
-| Item                                               | Current Version                                | Environment                         | Last Change                                | Open CRs |
-| -------------------------------------------------- | ---------------------------------------------- | ----------------------------------- | ------------------------------------------ | -------- |
-| CSCI-MC (whole app)                                | `v0.8.4` / `BL-14-ch05-vn-story`               | staging + prod (both verified live) | 2026-09-01, Chapter 5 VN redesign (CR-107) | —        |
-| TLCSC-02-UI > LevelSelect                          | `_r1` (new)                                    | staging + prod                      | 2026-08-20                                 | —        |
-| TLCSC-01-ENGINE (commit graph + level mechanics)   | `_r1` (all units)                              | staging + prod                      | 2026-08-06                                 | —        |
-| TLCSC-02-UI (GraphCanvas, LevelView)               | `_r1`                                          | staging + prod                      | 2026-08-06                                 | —        |
-| TLCSC-03-STATE (useGameStore)                      | `_r1`                                          | staging + prod                      | 2026-08-06                                 | —        |
-| TLCSC-04-CONTENT > LLCSC-04-01-CH01 (STORY-01-01)  | `_r2` (deepened; supersedes retired LVL-01-01) | staging + prod                      | 2026-09-01                                 | —        |
-| TLCSC-02-UI > StoryView                            | `_r2` (VN UI rebuild)                          | staging + prod                      | 2026-09-01                                 | —        |
-| TLCSC-01-ENGINE > LLCSC-01-02-MECHANICS > story.ts | `_r1` (new)                                    | staging + prod                      | 2026-09-01                                 | —        |
-| TLCSC-04-CONTENT > LLCSC-04-02-CH02 (STORY-02-01)  | `_r1` (supersedes retired LVL-02-01)           | staging + prod                      | 2026-09-01                                 | —        |
-| TLCSC-04-CONTENT > LLCSC-04-03-CH03 (STORY-03-01)  | `_r1` (supersedes retired LVL-03-01)           | staging + prod                      | 2026-09-01                                 | —        |
-| TLCSC-04-CONTENT > LLCSC-04-04-CH04 (STORY-04-01)  | `_r1` (supersedes retired LVL-04-01)           | staging + prod                      | 2026-09-01                                 | —        |
-| TLCSC-04-CONTENT > LLCSC-04-05-CH05 (STORY-05-01)  | `_r1` (supersedes retired LVL-05-01)           | staging + prod                      | 2026-09-01                                 | —        |
-| TLCSC-04-CONTENT > LLCSC-04-06-CH06 (LVL-06-01)    | `_r1` (new)                                    | staging + prod                      | 2026-08-20                                 | —        |
+| Item                                               | Current Version                                | Environment                         | Last Change                                                          | Open CRs |
+| -------------------------------------------------- | ---------------------------------------------- | ----------------------------------- | -------------------------------------------------------------------- | -------- |
+| CSCI-MC (whole app)                                | `v0.8.5` / `BL-15-ch06-vn-story`               | staging + prod (both verified live) | 2026-09-01, Chapter 6 VN redesign (CR-108) - all six chapters now VN | —        |
+| TLCSC-02-UI > LevelSelect                          | `_r1` (new)                                    | staging + prod                      | 2026-08-20                                                           | —        |
+| TLCSC-01-ENGINE (commit graph + level mechanics)   | `_r1` (all units)                              | staging + prod                      | 2026-08-06                                                           | —        |
+| TLCSC-02-UI (GraphCanvas, LevelView)               | `_r1`                                          | staging + prod                      | 2026-08-06                                                           | —        |
+| TLCSC-03-STATE (useGameStore)                      | `_r1`                                          | staging + prod                      | 2026-08-06                                                           | —        |
+| TLCSC-04-CONTENT > LLCSC-04-01-CH01 (STORY-01-01)  | `_r2` (deepened; supersedes retired LVL-01-01) | staging + prod                      | 2026-09-01                                                           | —        |
+| TLCSC-02-UI > StoryView                            | `_r2` (VN UI rebuild)                          | staging + prod                      | 2026-09-01                                                           | —        |
+| TLCSC-01-ENGINE > LLCSC-01-02-MECHANICS > story.ts | `_r1` (new)                                    | staging + prod                      | 2026-09-01                                                           | —        |
+| TLCSC-04-CONTENT > LLCSC-04-02-CH02 (STORY-02-01)  | `_r1` (supersedes retired LVL-02-01)           | staging + prod                      | 2026-09-01                                                           | —        |
+| TLCSC-04-CONTENT > LLCSC-04-03-CH03 (STORY-03-01)  | `_r1` (supersedes retired LVL-03-01)           | staging + prod                      | 2026-09-01                                                           | —        |
+| TLCSC-04-CONTENT > LLCSC-04-04-CH04 (STORY-04-01)  | `_r1` (supersedes retired LVL-04-01)           | staging + prod                      | 2026-09-01                                                           | —        |
+| TLCSC-04-CONTENT > LLCSC-04-05-CH05 (STORY-05-01)  | `_r1` (supersedes retired LVL-05-01)           | staging + prod                      | 2026-09-01                                                           | —        |
+| TLCSC-04-CONTENT > LLCSC-04-06-CH06 (STORY-06-01)  | `_r1` (supersedes retired LVL-06-01)           | staging + prod                      | 2026-09-01                                                           | —        |
 
 _(Table grows one row per top-level CI as they come online. `staging` =
 Vercel, deployed from `develop`; `prod` = GitHub Pages at
