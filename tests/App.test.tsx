@@ -281,26 +281,30 @@ describe("App", () => {
     });
 
     it("skips straight to the level for one with no project brief", () => {
-      // Chapter 4 doesn't have a project brief yet (only Chapters 1, 2,
-      // and 3 do, as of CR-114) - unlock it and confirm it opens directly.
+      // Chapter 5 doesn't have a project brief yet (only Chapters 1-4
+      // do, as of CR-115) - unlock it and confirm it opens directly.
       usePlayerStore.getState().setName("Test Player");
       usePlayerStore.setState({
         progress: {
           "STORY-01-01-which-one-shipped": { passed: true, totalRuns: 1 },
           "STORY-02-01-whose-fix-made-it": { passed: true, totalRuns: 1 },
           "STORY-03-01-who-skipped-review": { passed: true, totalRuns: 1 },
+          "STORY-04-01-what-does-prod-actually-run": {
+            passed: true,
+            totalRuns: 1,
+          },
         },
       });
       render(<App />);
       fireEvent.click(screen.getByRole("button", { name: /^Continue/ }));
       fireEvent.click(
         screen.getByRole("button", {
-          name: "What Does Prod Actually Run?",
+          name: "Does It Still Match?",
         }),
       );
 
       expect(
-        screen.getByRole("heading", { name: "What Does Prod Actually Run?" }),
+        screen.getByRole("heading", { name: "Does It Still Match?" }),
       ).toBeInTheDocument();
       expect(screen.queryByText("Project brief")).not.toBeInTheDocument();
     });
