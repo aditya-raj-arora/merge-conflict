@@ -8,6 +8,14 @@ This file is auto-maintained going forward by `release-please` off our
 Conventional Commit history — we just keep the `[Unreleased]` section honest
 in the meantime.
 
+## [0.11.1](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.11.0...v0.11.1) (2026-09-03)
+
+
+### Bug Fixes
+
+* **ui:** make graph labels legible and correct the progression blurb ([aaab1b0](https://github.com/aditya-raj-arora/merge-conflict/commit/aaab1b0e0c2ca8d0266235674f3ac15027b58b45)), closes [#164](https://github.com/aditya-raj-arora/merge-conflict/issues/164)
+* **ui:** make graph labels legible and correct the progression blurb ([#165](https://github.com/aditya-raj-arora/merge-conflict/issues/165)) ([aaab1b0](https://github.com/aditya-raj-arora/merge-conflict/commit/aaab1b0e0c2ca8d0266235674f3ac15027b58b45))
+
 ## [0.11.0](https://github.com/aditya-raj-arora/merge-conflict/compare/v0.10.5...v0.11.0) (2026-09-03)
 
 
