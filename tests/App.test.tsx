@@ -280,9 +280,10 @@ describe("App", () => {
       ).toBeInTheDocument();
     });
 
-    it("skips straight to the level for one with no project brief", () => {
-      // Chapter 6 doesn't have a project brief yet (only Chapters 1-5
-      // do, as of CR-116) - unlock it and confirm it opens directly.
+    it("shows the project brief for Chapter 6 too, now that all six chapters have one (CR-117)", () => {
+      // As of CR-117, every chapter (1-6) carries a project brief - there's
+      // no longer a "no brief" chapter left to test the skip-straight-in
+      // case against.
       usePlayerStore.getState().setName("Test Player");
       usePlayerStore.setState({
         progress: {
@@ -308,9 +309,17 @@ describe("App", () => {
       );
 
       expect(
+        screen.getByText("Q3 Release Train — Version Integrity Sweep"),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("heading", { name: "Which Tag Lied?" }),
+      ).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: "Begin" }));
+
+      expect(
         screen.getByRole("heading", { name: "Which Tag Lied?" }),
       ).toBeInTheDocument();
-      expect(screen.queryByText("Project brief")).not.toBeInTheDocument();
     });
   });
 });
