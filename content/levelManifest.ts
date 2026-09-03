@@ -15,6 +15,7 @@
 import { parseLevel, type Level } from "../src/engine/mechanics/level";
 import { parseStory, type Story } from "../src/engine/mechanics/story";
 import type { ProjectBrief } from "../src/engine/project";
+import type { TierDefinition } from "../src/engine/economy";
 import rawStory0101 from "./chapters/ch01-identification/STORY-01-01-which-one-shipped.json";
 import rawStory0201 from "./chapters/ch02-version-control/STORY-02-01-whose-fix-made-it.json";
 import rawStory0301 from "./chapters/ch03-change-control/STORY-03-01-who-skipped-review.json";
@@ -73,4 +74,33 @@ export const levelManifest: ManifestEntry[] = [
   toStoryEntry(rawStory0401),
   toStoryEntry(rawStory0501),
   toStoryEntry(rawStory0601),
+];
+
+// CR-118: three tiers of two chapters each, gating progression on total
+// budget earned (not just on having passed the previous chapter) once a
+// player crosses a tier boundary - see economy.ts's isLevelUnlockedWithTiers
+// for exactly how these thresholds get applied. Tier 1's threshold is
+// nominal (isChapterTierUnlocked always treats tier index 0 as unlocked),
+// kept at 0 here for clarity, not because the number does anything.
+// Tiers 2 and 3's thresholds are set to exactly what two clean "good
+// ending" chapter clears earn (2 x REWARD.storyGood, and 4 x, per
+// src/engine/economy.ts) - a player who plays each tier's two chapters
+// well crosses the next gate right as they finish, without needing to
+// grind or replay anything extra.
+export const TIERS: TierDefinition[] = [
+  {
+    name: "Foundations",
+    chapterIds: ["ch01-identification", "ch02-version-control"],
+    unlockThreshold: 0,
+  },
+  {
+    name: "Operations",
+    chapterIds: ["ch03-change-control", "ch04-status-accounting"],
+    unlockThreshold: 2_000,
+  },
+  {
+    name: "Governance",
+    chapterIds: ["ch05-configuration-audit", "ch06-build-release"],
+    unlockThreshold: 4_000,
+  },
 ];

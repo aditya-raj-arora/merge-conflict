@@ -8,11 +8,12 @@ beforeEach(() => {
 });
 
 describe("usePlayerStore", () => {
-  it("starts with no name, the starting budget, and no progress", () => {
+  it("starts with no name, the starting budget, no progress, and nothing earned yet", () => {
     const state = usePlayerStore.getState();
     expect(state.name).toBeNull();
     expect(state.budget).toBe(STARTING_BUDGET);
     expect(state.progress).toEqual({});
+    expect(state.totalEarned).toBe(0);
   });
 
   it("setName sets the player's name", () => {
@@ -127,7 +128,42 @@ describe("usePlayerStore", () => {
     });
   });
 
-  it("resetProfile wipes name, budget, and progress back to defaults", () => {
+  describe("totalEarned (CR-118)", () => {
+    it("a good/correct reward adds its full amount to totalEarned", () => {
+      usePlayerStore.getState().recordQuizAttempt("lvl-1", true);
+      expect(usePlayerStore.getState().totalEarned).toBe(
+        REWARD.quizCorrectFirstTry,
+      );
+    });
+
+    it("a loss costs budget but never reduces totalEarned", () => {
+      const store = usePlayerStore.getState();
+      store.recordQuizAttempt("lvl-1", true); // earns quizCorrectFirstTry
+      store.recordStoryEnding("story-1", "bad"); // a real loss, budget-wise
+
+      const state = usePlayerStore.getState();
+      expect(state.budget).toBe(
+        STARTING_BUDGET + REWARD.quizCorrectFirstTry + REWARD.storyBad,
+      );
+      // totalEarned only reflects the one positive reward - the loss
+      // never subtracts from it.
+      expect(state.totalEarned).toBe(REWARD.quizCorrectFirstTry);
+    });
+
+    it("a neutral ending's smaller reward still adds to totalEarned", () => {
+      usePlayerStore.getState().recordStoryEnding("story-1", "neutral");
+      expect(usePlayerStore.getState().totalEarned).toBe(REWARD.storyNeutral);
+    });
+
+    it("totalEarned accumulates across multiple rewards, including replays", () => {
+      const store = usePlayerStore.getState();
+      store.recordStoryEnding("story-1", "good");
+      store.recordStoryEnding("story-2", "good");
+      expect(usePlayerStore.getState().totalEarned).toBe(REWARD.storyGood * 2);
+    });
+  });
+
+  it("resetProfile wipes name, budget, progress, and totalEarned back to defaults", () => {
     const store = usePlayerStore.getState();
     store.setName("Ada");
     store.recordQuizAttempt("lvl-1", true);
@@ -138,6 +174,7 @@ describe("usePlayerStore", () => {
     expect(state.budget).toBe(STARTING_BUDGET);
     expect(state.progress).toEqual({});
     expect(state.lastReward).toBeNull();
+    expect(state.totalEarned).toBe(0);
   });
 
   it("clearLastReward clears lastReward without touching budget/progress", () => {

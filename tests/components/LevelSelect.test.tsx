@@ -4,7 +4,7 @@ import { LevelSelect } from "../../src/components/LevelSelect";
 import { usePlayerStore } from "../../src/state/usePlayerStore";
 import { STARTING_BUDGET } from "../../src/engine/economy";
 import type { ManifestEntry } from "../../content/levelManifest";
-import { toQuizEntry } from "../../content/levelManifest";
+import { levelManifest, toQuizEntry, TIERS } from "../../content/levelManifest";
 
 // As of CR-108 every registered chapter is story-format, so this test no
 // longer borrows a real chapter's quiz fixture (that pattern broke on every
@@ -161,6 +161,85 @@ describe("LevelSelect", () => {
       expect(state.name).toBeNull();
       expect(state.budget).toBe(STARTING_BUDGET);
       expect(state.progress).toEqual({});
+    });
+  });
+
+  describe("tiers (CR-118)", () => {
+    it("a chapter not listed in any tier renders with no tier header (synthetic fixtures)", () => {
+      render(<LevelSelect entries={entries} onSelect={() => {}} />);
+      for (const tier of TIERS) {
+        expect(
+          screen.queryByRole("heading", { name: tier.name }),
+        ).not.toBeInTheDocument();
+      }
+    });
+
+    it("renders a heading for each real tier, grouping its chapters underneath", () => {
+      render(<LevelSelect entries={levelManifest} onSelect={() => {}} />);
+      for (const tier of TIERS) {
+        expect(
+          screen.getByRole("heading", { name: tier.name }),
+        ).toBeInTheDocument();
+      }
+    });
+
+    it("a locked tier's first chapter shows how much more is needed, not just a lock icon", () => {
+      // Tier 2 ("Operations") needs 2,000 earned - starting fresh, it
+      // hasn't been.
+      render(<LevelSelect entries={levelManifest} onSelect={() => {}} />);
+      expect(
+        screen.getByText(/unlocks at 2,000 earned — you have 0/i),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /^Who Skipped Review\?/ }),
+      ).toBeDisabled();
+    });
+
+    it("passing both of Tier 1's chapters alone does not unlock Tier 2 without enough earned", () => {
+      usePlayerStore.setState({
+        progress: {
+          "STORY-01-01-which-one-shipped": { passed: true, totalRuns: 1 },
+          "STORY-02-01-whose-fix-made-it": { passed: true, totalRuns: 1 },
+        },
+        totalEarned: 0,
+      });
+      render(<LevelSelect entries={levelManifest} onSelect={() => {}} />);
+      expect(
+        screen.getByRole("button", { name: /^Who Skipped Review\?/ }),
+      ).toBeDisabled();
+    });
+
+    it("Tier 2's first chapter unlocks once totalEarned meets its threshold, even without Tier 1's last chapter passed", () => {
+      usePlayerStore.setState({
+        progress: {
+          "STORY-01-01-which-one-shipped": { passed: true, totalRuns: 1 },
+          // Chapter 2 deliberately left unpassed - CR-118's hybrid gate
+          // means Tier 2 no longer needs it, only the money.
+        },
+        totalEarned: 2_000,
+      });
+      render(<LevelSelect entries={levelManifest} onSelect={() => {}} />);
+      expect(
+        screen.getByRole("button", { name: "Who Skipped Review?" }),
+      ).toBeEnabled();
+      expect(
+        screen.queryByText(/unlocks at 2,000 earned/i),
+      ).not.toBeInTheDocument();
+    });
+
+    it("a tier's second chapter still needs the tier's first chapter passed, money aside", () => {
+      usePlayerStore.setState({
+        progress: {
+          "STORY-01-01-which-one-shipped": { passed: true, totalRuns: 1 },
+          "STORY-02-01-whose-fix-made-it": { passed: true, totalRuns: 1 },
+          // STORY-03-01 unlocked by money but never actually passed.
+        },
+        totalEarned: 2_000,
+      });
+      render(<LevelSelect entries={levelManifest} onSelect={() => {}} />);
+      expect(
+        screen.getByRole("button", { name: /^What Does Prod Actually Run\?/ }),
+      ).toBeDisabled();
     });
   });
 });
