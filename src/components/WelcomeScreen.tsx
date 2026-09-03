@@ -1,10 +1,16 @@
-// CSU-02.05.001-SRC-WelcomeScreen_r1
+// CSU-02.05.001-SRC-WelcomeScreen_r2
 // TLCSC-02-UI: the first-launch screen (CR-109) - introduces the budget
 // economy before the player ever sees a level, and collects their name.
 // Shown only when usePlayerStore has no name yet; App.tsx skips straight
-// to LevelSelect for a returning player.
+// to LevelSelect for a returning player. CR-119 rewrites the progression
+// blurb, which went stale when CR-118 added tier gating - it still said
+// "pass one before the next becomes available," which stopped being the
+// whole story the moment crossing a tier started costing money. The tier
+// names and thresholds are read from TIERS rather than written out by
+// hand, so this copy can't drift out of sync with the real gate again.
 import { useState } from "react";
 import { STARTING_BUDGET } from "../engine/economy";
+import { TIERS } from "../../content/levelManifest";
 
 export interface WelcomeScreenProps {
   onStart: (name: string) => void;
@@ -46,10 +52,20 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
       <div className="mt-6 rounded border border-slate-700 bg-slate-800/50 p-4">
         <h2 className="font-semibold text-sky-300">Progression</h2>
         <p className="mt-2 text-slate-300">
-          Chapters unlock in order. You'll need to pass one before the next
-          becomes available - a quiz level by answering correctly, a story level
-          by reaching a good ending. Anything short of that, you can always try
-          again.
+          The {TIERS.reduce((total, tier) => total + tier.chapterIds.length, 0)}{" "}
+          chapters are grouped into {TIERS.length} tiers. Inside a tier, pass
+          one chapter to unlock the next - a story level by reaching a good
+          ending, a quiz level by answering correctly. Anything short of that,
+          you can always try again.
+        </p>
+        <p className="mt-2 text-slate-300">
+          Opening a whole new tier takes money, not just a pass:{" "}
+          {TIERS.filter((t) => t.unlockThreshold > 0)
+            .map((t) => `${t.name} at ${t.unlockThreshold.toLocaleString()}`)
+            .join(", ")}{" "}
+          earned. That total only counts what you've earned - a bad call still
+          costs you budget, but it never takes back a tier you've already
+          opened.
         </p>
       </div>
 
