@@ -38,6 +38,68 @@ describe("STORY-05-01-does-it-still-match structural validity", () => {
     expect(story.project?.description).toBeTruthy();
   });
 
+  // CR-120 turned this chapter from a reading exercise into an inspection
+  // one: the evidence lives in the graph, and the prose and the choices
+  // must stop handing the answer over. These guard the properties that
+  // made that true, because they are easy to undo by accident when
+  // editing copy.
+  describe("the checks make the player read the graph (CR-120)", () => {
+    const checkStages = [
+      "check-nova-api",
+      "check-nova-web",
+      "check-nova-worker",
+      "check-nova-cache",
+      "check-nova-gateway",
+    ].map((id) => ({ id, stage: story.stages[id] }));
+
+    it("covers all five checks", () => {
+      expect(checkStages.every(({ stage }) => stage?.choices?.length === 2));
+    });
+
+    it("no check narrates whether the two refs actually match", () => {
+      // The old copy said things like "prod's ref points further back -
+      // before that fix ever landed", which is the finding, not the setup.
+      const givesItAway =
+        /points further back|tagged directly at prod|one more commit landed|points somewhere else/i;
+      for (const { id, stage } of checkStages) {
+        expect(`${id}: ${stage.narrative}`).not.toMatch(givesItAway);
+      }
+    });
+
+    it("no choice hedges - both options commit to a concrete claim", () => {
+      // "can't be sure without comparing again" was never once the correct
+      // answer, across every light check in the chapter: a free answer key.
+      const hedging = /can't be sure|close enough|not sure|maybe|probably/i;
+      for (const { id, stage } of checkStages) {
+        for (const choice of stage.choices!) {
+          expect(`${id}/${choice.id}: ${choice.label}`).not.toMatch(hedging);
+        }
+      }
+    });
+
+    it("both options open with a verdict, so neither is the odd one out", () => {
+      for (const { id, stage } of checkStages) {
+        for (const choice of stage.choices!) {
+          expect(`${id}/${choice.id}: ${choice.label}`).toMatch(
+            /^[^:]*: (Drifted|Compliant) - /,
+          );
+        }
+      }
+    });
+
+    it("the two options in a check are close in length, so size isn't a tell", () => {
+      for (const { id, stage } of checkStages) {
+        const lengths = stage.choices!.map((c) => c.label.length);
+        const ratio = Math.max(...lengths) / Math.min(...lengths);
+        // Named in the assertion so a failure says which check drifted.
+        expect({ id, tooLopsided: ratio >= 1.25 }).toEqual({
+          id,
+          tooLopsided: false,
+        });
+      }
+    });
+  });
+
   it("has good, bad, and neutral endings, with three distinct bad endings", () => {
     const endingKinds = Object.values(story.stages)
       .map((s) => s.ending?.kind)

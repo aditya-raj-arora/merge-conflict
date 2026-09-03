@@ -13,6 +13,7 @@ import { useEffect, useRef, useState } from "react";
 import { useStoryStore } from "../state/useStoryStore";
 import { usePlayerStore } from "../state/usePlayerStore";
 import { GraphCanvas } from "./GraphCanvas";
+import { CommitInspector } from "./CommitInspector";
 import type { Story, StoryMood } from "../engine/mechanics/story";
 import type { ManifestEntry } from "../../content/levelManifest";
 
@@ -63,6 +64,10 @@ export function StoryView({
 
   const [revealedLength, setRevealedLength] = useState(0);
   const [revealedForStageId, setRevealedForStageId] = useState(currentStageId);
+  /** Up to two commits the player has picked out of this stage's graph
+   * to inspect or compare (CR-121). Queue semantics: a third pick pushes
+   * out the oldest, and picking a selected commit again deselects it. */
+  const [selectedCommitIds, setSelectedCommitIds] = useState<string[]>([]);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   /** Which ending-stage arrival has already had a reward recorded for it
    * (CR-109) - cleared whenever the current stage isn't an ending, so
@@ -82,7 +87,18 @@ export function StoryView({
   if (currentStageId !== revealedForStageId) {
     setRevealedForStageId(currentStageId);
     setRevealedLength(0);
+    // Each stage asks about its own graph, so a selection made against
+    // the previous one is meaningless here (CR-121).
+    setSelectedCommitIds([]);
   }
+
+  const toggleCommitSelection = (commitId: string) =>
+    setSelectedCommitIds((current) => {
+      if (current.includes(commitId)) {
+        return current.filter((id) => id !== commitId);
+      }
+      return [...current, commitId].slice(-2);
+    });
 
   const stage =
     loadedStory?.id === story.id && currentStageId
@@ -154,7 +170,16 @@ export function StoryView({
 
         {stage.graph && (
           <div className="mt-6 rounded border border-slate-700 bg-slate-800/50 p-4">
-            <GraphCanvas graph={stage.graph} />
+            <GraphCanvas
+              graph={stage.graph}
+              selectedCommitIds={selectedCommitIds}
+              onSelectCommit={toggleCommitSelection}
+            />
+            <CommitInspector
+              graph={stage.graph}
+              selectedCommitIds={selectedCommitIds}
+              onClear={() => setSelectedCommitIds([])}
+            />
           </div>
         )}
       </div>

@@ -17,12 +17,11 @@
       "narrative": "Five configuration items, five baselines, one quarterly audit to close out. You decide to check each one against its recorded baseline before signing off - one at a time, comparing actual commits, not just trusting a tag's current position.",
       "autoNext": "check-nova-api"
     },
-
     "check-nova-api": {
       "id": "check-nova-api",
       "speaker": "You",
       "mood": "calm",
-      "narrative": "CI 1 of 5: Nova API. Its last approved baseline, BL-01, was tagged at a specific commit - \"chore: tag baseline BL-01 - approved launch configuration.\" Since then, one more commit landed: a rate-limit threshold bump, referencing CR-201. Nothing about it looks suspicious - signed, reasonable, with a real CR reference.",
+      "narrative": "CI 1 of 5: Nova API. BL-01 is the last configuration the compliance board signed off on. Every commit in this repo is signed and every change cites a real CR - that was never the question. The question is whether prod is still the configuration that was approved.",
       "graph": {
         "commits": {
           "a1": {
@@ -48,21 +47,30 @@
           }
         },
         "refs": {
-          "BL-01": { "name": "BL-01", "commitId": "a2" },
-          "prod": { "name": "prod", "commitId": "a3" }
+          "BL-01": {
+            "name": "BL-01",
+            "commitId": "a2"
+          },
+          "prod": {
+            "name": "prod",
+            "commitId": "a3"
+          }
         },
-        "head": { "type": "branch", "name": "prod" }
+        "head": {
+          "type": "branch",
+          "name": "prod"
+        }
       },
       "prompt": "Does Nova API's prod still match its approved baseline?",
       "choices": [
         {
           "id": "api-drifted",
-          "label": "No - prod has a commit on top of BL-01 that was never itself audited",
+          "label": "Drifted - prod has moved past the commit BL-01 names",
           "nextStageId": "check-nova-web"
         },
         {
           "id": "api-compliant",
-          "label": "Yes - it's signed, reasonable, and references a real CR",
+          "label": "Compliant - prod is exactly the commit BL-01 names",
           "nextStageId": "api-pushback"
         }
       ]
@@ -88,7 +96,7 @@
         },
         {
           "id": "defend",
-          "label": "Defend it - the change itself is fine",
+          "label": "Defend it - prod is what BL-01 approved",
           "nextStageId": "api-worse"
         }
       ]
@@ -117,12 +125,11 @@
         "debrief": "\"The change looks reasonable\" was never the question - \"does it match what was actually approved\" was. Prod sat one unaudited commit past BL-01 for the whole quarter because a sensible-looking diff got waved through instead of compared against the baseline's real commit ID."
       }
     },
-
     "check-nova-web": {
       "id": "check-nova-web",
       "speaker": "You",
       "mood": "calm",
-      "narrative": "CI 2 of 5: Nova Web. Its baseline, BL-04, is tagged directly at prod's current commit.",
+      "narrative": "CI 2 of 5: Nova Web. Its baseline is BL-04. Same question: is prod still what was approved?",
       "graph": {
         "commits": {
           "w1": {
@@ -141,21 +148,30 @@
           }
         },
         "refs": {
-          "BL-04": { "name": "BL-04", "commitId": "w2" },
-          "prod": { "name": "prod", "commitId": "w2" }
+          "BL-04": {
+            "name": "BL-04",
+            "commitId": "w2"
+          },
+          "prod": {
+            "name": "prod",
+            "commitId": "w2"
+          }
         },
-        "head": { "type": "branch", "name": "prod" }
+        "head": {
+          "type": "branch",
+          "name": "prod"
+        }
       },
       "prompt": "Does Nova Web's prod still match its approved baseline?",
       "choices": [
         {
           "id": "web-compliant",
-          "label": "Yes - prod's commit ID is exactly BL-04's",
+          "label": "Compliant - BL-04 and prod name the same commit",
           "nextStageId": "check-nova-worker"
         },
         {
           "id": "web-drifted",
-          "label": "No - can't be sure without comparing again",
+          "label": "Drifted - BL-04 and prod name different commits",
           "nextStageId": "web-flag-note"
         }
       ]
@@ -164,15 +180,14 @@
       "id": "web-flag-note",
       "speaker": "Narrator",
       "mood": "calm",
-      "narrative": "You compare again anyway. They match exactly - same commit ID.",
+      "narrative": "You check the two refs again. They land on the same node - BL-04 and prod are the same commit. Nothing has moved here.",
       "autoNext": "check-nova-worker"
     },
-
     "check-nova-worker": {
       "id": "check-nova-worker",
       "speaker": "You",
       "mood": "tense",
-      "narrative": "CI 3 of 5: Nova Worker. Its baseline, BL-02, includes a retry-cap fix on top of the original retry logic. But prod's ref points further back - before that fix ever landed.",
+      "narrative": "CI 3 of 5: Nova Worker. Its baseline is BL-02, approved after a run of incidents traced back to the retry logic. Check prod against it.",
       "graph": {
         "commits": {
           "n1": {
@@ -198,21 +213,30 @@
           }
         },
         "refs": {
-          "BL-02": { "name": "BL-02", "commitId": "n3" },
-          "prod": { "name": "prod", "commitId": "n1" }
+          "BL-02": {
+            "name": "BL-02",
+            "commitId": "n3"
+          },
+          "prod": {
+            "name": "prod",
+            "commitId": "n1"
+          }
         },
-        "head": { "type": "branch", "name": "prod" }
+        "head": {
+          "type": "branch",
+          "name": "prod"
+        }
       },
       "prompt": "Does Nova Worker's prod still match its approved baseline?",
       "choices": [
         {
           "id": "worker-drifted",
-          "label": "No - prod is missing the retry-cap fix that BL-02 included",
+          "label": "Drifted - prod sits behind a commit BL-02 includes",
           "nextStageId": "check-nova-cache"
         },
         {
           "id": "worker-compliant",
-          "label": "Yes - it's the same retry logic, close enough",
+          "label": "Compliant - prod includes everything BL-02 includes",
           "nextStageId": "worker-pushback"
         }
       ]
@@ -221,24 +245,24 @@
       "id": "worker-pushback",
       "speaker": "Sana",
       "mood": "tense",
-      "narrative": "\"Close enough? BL-02 exists specifically because that unbounded retry logic caused an infinite loop. If prod's missing the cap, that's not a minor gap.\"",
+      "narrative": "\"Everything? BL-02 exists specifically because that unbounded retry logic caused an infinite loop. If prod is sitting behind the commit that capped it, that's not a minor gap.\"",
       "autoNext": "worker-escalate"
     },
     "worker-escalate": {
       "id": "worker-escalate",
       "speaker": "You",
       "mood": "danger",
-      "narrative": "You treated \"same feature, roughly\" as compliant instead of checking whether prod actually includes everything the baseline does.",
-      "prompt": "Do you check what BL-02 actually included, or defend it as close enough?",
+      "narrative": "You checked that prod and BL-02 were on the same line of history, not how far along it prod actually sits.",
+      "prompt": "Do you check where prod sits relative to BL-02, or defend the call?",
       "choices": [
         {
           "id": "recheck",
-          "label": "Check exactly what BL-02 included",
+          "label": "Check where prod sits relative to BL-02",
           "nextStageId": "worker-recover"
         },
         {
           "id": "defend",
-          "label": "Defend it - it's fundamentally the same retry logic",
+          "label": "Defend it - prod has the retry logic BL-02 approved",
           "nextStageId": "worker-worse"
         }
       ]
@@ -267,12 +291,11 @@
         "debrief": "Configuration Audit isn't just about catching extra, unapproved commits - it's equally about catching when prod is missing something the baseline requires. \"Same feature, roughly\" let an incident BL-02 existed specifically to prevent happen anyway."
       }
     },
-
     "check-nova-cache": {
       "id": "check-nova-cache",
       "speaker": "You",
       "mood": "calm",
-      "narrative": "CI 4 of 5: Nova Cache. Its baseline, BL-03, is tagged directly at prod's current commit.",
+      "narrative": "CI 4 of 5: Nova Cache. Its baseline is BL-03, cut when the eviction policy was finalized. Check prod against it.",
       "graph": {
         "commits": {
           "c1": {
@@ -291,21 +314,30 @@
           }
         },
         "refs": {
-          "BL-03": { "name": "BL-03", "commitId": "c2" },
-          "prod": { "name": "prod", "commitId": "c2" }
+          "BL-03": {
+            "name": "BL-03",
+            "commitId": "c2"
+          },
+          "prod": {
+            "name": "prod",
+            "commitId": "c2"
+          }
         },
-        "head": { "type": "branch", "name": "prod" }
+        "head": {
+          "type": "branch",
+          "name": "prod"
+        }
       },
       "prompt": "Does Nova Cache's prod still match its approved baseline?",
       "choices": [
         {
           "id": "cache-compliant",
-          "label": "Yes - prod's commit ID is exactly BL-03's",
+          "label": "Compliant - prod is sitting on the commit BL-03 tags",
           "nextStageId": "check-nova-gateway"
         },
         {
           "id": "cache-drifted",
-          "label": "No - can't be sure without comparing again",
+          "label": "Drifted - prod is sitting somewhere BL-03 doesn't tag",
           "nextStageId": "cache-flag-note"
         }
       ]
@@ -314,15 +346,14 @@
       "id": "cache-flag-note",
       "speaker": "Narrator",
       "mood": "calm",
-      "narrative": "You compare again anyway. They match exactly.",
+      "narrative": "You check again. Both refs land on the same node - prod is exactly where BL-03 sits.",
       "autoNext": "check-nova-gateway"
     },
-
     "check-nova-gateway": {
       "id": "check-nova-gateway",
       "speaker": "You",
       "mood": "tense",
-      "narrative": "CI 5 of 5: Nova Gateway. Your audit log records BL-05 as approved at a specific commit: \"chore: tag baseline BL-05 - approved gateway configuration.\" But the BL-05 ref right now points somewhere else entirely - at a later, unreviewed config tweak - and prod matches wherever BL-05 currently points.",
+      "narrative": "CI 5 of 5: Nova Gateway. Your audit log is specific about what the board approved as BL-05: the commit whose message reads \"chore: tag baseline BL-05 - approved gateway configuration.\" Check prod against that record.",
       "graph": {
         "commits": {
           "g1": {
@@ -348,21 +379,30 @@
           }
         },
         "refs": {
-          "BL-05": { "name": "BL-05", "commitId": "g3" },
-          "prod": { "name": "prod", "commitId": "g3" }
+          "BL-05": {
+            "name": "BL-05",
+            "commitId": "g3"
+          },
+          "prod": {
+            "name": "prod",
+            "commitId": "g3"
+          }
         },
-        "head": { "type": "branch", "name": "prod" }
+        "head": {
+          "type": "branch",
+          "name": "prod"
+        }
       },
       "prompt": "Does Nova Gateway's prod still match its approved baseline?",
       "choices": [
         {
           "id": "gateway-drifted",
-          "label": "No - prod matches where BL-05 points now, not the commit the audit log actually approved",
+          "label": "Drifted - prod is not the commit the audit log approved",
           "nextStageId": "resolution-clean"
         },
         {
           "id": "gateway-compliant",
-          "label": "Yes - prod's commit ID matches BL-05's tag exactly",
+          "label": "Compliant - prod is exactly where the BL-05 tag points",
           "nextStageId": "gateway-pushback"
         }
       ]
@@ -410,7 +450,6 @@
         "debrief": "A baseline tag that can move after approval isn't a baseline - it's just a label. \"Matches the tag\" was never the same claim as \"matches what the audit log actually approved,\" and treating them as identical let an unreviewed config change get retroactively blessed as part of BL-05."
       }
     },
-
     "resolution-clean": {
       "id": "resolution-clean",
       "speaker": "Narrator",
@@ -428,7 +467,6 @@
         "debrief": "Three different kinds of drift, caught the same way each time: by comparing an actual commit ID against what the audit log recorded as approved, not by trusting a tag's current position or a change's surface-level reasonableness. That's the whole discipline - Configuration Audit isn't about catching bad actors, it's about catching the moment \"approved\" quietly stops being true."
       }
     },
-
     "check-nova-gateway-b-late": {
       "id": "check-nova-gateway-b-late",
       "speaker": "Narrator",
