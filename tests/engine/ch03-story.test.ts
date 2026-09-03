@@ -33,6 +33,11 @@ describe("STORY-03-01-who-skipped-review structural validity", () => {
     expect(validateStoryStructure(story)).toEqual([]);
   });
 
+  it("carries a project brief (CR-112)", () => {
+    expect(story.project?.name).toBeTruthy();
+    expect(story.project?.description).toBeTruthy();
+  });
+
   it("has good, bad, and neutral endings, with three distinct bad endings", () => {
     const endingKinds = Object.values(story.stages)
       .map((s) => s.ending?.kind)
@@ -44,84 +49,6 @@ describe("STORY-03-01-who-skipped-review structural validity", () => {
     expect(endingKinds.filter((k) => k === "bad")).toHaveLength(3);
   });
 
-  it("picking c4 directly reaches a good ending quickly (short path is intentional)", () => {
-    const path = walk(story, [{ choiceId: "c4" }, { auto: true }]);
-    expect(story.stages[path.at(-1)!].ending?.kind).toBe("good");
-    expect(path.length).toBe(3);
-  });
-
-  it("accusing c2, recheck: depth >= 5, recovers to a neutral ending", () => {
-    const path = walk(story, [
-      { choiceId: "c2" },
-      { auto: true },
-      { auto: true },
-      { choiceId: "recheck" },
-      { auto: true },
-    ]);
-    expect(story.stages[path.at(-1)!].ending?.kind).toBe("neutral");
-    expect(path.length).toBeGreaterThanOrEqual(5);
-  });
-
-  it("accusing c2, defend: depth >= 5, reaches a bad ending", () => {
-    const path = walk(story, [
-      { choiceId: "c2" },
-      { auto: true },
-      { auto: true },
-      { choiceId: "defend" },
-      { auto: true },
-    ]);
-    expect(story.stages[path.at(-1)!].ending?.kind).toBe("bad");
-    expect(path.length).toBeGreaterThanOrEqual(5);
-  });
-
-  it("accusing c3, recheck: depth >= 5, recovers to a good ending", () => {
-    const path = walk(story, [
-      { choiceId: "c3" },
-      { auto: true },
-      { auto: true },
-      { choiceId: "recheck" },
-      { auto: true },
-    ]);
-    expect(story.stages[path.at(-1)!].ending?.kind).toBe("good");
-    expect(path.length).toBeGreaterThanOrEqual(5);
-  });
-
-  it("accusing c3, defend: depth >= 5, reaches a bad ending", () => {
-    const path = walk(story, [
-      { choiceId: "c3" },
-      { auto: true },
-      { auto: true },
-      { choiceId: "defend" },
-      { auto: true },
-    ]);
-    expect(story.stages[path.at(-1)!].ending?.kind).toBe("bad");
-    expect(path.length).toBeGreaterThanOrEqual(5);
-  });
-
-  it("accusing c5, recheck: depth >= 5, recovers to a good ending", () => {
-    const path = walk(story, [
-      { choiceId: "c5" },
-      { auto: true },
-      { auto: true },
-      { choiceId: "recheck" },
-      { auto: true },
-    ]);
-    expect(story.stages[path.at(-1)!].ending?.kind).toBe("good");
-    expect(path.length).toBeGreaterThanOrEqual(5);
-  });
-
-  it("accusing c5, defend: depth >= 5, reaches a bad ending", () => {
-    const path = walk(story, [
-      { choiceId: "c5" },
-      { auto: true },
-      { auto: true },
-      { choiceId: "defend" },
-      { auto: true },
-    ]);
-    expect(story.stages[path.at(-1)!].ending?.kind).toBe("bad");
-    expect(path.length).toBeGreaterThanOrEqual(5);
-  });
-
   it("every stage's mood, if set, is one of the known set", () => {
     const knownMoods = new Set(["calm", "tense", "danger", "neutral"]);
     for (const stage of Object.values(story.stages)) {
@@ -129,5 +56,171 @@ describe("STORY-03-01-who-skipped-review structural validity", () => {
         expect(knownMoods.has(stage.mood)).toBe(true);
       }
     }
+  });
+
+  describe("the correct path reviews all 5 commits (CR-112: 5+ real decisions)", () => {
+    it("answering all 5 checks correctly reaches a good ending", () => {
+      const path = walk(story, [
+        { auto: true }, // start -> check-c1
+        { choiceId: "c1-fine" }, // -> check-c2
+        { choiceId: "c2-fine" }, // -> check-c3
+        { choiceId: "c3-fine" }, // -> check-c4
+        { choiceId: "c4-flag" }, // -> check-c5
+        { choiceId: "c5-fine" }, // -> resolution-clean
+        { auto: true }, // -> good-ending
+      ]);
+      expect(story.stages[path.at(-1)!].ending?.kind).toBe("good");
+      // 5 real decisions (one per commit) plus narration stages.
+      expect(path.length).toBe(8);
+    });
+  });
+
+  describe("commit 1 (docs-only, no CR needed) - escalation-capable", () => {
+    it("flagging it, then reconsidering, still reaches a good ending", () => {
+      const path = walk(story, [
+        { auto: true },
+        { choiceId: "c1-flag" },
+        { auto: true },
+        { choiceId: "recheck" },
+        { auto: true },
+        { choiceId: "c2-fine" },
+        { choiceId: "c3-fine" },
+        { choiceId: "c4-flag" },
+        { choiceId: "c5-fine" },
+        { auto: true },
+      ]);
+      expect(story.stages[path.at(-1)!].ending?.kind).toBe("good");
+      expect(path.length).toBeGreaterThanOrEqual(5);
+    });
+
+    it("flagging it and defending reaches a bad ending", () => {
+      const path = walk(story, [
+        { auto: true },
+        { choiceId: "c1-flag" },
+        { auto: true },
+        { choiceId: "defend" },
+        { auto: true },
+      ]);
+      expect(story.stages[path.at(-1)!].ending?.kind).toBe("bad");
+      expect(path.length).toBeGreaterThanOrEqual(5);
+    });
+  });
+
+  describe("commit 2 (caching, has a CR) - escalation-capable", () => {
+    it("flagging it, then reconsidering, still reaches a good ending", () => {
+      const path = walk(story, [
+        { auto: true },
+        { choiceId: "c1-fine" },
+        { choiceId: "c2-flag" },
+        { auto: true },
+        { choiceId: "recheck" },
+        { auto: true },
+        { choiceId: "c3-fine" },
+        { choiceId: "c4-flag" },
+        { choiceId: "c5-fine" },
+        { auto: true },
+      ]);
+      expect(story.stages[path.at(-1)!].ending?.kind).toBe("good");
+      expect(path.length).toBeGreaterThanOrEqual(5);
+    });
+
+    it("flagging it and defending reaches a bad ending", () => {
+      const path = walk(story, [
+        { auto: true },
+        { choiceId: "c1-fine" },
+        { choiceId: "c2-flag" },
+        { auto: true },
+        { choiceId: "defend" },
+        { auto: true },
+      ]);
+      expect(story.stages[path.at(-1)!].ending?.kind).toBe("bad");
+      expect(path.length).toBeGreaterThanOrEqual(5);
+    });
+  });
+
+  describe("commit 3 (pagination fix, has a CR) - light, single-shot", () => {
+    it("misreading it still self-corrects and reaches a good ending", () => {
+      const path = walk(story, [
+        { auto: true },
+        { choiceId: "c1-fine" },
+        { choiceId: "c2-fine" },
+        { choiceId: "c3-flag" },
+        { auto: true },
+        { choiceId: "c4-flag" },
+        { choiceId: "c5-fine" },
+        { auto: true },
+      ]);
+      expect(story.stages[path.at(-1)!].ending?.kind).toBe("good");
+    });
+  });
+
+  describe("commit 4 (the actual culprit - timeout change, no CR) - escalation-capable", () => {
+    it("clearing it, then catching the pushback, reaches a neutral ending", () => {
+      const path = walk(story, [
+        { auto: true },
+        { choiceId: "c1-fine" },
+        { choiceId: "c2-fine" },
+        { choiceId: "c3-fine" },
+        { choiceId: "c4-fine" },
+        { auto: true },
+        { auto: true },
+        { choiceId: "recheck" },
+        { auto: true },
+        { choiceId: "c5-fine" },
+        { auto: true },
+      ]);
+      expect(story.stages[path.at(-1)!].ending?.kind).toBe("neutral");
+      expect(path.length).toBeGreaterThanOrEqual(5);
+    });
+
+    it("clearing it and defending reaches a bad ending", () => {
+      const path = walk(story, [
+        { auto: true },
+        { choiceId: "c1-fine" },
+        { choiceId: "c2-fine" },
+        { choiceId: "c3-fine" },
+        { choiceId: "c4-fine" },
+        { auto: true },
+        { auto: true },
+        { choiceId: "defend" },
+        { auto: true },
+      ]);
+      expect(story.stages[path.at(-1)!].ending?.kind).toBe("bad");
+      expect(path.length).toBeGreaterThanOrEqual(5);
+    });
+  });
+
+  describe("commit 5 (README badges, has a CR) - light, single-shot", () => {
+    it("misreading it on the clean path still reaches a good ending", () => {
+      const path = walk(story, [
+        { auto: true },
+        { choiceId: "c1-fine" },
+        { choiceId: "c2-fine" },
+        { choiceId: "c3-fine" },
+        { choiceId: "c4-flag" },
+        { choiceId: "c5-flag" },
+        { auto: true },
+        { auto: true },
+      ]);
+      expect(story.stages[path.at(-1)!].ending?.kind).toBe("good");
+    });
+
+    it("misreading it on the recovered-late path still reaches a neutral ending", () => {
+      const path = walk(story, [
+        { auto: true },
+        { choiceId: "c1-fine" },
+        { choiceId: "c2-fine" },
+        { choiceId: "c3-fine" },
+        { choiceId: "c4-fine" },
+        { auto: true },
+        { auto: true },
+        { choiceId: "recheck" },
+        { auto: true },
+        { choiceId: "c5-flag" },
+        { auto: true },
+        { auto: true },
+      ]);
+      expect(story.stages[path.at(-1)!].ending?.kind).toBe("neutral");
+    });
   });
 });

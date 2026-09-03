@@ -29,6 +29,7 @@ interface Story {
   title: string; // shown as the story heading, every stage
   startStageId: string; // must be a key in stages
   stages: Record<string, StoryStage>;
+  project?: ProjectBrief; // optional project-brief framing (CR-112) - see SPEC-project-brief-v1.0.md
 }
 
 interface StoryStage {
@@ -120,3 +121,4 @@ including assertions on minimum path depth for the consequence branches.
 | ------- | ---------- | ------------------------------------------------------------------------------ |
 | 1.0     | 2026-09-01 | Initial spec, written alongside STORY-01-01 (CR-091)                           |
 | 1.0     | 2026-09-01 | Added `speaker`, `mood`, `autoNext` for the VN UI and deeper branches (CR-095) |
+| 1.0     | 2026-09-03 | Added optional `project` (CR-112)                                              |

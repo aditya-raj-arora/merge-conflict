@@ -9,8 +9,12 @@
 // code, still covered by their own tests), it just has no active content
 // right now. toQuizEntry/QuizManifestEntry stay exported so a future
 // quiz-format level can register here without re-adding this plumbing.
+// CR-112 adds an optional project-brief (`project`), surfaced uniformly
+// on every entry regardless of kind, so App.tsx doesn't need to know
+// which mechanic a level uses just to decide whether to show one.
 import { parseLevel, type Level } from "../src/engine/mechanics/level";
 import { parseStory, type Story } from "../src/engine/mechanics/story";
+import type { ProjectBrief } from "../src/engine/project";
 import rawStory0101 from "./chapters/ch01-identification/STORY-01-01-which-one-shipped.json";
 import rawStory0201 from "./chapters/ch02-version-control/STORY-02-01-whose-fix-made-it.json";
 import rawStory0301 from "./chapters/ch03-change-control/STORY-03-01-who-skipped-review.json";
@@ -24,6 +28,7 @@ export interface QuizManifestEntry {
   chapterId: string;
   title: string;
   level: Level;
+  project?: ProjectBrief;
 }
 
 export interface StoryManifestEntry {
@@ -32,6 +37,7 @@ export interface StoryManifestEntry {
   chapterId: string;
   title: string;
   story: Story;
+  project?: ProjectBrief;
 }
 
 export type ManifestEntry = QuizManifestEntry | StoryManifestEntry;
@@ -44,6 +50,7 @@ export function toQuizEntry(raw: unknown): QuizManifestEntry {
     chapterId: level.chapterId,
     title: level.title,
     level,
+    project: level.project,
   };
 }
 
@@ -55,6 +62,7 @@ function toStoryEntry(raw: unknown): StoryManifestEntry {
     chapterId: story.chapterId,
     title: story.title,
     story,
+    project: story.project,
   };
 }
 
