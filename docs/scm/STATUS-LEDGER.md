@@ -8,31 +8,40 @@ would actually check first).
 
 ## Ledger
 
-| Item                                                 | Current Version                                     | Environment                                            | Last Change                                    | Open CRs |
-| ---------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------ | ---------------------------------------------- | -------- |
-| CSCI-MC (whole app)                                  | `v0.13.0` / `BL-28-shared-chapter-graph`            | prod (verified live); staging not deployed - see BL-28 | 2026-09-04, Chapter-wide shared graph (CR-122) | —        |
-| TLCSC-01-ENGINE > LLCSC-01-02-MECHANICS > project.ts | `_r1` (new)                                         | staging + prod                                         | 2026-09-03                                     | —        |
-| TLCSC-02-UI > ProjectBriefScreen                     | `_r1` (new)                                         | staging + prod                                         | 2026-09-03                                     | —        |
-| TLCSC-02-UI > LevelSelect                            | `_r4` (adds tier grouping and earn-shortfall hints) | staging + prod                                         | 2026-09-03                                     | —        |
-| TLCSC-02-UI > WelcomeScreen                          | `_r2` (progression copy reads from TIERS)           | staging + prod                                         | 2026-09-04                                     | —        |
-| TLCSC-02-UI > TitleScreen                            | `_r1` (new)                                         | staging + prod                                         | 2026-09-03                                     | —        |
-| TLCSC-01-ENGINE > LLCSC-01-02-MECHANICS > economy.ts | `_r2` (adds tier gating)                            | staging + prod                                         | 2026-09-03                                     | —        |
-| TLCSC-03-STATE > usePlayerStore                      | `_r3` (adds totalEarned)                            | staging + prod                                         | 2026-09-03                                     | —        |
-| TLCSC-01-ENGINE (commit graph)                       | `_r1`                                               | staging + prod                                         | 2026-08-06                                     | —        |
-| TLCSC-01-ENGINE > LLCSC-01-02-MECHANICS > level.ts   | `_r2` (adds optional `project`)                     | staging + prod                                         | 2026-09-03                                     | —        |
-| TLCSC-02-UI (GraphCanvas)                            | `_r3` (adds multi-select and keyboard operation)    | prod (staging pending - see BL-27)                     | 2026-09-04                                     | —        |
-| TLCSC-01-ENGINE > LLCSC-01-01-GRAPH > compare.ts     | `_r1` (new)                                         | prod (staging pending - see BL-27)                     | 2026-09-04                                     | —        |
-| TLCSC-02-UI > CommitInspector                        | `_r1` (new)                                         | prod (staging pending - see BL-27)                     | 2026-09-04                                     | —        |
-| TLCSC-02-UI > LevelView                              | `_r3` (adds the Next Level shortcut)                | staging + prod                                         | 2026-09-03                                     | —        |
-| TLCSC-03-STATE (useGameStore)                        | `_r1`                                               | staging + prod                                         | 2026-08-06                                     | —        |
-| TLCSC-04-CONTENT > LLCSC-04-01-CH01 (STORY-01-01)    | `_r4` (inherits a chapter-wide graph)               | prod (staging pending - see BL-28)                     | 2026-09-04                                     | —        |
-| TLCSC-02-UI > StoryView                              | `_r6` (resolves an inherited chapter graph)         | prod (staging pending - see BL-28)                     | 2026-09-04                                     | —        |
-| TLCSC-01-ENGINE > LLCSC-01-02-MECHANICS > story.ts   | `_r4` (adds story-level `graph` + graphForStage)    | prod (staging pending - see BL-28)                     | 2026-09-04                                     | —        |
-| TLCSC-04-CONTENT > LLCSC-04-02-CH02 (STORY-02-01)    | `_r3` (inherits a chapter-wide graph)               | prod (staging pending - see BL-28)                     | 2026-09-04                                     | —        |
-| TLCSC-04-CONTENT > LLCSC-04-03-CH03 (STORY-03-01)    | `_r3` (inherits a chapter-wide graph)               | prod (staging pending - see BL-28)                     | 2026-09-04                                     | —        |
-| TLCSC-04-CONTENT > LLCSC-04-04-CH04 (STORY-04-01)    | `_r2` (5-question redesign; supersedes prior `_r1`) | staging + prod                                         | 2026-09-03                                     | —        |
-| TLCSC-04-CONTENT > LLCSC-04-05-CH05 (STORY-05-01)    | `_r3` (inspection redesign; supersedes `_r2`)       | prod (staging pending - see BL-27)                     | 2026-09-04                                     | —        |
-| TLCSC-04-CONTENT > LLCSC-04-06-CH06 (STORY-06-01)    | `_r2` (5-question redesign; supersedes prior `_r1`) | staging + prod                                         | 2026-09-03                                     | —        |
+| Item                                                 | Current Version                                     | Environment                         | Last Change                                    | Open CRs |
+| ---------------------------------------------------- | --------------------------------------------------- | ----------------------------------- | ---------------------------------------------- | -------- |
+| CSCI-MC (whole app)                                  | `v0.13.0` / `BL-28-shared-chapter-graph`            | staging + prod (both verified live) | 2026-09-04, Chapter-wide shared graph (CR-122) | —        |
+| TLCSC-01-ENGINE > LLCSC-01-02-MECHANICS > project.ts | `_r1` (new)                                         | staging + prod                      | 2026-09-03                                     | —        |
+| TLCSC-02-UI > ProjectBriefScreen                     | `_r1` (new)                                         | staging + prod                      | 2026-09-03                                     | —        |
+| TLCSC-02-UI > LevelSelect                            | `_r4` (adds tier grouping and earn-shortfall hints) | staging + prod                      | 2026-09-03                                     | —        |
+| TLCSC-02-UI > WelcomeScreen                          | `_r2` (progression copy reads from TIERS)           | staging + prod                      | 2026-09-04                                     | —        |
+| TLCSC-02-UI > TitleScreen                            | `_r1` (new)                                         | staging + prod                      | 2026-09-03                                     | —        |
+| TLCSC-01-ENGINE > LLCSC-01-02-MECHANICS > economy.ts | `_r2` (adds tier gating)                            | staging + prod                      | 2026-09-03                                     | —        |
+| TLCSC-03-STATE > usePlayerStore                      | `_r3` (adds totalEarned)                            | staging + prod                      | 2026-09-03                                     | —        |
+| TLCSC-01-ENGINE (commit graph)                       | `_r1`                                               | staging + prod                      | 2026-08-06                                     | —        |
+| TLCSC-01-ENGINE > LLCSC-01-02-MECHANICS > level.ts   | `_r2` (adds optional `project`)                     | staging + prod                      | 2026-09-03                                     | —        |
+| TLCSC-02-UI (GraphCanvas)                            | `_r3` (adds multi-select and keyboard operation)    | staging + prod                      | 2026-09-04                                     | —        |
+| TLCSC-01-ENGINE > LLCSC-01-01-GRAPH > compare.ts     | `_r1` (new)                                         | staging + prod                      | 2026-09-04                                     | —        |
+| TLCSC-02-UI > CommitInspector                        | `_r1` (new)                                         | staging + prod                      | 2026-09-04                                     | —        |
+| TLCSC-02-UI > LevelView                              | `_r3` (adds the Next Level shortcut)                | staging + prod                      | 2026-09-03                                     | —        |
+| TLCSC-03-STATE (useGameStore)                        | `_r1`                                               | staging + prod                      | 2026-08-06                                     | —        |
+| TLCSC-04-CONTENT > LLCSC-04-01-CH01 (STORY-01-01)    | `_r4` (inherits a chapter-wide graph)               | staging + prod                      | 2026-09-04                                     | —        |
+| TLCSC-02-UI > StoryView                              | `_r6` (resolves an inherited chapter graph)         | staging + prod                      | 2026-09-04                                     | —        |
+| TLCSC-01-ENGINE > LLCSC-01-02-MECHANICS > story.ts   | `_r4` (adds story-level `graph` + graphForStage)    | staging + prod                      | 2026-09-04                                     | —        |
+| TLCSC-04-CONTENT > LLCSC-04-02-CH02 (STORY-02-01)    | `_r3` (inherits a chapter-wide graph)               | staging + prod                      | 2026-09-04                                     | —        |
+| TLCSC-04-CONTENT > LLCSC-04-03-CH03 (STORY-03-01)    | `_r3` (inherits a chapter-wide graph)               | staging + prod                      | 2026-09-04                                     | —        |
+| TLCSC-04-CONTENT > LLCSC-04-04-CH04 (STORY-04-01)    | `_r2` (5-question redesign; supersedes prior `_r1`) | staging + prod                      | 2026-09-03                                     | —        |
+| TLCSC-04-CONTENT > LLCSC-04-05-CH05 (STORY-05-01)    | `_r3` (inspection redesign; supersedes `_r2`)       | staging + prod                      | 2026-09-04                                     | —        |
+| TLCSC-04-CONTENT > LLCSC-04-06-CH06 (STORY-06-01)    | `_r2` (5-question redesign; supersedes prior `_r1`) | staging + prod                      | 2026-09-03                                     | —        |
+
+_**Staging catch-up, 2026-09-04:** BL-27 and BL-28 were both promoted to
+prod without a staging deploy behind them - Vercel's account build rate
+limit was exhausted at the time, and their register entries record that
+as a deviation. The limit has since cleared and staging deployed
+successfully from `develop` at `f91aaa4`, which carries all of
+`v0.13.0`'s code, so every row above is back to `staging + prod`. The
+register rows stay as written: they describe what was true at those
+baselines, and this table describes what is true now._
 
 _(Table grows one row per top-level CI as they come online. `staging` =
 Vercel, deployed from `develop`; `prod` = GitHub Pages at
