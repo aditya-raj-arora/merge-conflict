@@ -132,6 +132,41 @@ reverted back to `required_approving_review_count: 1` so review is a real
 second pair of eyes again, not a formality. Track that reversion as its own
 CR when it happens.
 
+### 5.2 Logged decision — how `main` is promoted (CR-123)
+
+`main` is documented here and in `CONTRIBUTING.md` as production, but for
+the project's first 125 commits and 28 baselines it sat untouched at the
+scaffold commit while releases were tagged on `develop` and deployed from
+the tag. The documented path existed; nobody walked it. CR-123 closed that
+gap, and doing so required changing two protections on `main` — recorded
+here rather than left as an unexplained settings drift.
+
+**Why a fast-forward push, and not a PR.** This repo allows squash merges
+only. A squash produces a _new_ commit, so promoting a release into `main`
+that way would put a different SHA there than the signed tag points at —
+`SECURITY.md`'s "the latest tagged release on `main` is supported" could
+never have been true. A fast-forward preserves SHAs, so the signed `vX.Y.Z`
+and `BL-NN-*` tags are genuinely reachable from `main`. That is worth more
+here than the ceremony of a second PR against a commit that has already
+been through one.
+
+**Why linear history had to be switched off.** `develop`'s ancestry
+contains exactly one merge commit — `bbd8ed0`, PR #4, 2026-08-05, from
+before the squash-only convention took hold — and zero since. `main`'s
+linear-history rule rejected the fast-forward on account of that single
+day-one artifact. The alternative was rewriting history to remove it, which
+would have changed every subsequent SHA and invalidated all 28 signed
+baseline tags. Keeping verifiable provenance beat keeping the rule.
+
+**What still guards `main`.** Required status checks, required signed
+commits, enforce-admins, no force-push, no deletions. The PR requirement is
+deliberately absent, because with force-push disabled its absence is
+precisely what makes pushes fast-forward-only: `main` cannot be moved
+sideways or backwards, only forward onto commits that already exist on
+`develop`. Linear history is no longer enforced as a rule, but is still
+maintained in practice — everything merging into `develop` is squashed, so
+no new merge commits enter the ancestry.
+
 ## 6. Status Accounting
 
 `docs/scm/STATUS-LEDGER.md` tracks, per item: current version, which
@@ -227,6 +262,7 @@ the main `README.md` too, kept in sync with this doc.
 
 ## 10. Document history
 
-| Version | Date       | Change                            |
-| ------- | ---------- | --------------------------------- |
-| 1.0     | 2026-08-05 | Initial SCM plan, bootstrap phase |
+| Version | Date       | Change                                                                                            |
+| ------- | ---------- | ------------------------------------------------------------------------------------------------- |
+| 1.0     | 2026-08-05 | Initial SCM plan, bootstrap phase                                                                 |
+| 1.0     | 2026-09-04 | Added §5.2: how `main` is promoted, and why its PR and linear-history rules were dropped (CR-123) |
