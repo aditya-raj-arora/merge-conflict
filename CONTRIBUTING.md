@@ -1,7 +1,7 @@
 # Contributing to Merge Conflict
 
 Quick heads up before anything else: this repo is graded on how well we
-*use* SCM process, not just on shipped features. So yeah, the workflow below
+_use_ SCM process, not just on shipped features. So yeah, the workflow below
 looks like overkill for a two-person student project — that's the point,
 don't skip steps because "it's just us."
 
@@ -18,9 +18,13 @@ that proves the rule.)
 
 ## Branching model
 
-- **`main`** — production. Only fast-forward merges from `release/*`. Every
-  merge gets tagged. Protected: PR required, 1 review, status checks must
-  pass, linear history, signed commits required, no force-push, no deletions.
+- **`main`** — production. Only fast-forward pushes from a released commit
+  (see CR-123). Protected: status checks must pass, signed commits required,
+  no force-push, no deletions, admins included. Deliberately _not_ PR-gated:
+  with force-push disabled, dropping the PR rule is what makes pushes
+  fast-forward-only, which is the guarantee that actually matters here —
+  `main` can only ever move forward onto a commit that already exists, fully
+  reviewed and tagged, on `develop`. Nothing is authored on `main`.
 - **`develop`** — integration branch. All feature work PRs into here first.
   Protected: PR required, status checks, signed commits required.
 - **`feat/*`, `fix/*`, `docs/*`, `test/*`, `refactor/*`, `chore/*`, `ci/*`** —

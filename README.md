@@ -47,10 +47,13 @@ Honestly the game itself is secondary — what's actually being graded is
 whether _our own dev process_ visibly runs on the same six disciplines the
 game teaches. So a few rules we hold ourselves to, no exceptions:
 
-- **No direct commits to `main` or `develop`.** Every change goes
-  Issue → branch → PR → review → signed squash-merge. The only direct commit
-  to `main` in this repo's entire history is the very first scaffold commit,
-  and it says so in its own commit body.
+- **Nothing is ever authored directly on `main` or `develop`.** Every change
+  goes Issue → branch → PR → review → signed squash-merge into `develop`.
+  `main` then fast-forwards onto an already-released commit — it only moves
+  forward onto history that is already reviewed, signed and tagged, never
+  onto anything written straight to it (CR-123). The only commit ever
+  authored directly on `main` is the very first scaffold commit, and it says
+  so in its own commit body.
 - **Every PR traces back to a GitHub Issue** prefixed `CR-` (change request).
   No Issue, no code change — that's Change Control, not bureaucracy for its
   own sake.
